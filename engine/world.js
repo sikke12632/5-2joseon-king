@@ -1349,7 +1349,7 @@
       }, 90);
       if (d.name) W.label(d.name, new T.Vector3(d.x, y0 + d.label, d.z), 3600);
       W.focusOn(d.x, d.z, 0.4);
-      groundShadow(d.x, d.z, d.shadowR[0], d.shadowR[1], d.rot, 0.28);
+      groundShadow(d.x, d.z, d.shadowR[0], d.shadowR[1], d.rot, 0.28, key);
       shadowFrames = 150;
       return hd;
     }
@@ -1382,9 +1382,36 @@
     }, 90);
     if (d.name) W.label(d.name, new T.Vector3(d.x, y + d.label, d.z), 3200);
     W.focusOn(d.x, d.z, 0.4);
-    groundShadow(d.x, d.z, d.shadowR[0], d.shadowR[1], d.rot, 0.28);
+    groundShadow(d.x, d.z, d.shadowR[0], d.shadowR[1], d.rot, 0.28, key);
     shadowFrames = 70;
     return dur;
+  };
+  // 세운 것을 치운다(장식이 사라지는 연출): 천천히 가라앉으며 작아진 뒤 모형을 지운다. 여러 자리(spots)면 모두
+  W.unbuild = function (key, dur) {
+    const subs = Object.keys(BUILD_DEFS).filter((k) => k === key || k.startsWith(key + ':'));
+    dur = dur || 1.4;
+    for (const k of subs) {
+      const m = meshes[k];
+      if (!m || !built[k]) continue;
+      const d = BUILD_DEFS[k];
+      const y0 = m.position.y;
+      burst(d.x, y0, d.z, 18, Math.max(d.shadowR[0], d.shadowR[1]) * 0.7, 0.5);
+      anims.push({
+        t: 0,
+        dur,
+        step(t) {
+          const e = clamp(t / dur, 0, 1);
+          m.scale.set(1 - e * 0.6, Math.max(0.001, 1 - e), 1 - e * 0.6);
+          m.position.y = y0 - e * 0.25;
+        },
+        end() {
+          W.disposeBuilding(k);
+          for (let i = shadowRects.length - 1; i >= 0; i--) if (shadowRects[i][6] === k) shadowRects.splice(i, 1);
+          repaintGround();
+          shadowFrames = 30;
+        },
+      });
+    }
   };
   // 마을이 조금씩 자란다(이름 없는 집): n채만 더 세운다
   W.growVillage = function (key, n, instant) {
@@ -1551,7 +1578,7 @@
       const d = BUILD_DEFS[key];
       m.visible = true;
       m.scale.set(1, 1, 1);
-      groundShadow(d.x, d.z, d.shadowR[0], d.shadowR[1], d.rot, 0.28);
+      groundShadow(d.x, d.z, d.shadowR[0], d.shadowR[1], d.rot, 0.28, key);
     }
     if (state === 'late') W.setBuildState(key, 'late', 0);
     shadowFrames = Math.max(shadowFrames, 3);
@@ -1559,8 +1586,8 @@
 
   // 바닥 접촉 그림자(미리 칠한 음영): 땅 꼭짓점 색을 어둡게
   const shadowRects = [];
-  function groundShadow(x, z, hw, hd, rot, k) {
-    shadowRects.push([x, z, hw, hd, rot, k]);
+  function groundShadow(x, z, hw, hd, rot, k, key) {
+    shadowRects.push([x, z, hw, hd, rot, k, key]);
     repaintGround();
   }
   function groundShadowMany(list, k) {
@@ -2562,8 +2589,8 @@
       S.edge = (S.edge || 0) + ((S.edgeTarget || 0) - (S.edge || 0)) * Math.min(1, dt * 0.9);
       if (frameNo % 6 === 0) shadowFrames = Math.max(shadowFrames, 1);
     }
-    W.island.rotation.z = tilt * 0.09 + S.edge * 0.018;
-    W.island.rotation.x = tilt * -0.05 - S.edge * 0.01;
+    W.island.rotation.z = tilt * 0.09 + (S.edge || 0) * 0.018;
+    W.island.rotation.x = tilt * -0.05 - (S.edge || 0) * 0.01;
     W.island.position.y = -tilt * 0.9;
     // 연출
     for (let i = anims.length - 1; i >= 0; i--) {

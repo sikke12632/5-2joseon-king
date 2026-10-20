@@ -52,12 +52,13 @@ const stageIds = era.stages.map((s) => s.id);
 const gaugeKeys = era.gauges.map((g) => g.key);
 
 // 문장 수: . ? ! 로 끝나는 덩어리
-const sentences = (t) => (t.replace(/[“”"「」『』]/g, '').match(/[^.?!]+[.?!]+/g) || [t]).filter((s) => s.trim()).length;
+// 따옴표 안 말(“공자 왈!”)은 문장으로 세지 않는다(집필 규칙과 같게)
+const sentences = (t) => (t.replace(/“[^”]*”/g, '말').replace(/‘[^’]*’/g, '말').replace(/["「」『』]/g, '').match(/[^.?!]+[.?!]+/g) || [t]).filter((s) => s.trim()).length;
 const hasSource = (src) => Array.isArray(src) && src.some((s) => (s.type === 'guide' && s.page) || (s.type === 'textbook' && s.page) || (s.type === 'web' && s.url));
 
 /* ---------- 카드 (설계서 10-5 형식) ---------- */
 const ids = new Set();
-const KINDS = ['sagwan', 'history', 'device', 'daily', 'chain', 'rare', 'legend', 'crisis'];
+const KINDS = ['sagwan', 'history', 'device', 'daily', 'chain', 'rare', 'legend', 'crisis', 'alt'];
 for (const c of D.cards) {
   const id = c.id || '(id 없음)';
   if (ids.has(id)) err(id, '카드 id 중복');
@@ -68,9 +69,10 @@ for (const c of D.cards) {
   if (c.required_in && !(c.stages || []).includes(c.required_in)) err(id, 'required_in 왕이 stages에 없음');
   if (c.kind === 'sagwan' || c.kind === 'history') {
     if (typeof c.order !== 'number') err(id, 'order 없음');
-    if (!hasSource(c.sources)) err(id, '역사 카드 근거(sources) 없음');
+    if (!hasSource(c.sources) && !c.variant_of) err(id, '역사 카드 근거(sources) 없음');
   }
-  if (c.kind === 'history' && !c.real_history) err(id, '역사 카드에 「실제 역사」(real_history) 없음');
+  // 변형판(다른 길 뒤 바뀐 사건)은 「이번 판에서」만 — 실제 역사는 비교 화면용 real_note(출처 포함)
+  if (c.kind === 'history' && !c.real_history && !(c.variant_of && c.real_note)) err(id, '역사 카드에 「실제 역사」(real_history) 없음');
   // 위기 카드(설계서 10-8): 어느 게이지·어느 쪽·예고(warn)/사건(event)/후속(followup)
   if (c.kind === 'crisis') {
     if (!gaugeKeys.includes(c.gauge)) err(id, `위기 카드 gauge 이상: ${c.gauge}`);
@@ -83,6 +85,12 @@ for (const c of D.cards) {
     if (c.similar && c.similar.out_of_textbook && !hasSource(c.similar.sources)) err(id, '비슷한 실제 일이 [교과서 밖]인데 출처 없음');
   }
   checkCond(id, 'conditions', c.conditions);
+  // 사슬 다음 카드 · 변형판 · 희귀도
+  if (c.chain_next && !D.cards.some((x) => x.id === c.chain_next.card)) err(id, `사슬 다음 카드 없음: ${c.chain_next.card}`);
+  if (c.variant_of && !D.cards.some((x) => x.id === c.variant_of)) err(id, `변형판의 원래 카드 없음: ${c.variant_of}`);
+  if (c.rarity && !['common', 'uncommon', 'rare', 'legend'].includes(c.rarity)) err(id, `rarity 이상: ${c.rarity}`);
+  for (const b of (c.fx && c.fx.build) || []) if (!era.map.buildings[b]) err(id, `fx.build에 없는 건물: ${b}`);
+  for (const b of (c.fx && c.fx.remove) || []) if (!era.map.buildings[b]) err(id, `fx.remove에 없는 건물: ${b}`);
   // 역사 분기(10-10): 다른 길 열림 조건·실제 경로 잠김 조건·세울 건물·바뀌는 카드
   if (c.paths) {
     for (const sk of ['lock_right', 'lock_left']) {

@@ -98,6 +98,11 @@
     card.classList.toggle('scroll', !!v.scroll);
     card.classList.toggle('record', !!v.record);
     card.classList.toggle('crisis', !!v.crisis);
+    // 희귀·전설(금빛 테두리)·사건 사슬 표시
+    card.classList.toggle('rare', v.rarity === 'rare' || v.rarity === 'uncommon');
+    card.classList.toggle('legend', v.rarity === 'legend');
+    $('#chainTag').textContent = v.chain ? `사슬 · ${v.chain}` : v.rarity === 'legend' ? '전설' : v.rarity === 'rare' ? '희귀' : v.rarity === 'uncommon' ? '드묾' : '';
+    $('#chainTag').style.display = $('#chainTag').textContent ? '' : 'none';
     card.classList.toggle('crisis-event', v.crisis === 'event' || v.crisis === 'followup');
     card.style.transition = 'none';
     card.style.transform = 'translate(0, 40px) rotateY(80deg) scale(0.96)';

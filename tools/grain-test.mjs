@@ -23,7 +23,7 @@ export default async function (t) {
     choices: { right: { label: '오른쪽', effects: grain === 'mire' ? { treasury: -5 } : { people: 5 }, this_run: '시험 오른쪽' }, left: { label: '왼쪽', effects: grain === 'mire' ? { people: -5 } : grain === 'gift' ? { army: 5 } : { nobles: -5 }, this_run: '시험 왼쪽' } } }, extra || {});
   const tests = [];
   for (let i = 0; i < 4; i++) tests.push(mk('ZG' + i, 'gift'), mk('ZM' + i, 'mire'), mk('ZB' + i, 'gamble', { gamble: { side: 'right', win: { effects: { treasury: 20 }, this_run: '산삼을 캤다!' }, lose: { effects: { people: -10 }, this_run: '빈손으로 돌아왔다.' } } }));
-  await t.eval(`(()=>{for(const c of ${JSON.stringify(tests)}) __jk.G.debugAddCard(c); const r=__jk.G.run; r.pool=r.pool.concat(${JSON.stringify(tests.map((c) => c.id))}); JK.era.crisis.chance={warn:0,danger:0,cliff:0,end:0,cap:0};})()`);
+  await t.eval(`(()=>{for(const c of ${JSON.stringify(tests)}) __jk.G.debugAddCard(c); const r=__jk.G.run; r.pool=r.pool.filter(id=>/^D[0-9]{3}$/.test(id)).slice(0,6).concat(${JSON.stringify(tests.map((c) => c.id))}); JK.era.crisis.chance={warn:0,danger:0,cliff:0,end:0,cap:0};})()`);
   const seq = [];
   for (let i = 0; i < 60; i++) {
     await t.waitFor(`JK.Cards.isReady() || __jk.G.state!=='play'`, 12000);

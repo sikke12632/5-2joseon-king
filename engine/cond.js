@@ -6,7 +6,7 @@
  *   flag(이름)          이번 판에 그 깃발이 섰다(역사 분기 경로 등)
  *   gauge(people) < 30  게이지 비교 (< <= > >= == !=)
  *   device(S) >= 5     왕별 장치 값
- *   run_count >= 10    지금까지 시작한 판 수
+ *   run_count >= 10    지금까지 시작한 판 수      archive_count >= 20  기록관 권수(왕을 마친 기록 + 실각 기록)
  *   real(T02)          이번 왕에서 그 사건을 실제 경로(좌우 버튼)로 지났다(10-11)
  *   stage(taejo)  diff(sprout)
  *   &&  ||  !  ( )
@@ -124,6 +124,8 @@
           return (c) => fn(c, ...args);
         }
         if (t.v === 'run_count') return (c) => (c.meta && c.meta.plays) || 0;
+        // 기록관 권수 = 왕을 마친 기록 + 실각 기록(설계서 10-1)
+        if (t.v === 'archive_count') return (c) => (JK.Game && JK.Game.archiveCount ? JK.Game.archiveCount() : 0);
         if (t.v === 'true') return () => true;
         if (t.v === 'false') return () => false;
         return () => t.v; // 낱말(비교용)

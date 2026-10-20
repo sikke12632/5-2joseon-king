@@ -143,6 +143,17 @@
       altPalace: { kind: 'single', name: '', model: 'altPalace', at: { site: 'gyeongbok' }, label: 0, shadowR: [1.3, 1.0], alt: true },
       altTemple: { kind: 'single', name: '', model: 'altTemple', at: { site: 'seowon' }, rot: Math.PI / 2, label: 0, shadowR: [0.6, 0.5], alt: true, conflicts: ['seowon'] },
       altHyanggyo: { kind: 'spots', name: '', model: 'altHyanggyo', sites: ['hak1', 'hak2', 'hak3'], label: 0, alt: true, conflicts: ['hakdang'] },
+      altAltar: { kind: 'single', name: '', model: 'altAltar', at: { site: 'sajik' }, label: 0, shadowR: [0.6, 0.5], alt: true, conflicts: ['sajik'] },
+      altOldWall: { kind: 'single', name: '', model: 'altOldWall', at: { x: -4.4, z: -4.6 }, rot: 0.6, label: 0, shadowR: [0.8, 0.2], alt: true },
+      altSmallSG: { kind: 'single', name: '', model: 'altSmallSG', at: { site: 'seonggyun' }, label: 0, shadowR: [0.6, 0.4], alt: true, conflicts: ['seonggyun'] },
+      gateFence: { kind: 'single', name: '', model: 'gateFence', at: { gate: 'sungnye' }, label: 0, shadowR: [0, 0], alt: true },
+      // 태조 추가 집필 연출표(FX_T). 이름표는 근거가 있는 것만(문묘·천상열차분야지도 — CREDITS.md)
+      munmyo: { kind: 'single', name: '문묘', model: 'munmyo', at: { x: 4.0, z: -3.12 }, label: 0.8, shadowR: [0.45, 0.3] },
+      starStone: { kind: 'single', name: '천상열차분야지도', model: 'starStone', at: { x: -2.72, z: -3.35 }, rot: 0.3, label: 0.9, shadowR: [0.2, 0.1] },
+      gyeryong: { kind: 'single', name: '', model: 'gyeryong', at: { x: 0.3, z: 5.9 }, label: 0, shadowR: [0.7, 0.5] },
+      muak: { kind: 'single', name: '', model: 'muak', at: { x: -6.1, z: -4.4 }, rot: 0.7, label: 0, shadowR: [0.9, 0.6] },
+      wihwa: { kind: 'single', name: '', model: 'wihwa', at: { riverPhi: 2.25 }, label: 0, shadowR: [0, 0], y: 0.0 },
+      workyard: { kind: 'single', name: '', model: 'workyard', at: { x: 5.6, z: 4.3 }, label: 0, shadowR: [0.6, 0.45], removeAfter: ['T08', 'T08v1'] },
       // 초가 마을은 이름 없는 장식 무리(연출표 7-1): 처음 몇 채에서 카드마다 조금씩 늘어난다
       choga: { kind: 'village', name: '', grow: 2, model: 'choga', max: 40, focus: [-1.5, 2.6], extra: [[-4.6, 7.0], [-5.6, 6.2], [-1.2, 7.4], [0.6, 7.3], [-7.8, 1.4], [-7.6, 0.3]] },
       giwa: { kind: 'village', name: '기와집 마을', model: 'giwa', max: 30, focus: [1.0, 0.8] },

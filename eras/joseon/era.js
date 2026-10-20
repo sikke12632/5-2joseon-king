@@ -151,6 +151,8 @@
       gambleWin: { sprout: 0.7, normal: 0.6, sage: 0.5, annals: 0.45 },
       marks: { gift: '🌸', mire: '☁', seed: '🌱' },
     },
+    // 무작위 칸 뽑기 가중치 (설계서 10-2): 희귀도 · 처음 보는 카드 · 기록관 10권 이상이면 드묾·희귀 ×1.5
+    deck: { rarity: { common: 1, uncommon: 0.35, rare: 0.12, legend: 0.04 }, unseen: 3, archiveBoostAt: 10, archiveBoost: 1.5 },
     // 사관 퀴즈 (설계서 4-1·9-3 결정 4): 왕이 바뀔 때 3문항, 그 가운데 교과서 밖은 많아야 1문항. 왕당 문항 풀에서 교과서 밖은 6문항까지
     quiz: { perStage: 3, outsidePerRound: 1, outsidePoolMax: 6 },
     // 역사 분기 (설계서 10-10-2): 한 왕에서 다른 길은 최대 3개. 넘으면 남은 다른 길은 잠긴다

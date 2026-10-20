@@ -50,6 +50,8 @@ export default async function (t) {
   if (OUT) await t.shot(`${OUT}/branch-alt.png`);
 
   console.log('2) T05 경복궁, 보통 게이지: 다른 길 잠김(이유) · 실제 경로로 지으면 옛 궁궐 자리를 치움');
+  // 개경에 머문 판에서는 T05가 변형판 T05v1로 바뀐다(more-test에서 확인). 여기서는 T05 자체를 보려고 변형판을 끈다
+  await t.eval(`__jk.G.run.variants = {}`);
   await show('T05', {});
   const v2 = JSON.parse(await t.eval(`JSON.stringify({locked:document.querySelector('#altBtn').classList.contains('locked'), why:document.querySelector('#altWhy').textContent})`));
   ok('다른 길 🔒 + 이유', v2.locked && /🔒/.test(v2.why), v2.why);
@@ -83,6 +85,7 @@ export default async function (t) {
   await show('T02', { people: 70 });
   await t.eval(`document.querySelector('#altBtn').click()`);
   await t.sleep(2500);
+  await t.eval(`__jk.G.run.variants = {}`); // T02 다른 길 뒤 T08은 변형판 T08v1이 된다 — 여기서는 T08 자체로 한도를 본다
   await show('T08', { people: 70 });
   const v4 = JSON.parse(await t.eval(`JSON.stringify({locked:document.querySelector('#altBtn').classList.contains('locked'), why:document.querySelector('#altWhy').textContent, n:__jk.G.run.altCards.length})`));
   ok('네 번째 다른 길 잠김("이미 나라가 많이 흔들렸다")', v4.locked && /흔들렸다/.test(v4.why), `${v4.n}개 · ${v4.why}`);

@@ -417,3 +417,10 @@ body.over #altBtn, #deck:not(.show) ~ #altBtn { pointer-events: none; }
 #chance.one { justify-content: center; }
 #chance.one span { max-width: 100%; }
 #chance span:not(:empty) { background: rgba(38,30,26,.78); color: #ffe6d6; padding: 2px 9px; border-radius: 999px; text-shadow: none; }
+/* 희귀·전설 카드 · 사건 사슬 표시 */
+#chainTag { position: absolute; top: 36px; left: 18px; z-index: 1; font-size: 12px; padding: 1px 8px; border-radius: 999px; background: #6b4a1e; color: #fff3d6; }
+#card.rare { box-shadow: 0 14px 30px rgba(40,25,10,.28), inset 0 0 0 3px #7a6aa8, inset 0 0 0 8px var(--paper2); }
+#card.rare #chainTag { background: #5a4a8a; }
+#card.legend { box-shadow: 0 0 0 3px #e2b94a, 0 0 26px rgba(242,196,80,.75), inset 0 0 0 4px #e9c766, inset 0 0 0 9px #fff4d2; animation: legendGlow 2.4s ease-in-out infinite; }
+#card.legend #chainTag { background: linear-gradient(#e2b94a, #b88a22); color: #3a2a0a; }
+@keyframes legendGlow { 50% { box-shadow: 0 0 0 3px #f2d27a, 0 0 40px rgba(242,196,80,.95), inset 0 0 0 4px #e9c766, inset 0 0 0 9px #fff4d2; } }

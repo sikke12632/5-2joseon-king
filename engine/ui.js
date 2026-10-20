@@ -208,11 +208,17 @@
   const card = (id) => era.data.cards.find((c) => c.id === id);
   const firstStep = (t) => String(t || '').split('→')[0].trim();
   function compareRows(entry) {
-    const hist = era.data.cards.filter((x) => x.kind === 'history' && x.stages.includes(entry.st)).sort((a, b) => a.order - b.order);
+    const hist = era.data.cards.filter((x) => x.kind === 'history' && !x.variant_of && x.stages.includes(entry.st)).sort((a, b) => a.order - b.order);
     return hist.map((c) => {
       const sk = entry.ch[c.id];
       const alt = sk === 'alt' && c.paths ? c.paths.alt[entry.ap[c.id] || 0] : null;
       let mine;
+      // 앞의 다른 길 때문에 바뀐 사건(변형판): 실제 경로가 남아 있던 변형판(T02v1)만 같은 길
+      const vc = sk && sk.startsWith('v:') && card((entry.vr || {})[c.id]);
+      if (vc) {
+        const vs = vc.choices[sk.slice(2)];
+        return { c, ev: c.event || c.learn || c.id, mine: { path: '바뀐 사건(앞의 다른 길 때문에)', label: vs.label, text: firstStep(vs.this_run) }, same: vc.event_type === 'normal', alt: null, real: { year: c.year || '', text: c.real_history || '', src: JK.Quiz.sourceLine(c.sources) } };
+      }
       if (alt) mine = { path: '다른 길', label: alt.label, text: alt.this_run };
       else if (sk) mine = { path: '실제 경로', label: c.choices[sk].label, text: firstStep(c.choices[sk].this_run), state: entry.bs[c.id] };
       else mine = { path: '', label: '', text: '이번 판에서 만나지 못했어요' };

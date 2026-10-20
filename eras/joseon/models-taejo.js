@@ -329,4 +329,156 @@
     b.pop();
     return b.build();
   };
+
+  /* ---------- 태조 추가 집필 연출표 (FX_T 14줄) ---------- */
+  // 산·고개 단면(꼭대기→아래로 적은 것)을 엔진 lathe 순서(아래→위)로 바꾼다
+  const lat = (pts, c) => pts.map((p) => [p[0], p[1], c]).reverse();
+  // 문묘 대성전: 공자께 제사 지내는 전각(성균관 앞). 근거: 지도서 238, 백과 '문묘'
+  M.munmyo = function () {
+    const b = new JK.Builder();
+    b.ao(0, 0.25, 0.72);
+    b.box(0, 0.01, 0, 0.9, 0.02, 0.62, C.stoneWarm, { noBottom: true });
+    platform(b, 0.7, 0.4, 0.07, { steps: true });
+    b.push().t(0, 0.07, 0);
+    const t = hall(b, { bw: 0.28, bd: 0.13, h: 0.18, nx: 5, nz: 2, wall: C.door, colR: 0.016 });
+    b.ao(0, 0, 1);
+    b.push().t(0, t, 0);
+    roof(b, { type: 'paljak', w: 0.42, d: 0.24, h: 0.2, r: 0.24, lift: 0.06, out: 0.03, nu: 8, nv: 4, dens: 30, bw: 0.32, bd: 0.15, v1: 0.55 });
+    b.pop();
+    b.pop();
+    hongsal(b, 0, 0.3, 0, 0.2);
+    return b.build();
+  };
+  // 천상열차분야지도: 검은 돌판에 둥근 별자리(별은 빛나는 점). 근거: 지도서 268, 백과 '천상열차분야지도'
+  M.starStone = function () {
+    const b = new JK.Builder();
+    b.ao(0, 0.3, 0.7);
+    b.box(0, 0.03, 0, 0.36, 0.06, 0.16, C.stoneDark, { top: C.stone, noBottom: true });
+    b.box(0, 0.3, 0, 0.26, 0.5, 0.06, col('#2c2f36'), { noBottom: true });
+    b.ao(0, 0, 1);
+    // 둥근 테와 별(밤에 빛남)
+    b.push().t(0, 0.32, 0.032).rx(Math.PI / 2);
+    b.cyl(0, 0, 0, 0.11, 0.11, 0.004, 24, col('#6a7a8c'));
+    b.pop();
+    const rnd = JK.rng(1395);
+    b.kind(2);
+    for (let i = 0; i < 26; i++) {
+      const a = rnd() * Math.PI * 2,
+        r = Math.sqrt(rnd()) * 0.1;
+      b.box(Math.cos(a) * r, 0.32 + Math.sin(a) * r, 0.036, 0.012, 0.012, 0.004, col('#fff2b8'));
+    }
+    b.kind(0);
+    return b.build();
+  };
+  // 계룡산 공사터(이름표 없음): 작은 산 하나 + 말뚝과 새끼줄
+  M.gyeryong = function () {
+    const b = new JK.Builder();
+    b.ao(0, 0.6, 0.7);
+    b.push().s(0.6, 0.75, 0.6);
+    b.lathe(lat([[0, 0.9], [0.25, 0.82], [0.55, 0.55], [0.9, 0.2], [1.15, -0.05]], col('#6f9a58')), 10);
+    b.pop();
+    b.ao(0, 0, 1);
+    for (let i = 0; i < 8; i++) {
+      const a = (i / 8) * Math.PI * 2;
+      b.cyl(0.95 + Math.cos(a) * 0.35, 0, Math.sin(a) * 0.25, 0.015, 0.012, 0.18, 4, C.wood);
+    }
+    for (let i = 0; i < 8; i++) {
+      const a0 = (i / 8) * Math.PI * 2,
+        a1 = ((i + 1) / 8) * Math.PI * 2;
+      b.cylAB([0.95 + Math.cos(a0) * 0.35, 0.15, Math.sin(a0) * 0.25], [0.95 + Math.cos(a1) * 0.35, 0.15, Math.sin(a1) * 0.25], 0.005, 0.005, 3, col('#d9bd78'));
+    }
+    return b.build();
+  };
+  // 무악 고개(이름표 없음): 낮은 고개 둘
+  M.muak = function () {
+    const b = new JK.Builder();
+    b.ao(0, 0.5, 0.75);
+    b.push().s(1.3, 1, 0.8);
+    b.lathe(lat([[0, 0.55], [0.3, 0.48], [0.65, 0.25], [0.95, 0.0]], col('#7fa765')), 9);
+    b.pop();
+    b.push().t(0.7, 0, 0.5).s(0.9, 1, 0.8);
+    b.lathe(lat([[0, 0.38], [0.3, 0.3], [0.7, 0.0]], col('#86ad6b')), 9);
+    b.pop();
+    return b.build();
+  };
+  // 위화도(이름표 없음): 강 가운데 작은 모래섬과 깃발 셋
+  M.wihwa = function () {
+    const b = new JK.Builder();
+    b.ao(0, 0.2, 0.8);
+    b.push().s(1.6, 1, 0.7);
+    b.lathe(lat([[0, 0.06], [0.25, 0.05], [0.45, 0.0], [0.5, -0.05]], col('#dccb98')), 12);
+    b.pop();
+    b.ao(0, 0, 1);
+    for (const [x, c] of [[-0.35, '#c0392b'], [0, '#e2b94a'], [0.35, '#3d5e8c']]) {
+      b.cyl(x, 0.04, 0, 0.008, 0.008, 0.36, 4, C.woodDark);
+      b.box(x + 0.06, 0.34, 0, 0.12, 0.08, 0.006, col(c));
+    }
+    return b.build();
+  };
+  // 공사장(이름표 없음): 비계 · 기와 가마 · 돌무더기 · 흙더미 — 공사철에만
+  M.workyard = function () {
+    const b = new JK.Builder();
+    const rnd = JK.rng(1394);
+    b.ao(0, 0.3, 0.7);
+    b.box(0, 0.01, 0, 1.3, 0.02, 0.9, C.mud, { noBottom: true });
+    // 비계
+    for (const x of [-0.45, -0.15]) for (const z of [-0.25, 0.05]) b.cyl(x, 0, z, 0.012, 0.012, 0.42, 4, C.wood);
+    for (const y of [0.14, 0.28, 0.4]) {
+      b.box(-0.3, y, -0.25, 0.34, 0.012, 0.012, C.wood);
+      b.box(-0.3, y, 0.05, 0.34, 0.012, 0.012, C.wood);
+    }
+    b.box(-0.3, 0.29, -0.1, 0.34, 0.01, 0.3, C.wood);
+    // 기와 가마(둥근 흙 가마와 연기 구멍)
+    b.push().t(0.35, 0, -0.18).s(1.2, 0.7, 0.8);
+    b.ball(0, 0, 0, 0.2, 2, col('#a9714e'), 0.55);
+    b.pop();
+    b.cyl(0.47, 0.1, -0.18, 0.03, 0.025, 0.1, 6, col('#5a3a28'));
+    // 다듬은 돌 무더기
+    for (let i = 0; i < 7; i++) b.box(0.1 + rnd() * 0.3, 0.03 + (i > 3 ? 0.05 : 0), 0.18 + rnd() * 0.15, 0.1, 0.05, 0.07, i % 2 ? C.stone : C.stoneDark);
+    // 흙더미
+    b.push().t(-0.45, 0, 0.3).s(1.3, 0.5, 1);
+    b.ball(0, 0, 0, 0.16, 2, col('#b98d5a'), 0.5);
+    b.pop();
+    return b.build();
+  };
+  // 다른 길(개경에 머문 판): 이름 없는 제사 터 · 낡은 옛 성벽 · 작은 성균관(강당 하나) · 성 없는 문 옆 울타리
+  M.altAltar = function () {
+    const b = new JK.Builder();
+    b.ao(0, 0.25, 0.72);
+    b.box(0, 0.01, 0, 1.2, 0.02, 1.0, C.stoneWarm, { noBottom: true });
+    wallRect(b, 0.55, 0.45, 0.13, 0.15, col('#c79a6b'));
+    platform(b, 0.42, 0.42, 0.08, { color: C.stone, top: col('#d9cba7') });
+    return b.build();
+  };
+  M.altOldWall = function () {
+    const b = new JK.Builder();
+    const rnd = JK.rng(918);
+    b.ao(0, 0.3, 0.7);
+    for (let s = 0; s < 4; s++) {
+      b.push().t(s * 0.42 - 0.63, 0, Math.sin(s * 1.3) * 0.12).ry(0.2 * s);
+      const h = 0.16 + rnd() * 0.12;
+      b.box(0, h / 2, 0, 0.36, h, 0.12, s % 2 ? C.stone : C.stoneDark, { noBottom: true });
+      // 무너진 틈
+      if (s === 1) b.box(0.08, h + 0.02, 0, 0.12, 0.04, 0.13, C.stoneDark);
+      b.pop();
+    }
+    return b.build();
+  };
+  M.altSmallSG = function () {
+    const b = new JK.Builder();
+    b.box(0, 0.01, 0, 1.0, 0.02, 0.8, C.stoneWarm, { noBottom: true });
+    b.ao(0, 0.25, 0.72);
+    lectureHall(b, 0.85, true);
+    return b.build();
+  };
+  M.gateFence = function () {
+    const b = new JK.Builder();
+    b.ao(0, 0.15, 0.8);
+    for (const sx of [-1, 1]) {
+      for (let i = 0; i < 6; i++) b.cyl(sx * (0.62 + i * 0.12), 0, 0, 0.012, 0.012, 0.16, 4, C.wood);
+      b.box(sx * 0.92, 0.12, 0, 0.62, 0.012, 0.012, C.wood);
+      b.box(sx * 0.92, 0.06, 0, 0.62, 0.012, 0.012, C.wood);
+    }
+    return b.build();
+  };
 })();

@@ -48,8 +48,12 @@
     const rnd = JK.rng(seed);
     const cards = era.data.cards;
     const si = stageIndex(stage.id);
-    const hist = cards.filter((c) => isFixed(c) && c.stages.includes(stage.id)).sort((a, b) => a.order - b.order);
-    const daily = cards.filter((c) => c.kind === 'daily' && c.stages.includes(stage.id) && !used.includes(c.id));
+    const hist = cards.filter((c) => isFixed(c) && !c.variant_of && c.stages.includes(stage.id)).sort((a, b) => a.order - b.order);
+    // 무작위 후보(10-2): 일상·희귀·전설과 사슬의 첫 카드. 사슬의 다음 카드·씨앗 열매·다른 길 카드·꼭 끼울 카드는 따로 들어온다
+    const followers = new Set(cards.filter((c) => c.chain_next).map((c) => c.chain_next.card).concat(cards.filter((c) => c.seed && c.seed.fruit_id).map((c) => c.seed.fruit_id)));
+    const daily = cards.filter(
+      (c) => ['daily', 'rare', 'legend', 'chain'].includes(c.kind) && !c.force && !c.alt_only && !followers.has(c.id) && c.stages.includes(stage.id) && !used.includes(c.id),
+    );
     // 필수(★)는 이 왕에서 꼭 한 번. 다른 왕의 필수 카드는 그 왕보다 앞선 왕에서 뽑지 않는다.
     const required = daily.filter((c) => c.required_in === stage.id);
     const optional = short ? [] : shuffle(daily.filter((c) => !c.required_in || stageIndex(c.required_in) < si), rnd);
@@ -252,7 +256,7 @@
       const c = cardsById[id];
       if (!c || fr.has(id) || (run.used || []).includes(id) || !JK.Cond.test(c.conditions, ctx)) continue;
       const g = c.grain || 'balance';
-      let w = 1 * ((row && row.mult && row.mult[g]) || 1) * (dm[g] || 1);
+      let w = deckWeight(c) * ((row && row.mult && row.mult[g]) || 1) * (dm[g] || 1);
       const seq = run.grainHist.concat(g);
       const bad = grainBreaks(seq) || (nextGrain && grainBreaks(seq.concat(nextGrain)));
       cands.push({ id, w, bad });
@@ -267,6 +271,23 @@
     for (const x of list) if ((r -= x.w) <= 0) return x.id;
     return list[list.length - 1].id;
   }
+  // 무작위 칸 가중치(설계서 10-2): 희귀도(보통 1 · 드묾 .35 · 희귀 .12 · 전설 .04) × 처음 보는 카드 3 × 기록관 10권 이상이면 드묾·희귀 1.5 × 난이도 rareMult
+  function deckWeight(c) {
+    const dk = era.deck || {};
+    const r = c.rarity || 'common';
+    let w = (dk.rarity || {})[r] !== undefined ? dk.rarity[r] : 1;
+    if (!S.meta.seen[c.id]) w *= dk.unseen || 3;
+    if ((r === 'uncommon' || r === 'rare') && G.archiveCount() >= (dk.archiveBoostAt || 10)) w *= dk.archiveBoost || 1.5;
+    if (r === 'rare' || r === 'legend') w *= G.diff().rareMult || 1;
+    return w;
+  }
+  // 기록관 권수 = 왕을 마친 기록 + 실각 기록(설계서 10-1, 담임 판단: 전설 조건에 씀)
+  G.archiveCount = function () {
+    let n = 0;
+    for (const k in S.meta.clears || {}) n += S.meta.clears[k];
+    for (const k in S.meta.falls || {}) n += S.meta.falls[k];
+    return n;
+  };
   // 도박 결과 미리 정하기는 하지 않는다. 고른 순간 굴린다(성공 확률은 난이도표)
   function gambleRoll(run, c) {
     const p = ((grainCfg().gambleWin || {})[G.diffId()]) || 0.6;
@@ -327,6 +348,8 @@
       fx: c.single ? null : { left: previewFx(c, 'left', scaled), right: previewFx(c, 'right', scaled) },
       grainMark: c.grain && (grainCfg().marks || {})[c.grain] ? grainMarkFor(c) : null,
       preview: run.bigPreview > 0 ? 'arrows' : D.preview,
+      rarity: ['rare', 'legend', 'uncommon'].includes(c.rarity) && c.kind !== 'daily' ? c.rarity : '',
+      chain: c.kind === 'chain' ? c.chain || '사건 사슬' : '',
       hand: st.tutorial && run.pos < st.tutorial && S.meta.cardsPlayed < 12,
     });
     S.markSeen(c.id);
@@ -414,17 +437,23 @@
   }
   // 이번 왕의 "나의 역사 vs 실제 역사" 기록(기록관에 짧게 남기고, 글은 볼 때 데이터에서 다시 만든다)
   function compareEntry(run, st) {
-    const hist = era.data.cards.filter((x) => x.kind === 'history' && x.stages.includes(st.id)).sort((a, b) => a.order - b.order);
+    const hist = era.data.cards.filter((x) => x.kind === 'history' && !x.variant_of && x.stages.includes(st.id)).sort((a, b) => a.order - b.order);
     const ch = {};
+    const vr = {};
     for (const h of hist) if (run.choices[h.id]) ch[h.id] = run.choices[h.id];
+    // 다른 길 때문에 바뀐 사건(변형판)은 원래 사건 줄에
+    for (const v of era.data.cards.filter((x) => x.variant_of && run.choices[x.id])) {
+      vr[v.variant_of] = v.id;
+      ch[v.variant_of] = 'v:' + run.choices[v.id];
+    }
     const states = {};
     for (const h of hist) {
       const sk = run.choices[h.id];
-      const b = sk && sk !== 'alt' && h.choices[sk].build;
+      const b = sk && sk !== 'alt' && !sk.startsWith('v:') && h.choices[sk].build;
       if (b && b[0] && run.states[b[0]]) states[h.id] = run.states[b[0]];
     }
     const log = (run.crisisLog || []).filter((x) => x.stage === st.id);
-    return { d: new Date().toISOString().slice(0, 10), st: st.id, ch, ap: Object.assign({}, run.altPick), bs: states, tr: routeSummary(run), alts: run.stats.alt || 0, held: log.filter((x) => !x.fell).map((x) => [x.name, Math.round(x.p * 100)]), fell: log.filter((x) => x.fell).length };
+    return { d: new Date().toISOString().slice(0, 10), st: st.id, ch, vr, ap: Object.assign({}, run.altPick), bs: states, tr: routeSummary(run), alts: run.stats.alt || 0, held: log.filter((x) => !x.fell).map((x) => [x.name, Math.round(x.p * 100)]), fell: log.filter((x) => x.fell).length };
   }
   G.compareEntry = () => compareEntry(G.run, stageOf(G.run.stage));
   // 도박 쪽 버튼은 수치 대신 '?'(이기면·지면 움직이는 게이지 모두)
@@ -466,7 +495,7 @@
     if (c.kind === 'history' && !c.single) {
       const et = c.event_type || 'normal';
       const before = routeSummary(run).broken;
-      run.route[run.stage][c.id] = et === 'life' ? 'life' : isAlt ? 'diff' : et === 'judge' ? 'open' : 'same';
+      run.route[run.stage][c.variant_of || c.id] = et === 'life' ? 'life' : isAlt || et === 'variant' ? 'diff' : et === 'judge' ? 'open' : 'same';
       if (!before && routeSummary(run).broken) {
         JK.UI.setSeal && JK.UI.setSeal(routeSummary(run), true);
         setTimeout(() => Cards.toast((era.trueEnding || {}).brokenText || '이번 판의 진엔딩은 멀어졌어요', 2600), 3000);
@@ -563,13 +592,21 @@
     // 결 기록(연속 규칙) · 씨앗 → 열매 예약 · 안정 구간이 이어진 장수
     if (c.grain) run.grainHist.push(c.grain);
     if (c.seed && c.seed.fruit_id && side && (!c.seed.side || c.seed.side === sideKey) && cardsById[c.seed.fruit_id]) run.reserve.push({ card: c.seed.fruit_id, at: run.pos + 1 + (c.seed.after_n || 5), from: c.id });
+    // 사건 사슬(10-2 ⑤): 다음 카드를 n장 뒤에 예약(무작위 칸을 대신 쓰는 셈)
+    if (c.chain_next && cardsById[c.chain_next.card]) run.reserve.push({ card: c.chain_next.card, at: run.pos + 1 + (c.chain_next.after_n || 3), from: c.id });
     run.calmRun = Object.values(run.zones || {}).every((z) => z.level === 'stable') ? (run.calmRun || 0) + 1 : 0;
     S.meta.cardsPlayed++;
     W.cardPassed();
-    if (c.kind === 'daily') run.used.push(c.id);
+    if (!isFixed(c) && c.kind !== 'crisis') run.used.push(c.id);
+    // 공사철이 끝나면(성균관을 세우면) 공사장 같은 장식을 치운다
+    for (const k of run.built.slice()) {
+      const def = era.map.buildings[k.split(':')[0]] || {};
+      if ((def.removeAfter || []).includes(c.variant_of || c.id)) unbuild(k, 900);
+    }
     // 짓기: 이름 있는 건물은 어느 쪽을 골라도 역사대로 선다. 고른 방식은 건물 상태로 남는다(설계서 7-4).
     let wait = against ? 1300 : cres ? 2300 : gres ? 2000 : 700;
-    const builds = (side ? side.build : c.fx && c.fx.build) || [];
+    // 다른 길이면 그 길의 장식만(실제 경로 카드의 연출 build는 세우지 않음)
+    const builds = isAlt ? alt.build || [] : ((side && side.build) || []).concat((c.fx && c.fx.build) || []).filter((k, i, a) => a.indexOf(k) === i);
     const state = side && side.build_state;
     if (builds.length) wait = Math.max(wait, doBuilds(builds, against ? 1300 : 350, state));
     // 다른 길에서는 실제 경로의 연출(하늘 글씨·짐배 등)을 하지 않는다
@@ -587,12 +624,19 @@
     // 게이지가 0·100에 닿아도 바로 실각하지 않는다(v3) — 끝 구간에서는 위기 확률이 매우 높을 뿐이다
     const cid = JK.Crisis.pick(run, JK.rng((run.stageSeed + run.pos * 977 + (run.stats.fallsRun || 0)) >>> 0), prevZones);
     if (cid) run.deck.splice(run.pos, 0, cid);
-    else if (run.reserve.length) {
-      // 씨앗의 열매: 기한이 된 것 하나를 다음 자리에(위기가 끼면 한 장 미룸)
-      const due = run.reserve.find((r) => r.at <= run.pos);
+    else {
+      // 씨앗의 열매·사슬의 다음 카드: 기한이 되고 조건이 맞는 것 하나를 다음 자리에(위기가 끼면 한 장 미룸, 조건이 안 맞으면 기다림)
+      const ctx = { run, meta: S.meta };
+      // 끼워도 결 연속 규칙(10-9-3)을 어기지 않을 때만 — 어기면 한 장 더 기다린다
+      const fits = (id) => !cardsById[id] || !cardsById[id].grain || !grainBreaks(run.grainHist.concat(cardsById[id].grain));
+      const due = run.reserve.find((r) => r.at <= run.pos && fits(r.card) && JK.Cond.test((cardsById[r.card] || {}).conditions, ctx));
       if (due) {
         run.reserve = run.reserve.filter((r) => r !== due);
         run.deck.splice(run.pos, 0, due.card);
+      } else {
+        // 꼭 나와야 하는 카드(사슬 시작 '반드시'·다른 길 전용 카드): 조건이 맞는 순간 한 번
+        const f = era.data.cards.find((x) => x.force && x.stages.includes(run.stage) && !run.seenRun.includes(x.id) && !run.deck.slice(run.pos).includes(x.id) && fits(x.id) && JK.Cond.test(x.conditions, ctx));
+        if (f) run.deck.splice(run.pos, 0, f.id);
       }
     }
     // 실제 경로는 「실제 역사」 두루마리. 다른 길은 그 자리에서 길게 보여 주지 않고 비교 화면에서 한꺼번에(10-10-5)
@@ -631,6 +675,11 @@
     });
     return end;
   }
+  function unbuild(k, delay) {
+    if (!G.run.built.includes(k)) return;
+    G.run.built = G.run.built.filter((x) => x !== k);
+    setTimeout(() => W.unbuild(k), delay || 0);
+  }
   // 카드 연출 (설계서 3장 연출 칸): 왕기, 짐배, 하늘 글씨, 성문 글자 빛
   function cardFx(c, state, builds) {
     const f = c.fx || {};
@@ -645,6 +694,12 @@
       setTimeout(() => W.fxBoats(true), 600);
     }
     if (f.skyText) setTimeout(() => W.fxSkyText(f.skyText), 400);
+    for (const k of f.remove || []) unbuild(k, 600);
+    // 잠깐 떠올랐다 사라지는 장식(예: 수창궁 즉위 — 이름표 없는 옛 궁궐)
+    if (f.flash && !run.built.includes(f.flash)) {
+      setTimeout(() => W.build(f.flash, { state: 'smooth' }), 500);
+      setTimeout(() => W.unbuild(f.flash), 5200);
+    }
     if (f.glyphs) {
       for (const k in f.glyphs) {
         const i = builds.indexOf(k);
@@ -854,9 +909,11 @@
   }
 
   /* ---------- 점검용 ---------- */
+  // 점검: 실제 경로로 설 수 있는 건물을 모두 세운다(다른 길 장식은 실제 건물과 같은 자리라 빼고)
   G.debugBuildAll = function () {
     for (const c of era.data.cards) {
-      const b = (c.choices ? c.choices.right.build : c.fx && c.fx.build) || [];
+      if (c.alt_only || c.variant_of) continue;
+      const b = ((c.choices && c.choices.right.build) || []).concat((c.fx && c.fx.build) || []).filter((k) => !(era.map.buildings[k] || {}).alt);
       for (const k of b) if (!G.run.built.includes(k)) doBuilds([k], 0, c.choices && c.choices.left.build_state);
     }
   };
