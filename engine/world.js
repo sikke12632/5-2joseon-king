@@ -606,6 +606,7 @@
     sun.shadow.bias = -0.0006;
     sun.shadow.normalBias = 0.02;
     sun.shadow.mapSize.set(1024, 1024);
+    sun.shadow.camera.layers.enable(1); // 그림자 전용 단순 모형 층
     scene.add(sun);
     scene.add(sun.target);
 
@@ -688,6 +689,13 @@
   function resolveDefs() {
     for (const k in MAP.buildings) {
       const d = MAP.buildings[k];
+      if (d.kind === 'spots') {
+        d.sites.forEach((sk, i) => {
+          const st = SITES[sk];
+          BUILD_DEFS[`${k}:${i}`] = Object.assign({ key: `${k}:${i}`, rot: 0, label: 0.8, shadowR: [st.hw * 0.8, st.hd * 0.8] }, d, { x: st.x, z: st.z, name: i === 0 ? d.name : '' });
+        });
+        continue;
+      }
       if (d.kind !== 'single') continue;
       const o = Object.assign({ key: k, rot: 0, label: 1.2, shadowR: [0.6, 0.6] }, d);
       if (d.at.site) {
@@ -700,6 +708,20 @@
         o.z = gatePos[d.at.gate][1];
         const phi = GATES[d.at.gate];
         o.rot = Math.atan2(Math.cos(phi) / RING.rx, Math.sin(phi) / RING.rz);
+      } else if (d.at.riverPhi !== undefined) {
+        // 강 위: 가장 가까운 강 점, 다리는 강을 가로지르게(앞뒤 = 바깥쪽)
+        let best = RIVER[0],
+          bd = 1e9;
+        for (const p of RIVER) {
+          const dd = Math.abs(Math.atan2(p[1], p[0]) - d.at.riverPhi);
+          if (dd < bd) {
+            bd = dd;
+            best = p;
+          }
+        }
+        o.x = best[0];
+        o.z = best[1];
+        o.rot = Math.atan2(Math.cos(d.at.riverPhi), Math.sin(d.at.riverPhi));
       } else {
         o.x = d.at.x;
         o.z = d.at.z;
@@ -712,7 +734,7 @@
     if (meshes[k]) return meshes[k];
     const d = BUILD_DEFS[k];
     const m = new T.Mesh(EM[d.model](), JK.MAT);
-    m.position.set(d.x, height(d.x, d.z) - 0.01, d.z);
+    m.position.set(d.x, d.y !== undefined ? d.y : height(d.x, d.z) - 0.01, d.z);
     m.rotation.y = d.rot;
     m.castShadow = true;
     m.receiveShadow = true;
@@ -869,13 +891,42 @@
     _hm.compose(_hp, _hq, _hs);
     mesh.setMatrixAt(i, _hm);
   }
+  // 그림자 전용 단순 모형: 집 몸통 상자 + 지붕 뿔(16면). 그림자 지도에서는 정밀 모형과 거의 같아 보인다.
+  // 그림자 카메라만 보는 층(1)에 두어 본 화면에는 그리지 않는다.
+  function shadowProxyGeo(geo) {
+    geo.computeBoundingBox();
+    const bb = geo.boundingBox;
+    const b = new JK.Builder();
+    const c = JK.col('#808080');
+    const w = (bb.max.x - bb.min.x) * 0.42,
+      d = (bb.max.z - bb.min.z) * 0.42,
+      h = bb.max.y;
+    const cx = (bb.max.x + bb.min.x) / 2,
+      cz = (bb.max.z + bb.min.z) / 2;
+    b.box(cx, h * 0.28, cz, w * 2 * 0.9, h * 0.56, d * 2 * 0.9, c);
+    const y0 = h * 0.5;
+    const P = [
+      [cx - w, y0, cz + d],
+      [cx + w, y0, cz + d],
+      [cx + w, y0, cz - d],
+      [cx - w, y0, cz - d],
+    ];
+    const top = [cx, h, cz];
+    for (let i = 0; i < 4; i++) b.tri(P[i], P[(i + 1) % 4], top, c);
+    return b.build();
+  }
   function makeHouseMesh(geo, list) {
     const m = new T.InstancedMesh(geo, JK.MAT, list.length);
-    m.castShadow = true;
+    m.castShadow = false;
     m.receiveShadow = true;
     list.forEach((d, i) => setHouseMatrix(m, i, d, 0.0001, 0.0001));
     m.visible = false;
     W.island.add(m);
+    const proxy = new T.InstancedMesh(shadowProxyGeo(geo), JK.MAT, list.length);
+    proxy.instanceMatrix = m.instanceMatrix;
+    proxy.castShadow = true;
+    proxy.layers.set(1);
+    W.island.add(proxy);
     return m;
   }
 
@@ -1224,6 +1275,11 @@
     const kind = MAP.buildings[key] && MAP.buildings[key].kind;
     if (kind === 'wall') return buildWallAnim(sfx, MAP.buildings[key]);
     if (kind === 'village') return buildVillageAnim(key, sfx);
+    if (kind === 'spots') {
+      const subs = Object.keys(BUILD_DEFS).filter((k) => k.startsWith(key + ':'));
+      subs.forEach((k, i) => setTimeout(() => W.build(k, opts), i * 260));
+      return 0.95 + subs.length * 0.26;
+    }
     if (!BUILD_DEFS[key]) return 0;
     const m = ensureMesh(key);
     const d = BUILD_DEFS[key];
@@ -1247,25 +1303,54 @@
     setTimeout(() => {
       burst(d.x, y, d.z, 46, Math.max(d.shadowR[0], d.shadowR[1]) * 0.8, 1.4);
       shock(d.x, y, d.z, Math.max(d.shadowR[0], d.shadowR[1]) * 1.6);
-      W.shake(0.35);
-      if (sfx) sfx.pop(1);
+      W.shake(opts.state === 'forced' ? 0.6 : 0.35);
+      if (sfx) {
+        if (opts.state === 'forced') sfx.thud(0.9);
+        else sfx.pop(1);
+        if (opts.state === 'late') sfx.hammer();
+      }
     }, 90);
-    W.label(d.name, new T.Vector3(d.x, y + d.label, d.z), 3200);
+    if (d.name) W.label(d.name, new T.Vector3(d.x, y + d.label, d.z), 3200);
+    if (opts.state) setTimeout(() => W.setBuildState(key, opts.state, 4), 700);
     W.focusOn(d.x, d.z, 0.4);
     groundShadow(d.x, d.z, d.shadowR[0], d.shadowR[1], d.rot, 0.28);
     shadowFrames = 70;
     return dur;
   };
-  function buildVillageAnim(key, sfx) {
-    const mesh = meshes[key];
+  // 마을이 조금씩 자란다(이름 없는 집): n채만 더 세운다
+  W.growVillage = function (key, n, instant) {
+    if (!houseData[key]) return 0;
+    if (!instant) return buildVillageAnim(key, JK.Audio, n);
     const list = houseData[key];
-    mesh.visible = true;
     const shown = houseShown[key] || (houseShown[key] = new Set());
     const order = list
       .map((d, i) => i)
       .filter((i) => !shown.has(i))
+      .sort((a, b) => Math.hypot(list[a].x, list[a].z - 1) - Math.hypot(list[b].x, list[b].z - 1))
+      .slice(0, n);
+    const rects = [];
+    for (const i of order) {
+      shown.add(i);
+      setHouseMatrix(meshes[key], i, list[i], 1, 1);
+      rects.push([list[i].x, list[i].z, 0.36 * list[i].s, 0.24 * list[i].s, list[i].rot]);
+    }
+    meshes[key].visible = true;
+    meshes[key].instanceMatrix.needsUpdate = true;
+    groundShadowMany(rects, 0.22);
+    return 0;
+  };
+  function buildVillageAnim(key, sfx, limit) {
+    const mesh = meshes[key];
+    const list = houseData[key];
+    mesh.visible = true;
+    const shown = houseShown[key] || (houseShown[key] = new Set());
+    let order = list
+      .map((d, i) => i)
+      .filter((i) => !shown.has(i))
       .sort((a, b) => Math.hypot(list[a].x, list[a].z - 1) - Math.hypot(list[b].x, list[b].z - 1));
+    if (limit !== undefined) order = order.slice(0, limit);
     for (const i of order) shown.add(i);
+    if (!order.length) return 0;
     const gap = 0.045;
     order.forEach((idx, n) => {
       const d = list[idx];
@@ -1291,13 +1376,13 @@
       });
     });
     const total = order.length * gap + 0.6;
-    const rects = list.map((d) => [d.x, d.z, 0.36 * d.s, 0.24 * d.s, d.rot]);
+    const rects = order.map((i) => list[i]).map((d) => [d.x, d.z, 0.36 * d.s, 0.24 * d.s, d.rot]);
     groundShadowMany(rects, 0.22);
     const vd = MAP.buildings[key];
-    if (vd.name) W.label(vd.name, new T.Vector3(list[0].x, 1.2, list[0].z), 3200);
-    if (vd.focus) W.focusOn(vd.focus[0], vd.focus[1], 0.25);
-    shadowFrames = Math.ceil(total * 60) + 10;
-    W.shake(0.15);
+    if (limit === undefined && vd.name) W.label(vd.name, new T.Vector3(list[0].x, 1.2, list[0].z), 3200);
+    if (limit === undefined && vd.focus) W.focusOn(vd.focus[0], vd.focus[1], 0.25);
+    shadowFrames = Math.max(shadowFrames, Math.ceil(total * 60) + 10);
+    if (limit === undefined) W.shake(0.15);
     return total;
   }
   function buildWallAnim(sfx, wd) {
@@ -1344,8 +1429,20 @@
 
   // 연출 없이 바로 세운다 (이어하기, 스테이지 처음부터 서 있는 것)
   // count: 마을이면 몇 채만(흩어진 자리에서 고름). 없으면 전부.
-  W.buildInstant = function (key, count) {
+  W.buildInstant = function (key, count, state) {
     const def = MAP.buildings[key];
+    if (def && def.kind === 'spots') {
+      built[key] = true;
+      for (const k of Object.keys(BUILD_DEFS).filter((k) => k.startsWith(key + ':'))) W.buildInstant(k);
+      return;
+    }
+    if (!def && BUILD_DEFS[key]) {
+      built[key] = true;
+      const m = ensureMesh(key);
+      m.visible = true;
+      m.scale.set(1, 1, 1);
+      return;
+    }
     if (!def) return;
     if (def.kind === 'village') {
       const mesh = meshes[key];
@@ -1387,6 +1484,7 @@
       m.scale.set(1, 1, 1);
       groundShadow(d.x, d.z, d.shadowR[0], d.shadowR[1], d.rot, 0.28);
     }
+    if (state === 'late') W.setBuildState(key, 'late', 0);
     shadowFrames = Math.max(shadowFrames, 3);
   };
 
@@ -1455,11 +1553,282 @@
     colA.needsUpdate = true;
   }
 
+  /* ================= 건물 상태: 순조롭게 / 억지로 / 늦게 (설계서 7-4) =================
+   * 억지로: 건물 위 작은 먹구름 + 둘레에 주저앉은 일꾼 (카드 몇 장 동안)
+   * 늦게: 나무 비계와 천막 (이 왕이 끝날 때까지)
+   * 상태는 장식이다. 건물 모양·크기·자리는 바꾸지 않는다. */
+  const stateFx = [];
+  let stormMesh = null,
+    workerMesh = null;
+  const STORM_MAX = 12,
+    WORKER_MAX = 36;
+  function ensureStateMeshes() {
+    if (stormMesh) return;
+    stormMesh = new T.InstancedMesh(JK.cloudPuff(), new T.MeshLambertMaterial({ color: 0x575c69, emissive: 0x23262e, emissiveIntensity: 0.7 }), STORM_MAX);
+    stormMesh.count = 0;
+    stormMesh.frustumCulled = false;
+    W.island.add(stormMesh);
+    workerMesh = new T.InstancedMesh(JK.walkerDoll(), JK.MAT, WORKER_MAX);
+    workerMesh.count = 0;
+    workerMesh.frustumCulled = false;
+    const wc = JK.col('#b9a88c');
+    for (let i = 0; i < WORKER_MAX; i++) workerMesh.setColorAt(i, wc);
+    W.island.add(workerMesh);
+  }
+  // 건물 겉 크기(땅 위 좌표): 모형 경계 상자로
+  function footprint(key) {
+    const def = MAP.buildings[key];
+    if (def && def.kind === 'wall') return null;
+    const m = meshes[key];
+    if (!m) return null;
+    const bb = m.geometry.boundingBox;
+    return { m, bb };
+  }
+  function scaffoldGeo(bb) {
+    const b = new JK.Builder();
+    const wood = JK.col('#b5875a'),
+      tarp = JK.col('#eadfc6');
+    const x0 = bb.min.x - 0.07,
+      x1 = bb.max.x + 0.07,
+      z0 = bb.min.z - 0.07,
+      z1 = bb.max.z + 0.07;
+    const h = Math.max(0.3, (bb.max.y - bb.min.y) * 0.8);
+    const poles = [];
+    const nx = Math.max(2, Math.round((x1 - x0) / 0.38)),
+      nz = Math.max(2, Math.round((z1 - z0) / 0.38));
+    for (let i = 0; i <= nx; i++) poles.push([x0 + ((x1 - x0) * i) / nx, z1], [x0 + ((x1 - x0) * i) / nx, z0]);
+    for (let j = 1; j < nz; j++) poles.push([x0, z0 + ((z1 - z0) * j) / nz], [x1, z0 + ((z1 - z0) * j) / nz]);
+    for (const [x, z] of poles) b.cyl(x, 0, z, 0.012, 0.012, h, 4, wood, { noTop: true });
+    for (const y of [h * 0.35, h * 0.7, h * 0.98]) {
+      b.box((x0 + x1) / 2, y, z1, x1 - x0, 0.014, 0.014, wood);
+      b.box((x0 + x1) / 2, y, z0, x1 - x0, 0.014, 0.014, wood);
+      b.box(x0, y, (z0 + z1) / 2, 0.014, 0.014, z1 - z0, wood);
+      b.box(x1, y, (z0 + z1) / 2, 0.014, 0.014, z1 - z0, wood);
+    }
+    // 천막 한 자락(앞쪽 반)
+    b.quad([x0, h * 0.4, z1 + 0.01], [(x0 + x1) / 2, h * 0.4, z1 + 0.01], [(x0 + x1) / 2, h * 0.95, z1 + 0.01], [x0, h * 0.95, z1 + 0.01], tarp);
+    b.quad([(x0 + x1) / 2, h * 0.4, z1 + 0.01], [x0, h * 0.4, z1 + 0.01], [x0, h * 0.95, z1 + 0.01], [(x0 + x1) / 2, h * 0.95, z1 + 0.01], tarp);
+    return b.build();
+  }
+  function wallScaffoldGeo() {
+    const b = new JK.Builder();
+    const wood = JK.col('#b5875a');
+    const n = wallData.length;
+    for (let k = 0; k < 6; k++) {
+      const s = wallData[Math.floor(((k + 0.5) / 6) * n)];
+      b.push().t(s.x, s.y, s.z).ry(-s.ang);
+      for (const x of [-0.4, 0, 0.4]) for (const z of [0.2, -0.2]) b.cyl(x, 0, z, 0.012, 0.012, 0.5, 4, wood, { noTop: true });
+      for (const y of [0.25, 0.48]) {
+        b.box(0, y, 0.2, 0.84, 0.014, 0.014, wood);
+        b.box(0, y, -0.2, 0.84, 0.014, 0.014, wood);
+      }
+      b.pop();
+    }
+    return b.build();
+  }
+  // cards: 먹구름·일꾼이 남는 카드 수 (늦게는 이 왕이 끝날 때까지)
+  W.setBuildState = function (key, state, cards) {
+    if (state === 'smooth' || !state) return;
+    const def = MAP.buildings[key];
+    if (state === 'late') {
+      if (stateFx.some((f) => f.key === key && f.kind === 'scaffold')) return;
+      let mesh;
+      if (def && def.kind === 'wall') mesh = new T.Mesh(wallScaffoldGeo(), JK.MAT);
+      else {
+        const fp = footprint(key);
+        if (!fp) return;
+        mesh = new T.Mesh(scaffoldGeo(fp.bb), JK.MAT);
+        mesh.position.copy(fp.m.position);
+        mesh.rotation.y = fp.m.rotation.y;
+      }
+      mesh.receiveShadow = true;
+      W.island.add(mesh);
+      stateFx.push({ key, kind: 'scaffold', mesh, left: Infinity });
+      shadowFrames = Math.max(shadowFrames, 3);
+      return;
+    }
+    if (state === 'forced') {
+      ensureStateMeshes();
+      const fp = footprint(key);
+      let cx, cz, top, rad;
+      if (fp) {
+        cx = fp.m.position.x;
+        cz = fp.m.position.z;
+        top = fp.m.position.y + fp.bb.max.y;
+        rad = Math.max(fp.bb.max.x - fp.bb.min.x, fp.bb.max.z - fp.bb.min.z) / 2;
+      } else {
+        const s = wallData[Math.floor(wallData.length * 0.5)];
+        cx = s.x;
+        cz = s.z;
+        top = s.y + 0.4;
+        rad = 0.8;
+      }
+      const pts = [];
+      const n = 5;
+      for (let i = 0; i < n; i++) {
+        const a = (i / n) * Math.PI * 2 + 0.4;
+        const r = rad * 0.75 + 0.15;
+        const x = cx + Math.cos(a) * r,
+          z = cz + Math.sin(a) * r;
+        pts.push({ x, z, y: height(x, z), a });
+      }
+      stateFx.push({ key, kind: 'forced', cx, cz, top: top + 0.55, rad, pts, left: cards || 4, t0: clock.t });
+    }
+  };
+  W.cardPassed = function () {
+    for (let i = stateFx.length - 1; i >= 0; i--) {
+      const f = stateFx[i];
+      if (f.left === Infinity) continue;
+      f.left--;
+      if (f.left <= 0) stateFx.splice(i, 1);
+    }
+  };
+  W.clearStates = function () {
+    for (const f of stateFx) if (f.mesh) {
+      W.island.remove(f.mesh);
+      f.mesh.geometry.dispose();
+    }
+    stateFx.length = 0;
+    if (stormMesh) stormMesh.count = workerMesh.count = 0;
+  };
+  const _sm = new T.Matrix4(),
+    _sq = new T.Quaternion(),
+    _se = new T.Euler(),
+    _sp = new T.Vector3(),
+    _ss = new T.Vector3();
+  function updateStates(t) {
+    if (!stormMesh) return;
+    let si = 0,
+      wi = 0;
+    for (const f of stateFx) {
+      if (f.kind !== 'forced') continue;
+      const fade = Math.min(1, (t - f.t0) * 1.5);
+      for (let k = 0; k < 2 && si < STORM_MAX; k++) {
+        const s = (0.32 + f.rad * 0.18) * fade;
+        _sp.set(f.cx + (k - 0.5) * f.rad * 0.6 + Math.sin(t * 0.4 + k) * 0.08, f.top + Math.sin(t * 0.8 + k * 2) * 0.05, f.cz + (k - 0.5) * 0.2);
+        _se.set(0, k * 1.3, 0);
+        _sq.setFromEuler(_se);
+        _ss.set(s, s * 0.55, s * 0.8);
+        _sm.compose(_sp, _sq, _ss);
+        stormMesh.setMatrixAt(si++, _sm);
+      }
+      for (const p of f.pts) {
+        if (wi >= WORKER_MAX) break;
+        // 주저앉아 고개를 떨군 일꾼(키를 줄이고 앞으로 기울임)
+        _sp.set(p.x, p.y - 0.02, p.z);
+        _se.set(0.35 + Math.sin(t * 1.3 + p.a) * 0.04, p.a + Math.PI, 0, 'YXZ');
+        _sq.setFromEuler(_se);
+        _ss.set(0.3, 0.22, 0.3);
+        _sm.compose(_sp, _sq, _ss);
+        workerMesh.setMatrixAt(wi++, _sm);
+      }
+    }
+    stormMesh.count = si;
+    workerMesh.count = wi;
+    stormMesh.instanceMatrix.needsUpdate = true;
+    workerMesh.instanceMatrix.needsUpdate = true;
+  }
+
+  /* ================= 카드 연출 (설계서 3장 연출 칸) ================= */
+  // 짐배: 한강을 오가는 이름 없는 돛배
+  let boatMesh = null;
+  const boatData = [];
+  W.fxBoats = function (on) {
+    if (!on) {
+      if (boatMesh) boatMesh.visible = false;
+      return;
+    }
+    if (!boatMesh) {
+      const b = new JK.Builder();
+      const hull = JK.col('#8a5a3b'),
+        sail = JK.col('#f1e8d4');
+      b.box(0, 0.03, 0, 0.12, 0.06, 0.4, hull);
+      b.box(0, 0.07, -0.02, 0.1, 0.02, 0.3, JK.col('#a87850'));
+      b.cyl(0, 0.07, 0.02, 0.01, 0.01, 0.34, 4, hull, { noTop: true });
+      b.quad([0, 0.12, 0.03], [0, 0.12, -0.12], [0, 0.4, -0.08], [0, 0.4, 0.03], sail);
+      b.quad([0, 0.12, -0.12], [0, 0.12, 0.03], [0, 0.4, 0.03], [0, 0.4, -0.08], sail);
+      boatMesh = new T.InstancedMesh(b.build(), JK.MAT, 3);
+      boatMesh.castShadow = false;
+      boatMesh.frustumCulled = false;
+      W.island.add(boatMesh);
+      for (let i = 0; i < 3; i++) boatData.push({ s: 0.15 + i * 0.3, sp: 0.018 + i * 0.006, dir: i % 2 ? 1 : -1 });
+    }
+    boatMesh.visible = true;
+  };
+  function updateBoats(dt) {
+    if (!boatMesh || !boatMesh.visible) return;
+    const n = RIVER.length - 4;
+    boatData.forEach((bd, i) => {
+      bd.s += bd.dir * bd.sp * dt;
+      if (bd.s > 0.92 || bd.s < 0.04) bd.dir *= -1;
+      const f = bd.s * (n - 1),
+        k = Math.floor(f),
+        u = f - k;
+      const a = RIVER[k],
+        c = RIVER[k + 1];
+      const x = a[0] + (c[0] - a[0]) * u,
+        z = a[1] + (c[1] - a[1]) * u;
+      _sp.set(x, -0.1 + Math.sin(clock.t * 2 + i) * 0.01, z);
+      _se.set(0, Math.atan2(c[0] - a[0], c[1] - a[1]) + (bd.dir < 0 ? Math.PI : 0), Math.sin(clock.t * 1.7 + i) * 0.05);
+      _sq.setFromEuler(_se);
+      _ss.set(1, 1, 1);
+      _sm.compose(_sp, _sq, _ss);
+      boatMesh.setMatrixAt(i, _sm);
+    });
+    boatMesh.instanceMatrix.needsUpdate = true;
+  }
+  // 왕기: 섬 한가운데 꽂히는 붉은 깃발(이름 없음)
+  let flagMesh = null;
+  W.fxFlag = function (on) {
+    if (!on) {
+      if (flagMesh) flagMesh.visible = false;
+      return;
+    }
+    if (!flagMesh) {
+      const b = new JK.Builder();
+      b.cyl(0, 0, 0, 0.02, 0.016, 1.1, 5, JK.col('#5a3a28'), { noTop: true });
+      b.ball(0, 1.12, 0, 0.035, 0, JK.col('#d8b64e'));
+      const red = JK.col('#c0392b');
+      b.quad([0.01, 0.68, 0], [0.42, 0.72, 0], [0.42, 1.04, 0], [0.01, 1.06, 0], red);
+      b.quad([0.42, 0.72, 0], [0.01, 0.68, 0], [0.01, 1.06, 0], [0.42, 1.04, 0], red);
+      flagMesh = new T.Mesh(b.build(), JK.MAT);
+      const x = -0.9,
+        z = -0.85;
+      flagMesh.position.set(x, height(x, z), z);
+      flagMesh.castShadow = true;
+      W.island.add(flagMesh);
+      anims.push({
+        t: 0,
+        dur: 0.8,
+        step(t) {
+          const k = Math.min(1, t / 0.8);
+          flagMesh.scale.set(1, easeBack(k), 1);
+        },
+      });
+      shadowFrames = Math.max(shadowFrames, 40);
+    }
+    flagMesh.visible = true;
+  };
+  // 하늘에 먹으로 쓰는 글씨, 건물 위에 잠깐 뜨는 글자 빛
+  W.fxSkyText = function (text) {
+    const el = document.getElementById('skyText');
+    if (!el) return;
+    el.textContent = text;
+    el.classList.remove('show');
+    void el.offsetWidth;
+    el.classList.add('show');
+  };
+  W.fxGlyph = function (key, ch, delay) {
+    const d = BUILD_DEFS[key];
+    if (!d) return;
+    setTimeout(() => W.label(ch, new T.Vector3(d.x, height(d.x, d.z) + d.label + 0.9, d.z), 2600, 'glyph'), delay || 0);
+  };
+
   /* ================= 이름표 ================= */
   const labels = [];
-  W.label = function (text, pos, ms) {
+  W.label = function (text, pos, ms, cls) {
     const el = document.createElement('div');
-    el.className = 'b-label';
+    el.className = 'b-label' + (cls ? ' ' + cls : '');
     el.textContent = text;
     document.getElementById('labels').appendChild(el);
     labels.push({ el, pos: pos.clone(), until: performance.now() + ms, born: performance.now() });
@@ -1846,6 +2215,8 @@
       }
     }
     updatePeople(dt, clock.t);
+    updateStates(clock.t);
+    updateBoats(dt);
     stats.walkers = dollMesh.count;
     W.clouds.rotation.y += dt * 0.004;
     // 떠 있는 섬
@@ -1897,6 +2268,9 @@
     wallMesh.visible = false;
     shadowRects.length = 0;
     repaintGround();
+    W.clearStates();
+    W.fxBoats(false);
+    W.fxFlag(false);
     W.state.ink = 0;
     W.state.inkTarget = 0;
     cam.orbit = 0;

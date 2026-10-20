@@ -192,7 +192,18 @@
         el.appendChild(li);
       }
     };
-    list($('#recCodex'), D.codex, codexOpen, (x) => `${x.name}${x.outside ? ' [교과서 밖]' : ''} — ${x.desc}`, () => '？？？');
+    // 도감은 분류별로: 열린 칸만 이름을 보이고, 닫힌 칸은 수만 센다
+    const cx = $('#recCodex');
+    cx.innerHTML = '';
+    const cats = [...new Set(D.codex.map((x) => x.cat))];
+    for (const cat of cats) {
+      const all = D.codex.filter((x) => x.cat === cat);
+      const on = all.filter(codexOpen);
+      const li = document.createElement('li');
+      li.className = on.length ? 'on' : 'off';
+      li.innerHTML = `<b>${cat} ${on.length}/${all.length}</b>` + (on.length ? '<br>' + on.map((x) => `${x.name}${x.outside ? ' <span class="tag-out">교과서 밖</span>' : ''}`).join(' · ') : '');
+      cx.appendChild(li);
+    }
     list($('#recFalls'), D.falls, (f) => m.falls[f.id], (f) => `${f.name} (${m.falls[f.id]}번)`, () => '？？？');
     list($('#recTitles'), D.titles, (t) => m.titles[t.id], (t) => `「${t.name}」`, (t) => `？？？ — ${t.hint}`);
     open('#records');

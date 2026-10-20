@@ -214,3 +214,22 @@ body.playing #btnHome { display: grid; }
 #settings { z-index: 50; }
 #title.gone { visibility: hidden; transition: opacity .8s, visibility 0s .8s; }
 #loading.gone { visibility: hidden; transition: opacity .6s, visibility 0s .6s; }
+
+/* ===== 태조 데이터(설계서 v2) ===== */
+/* 두루마리: 「이번 판에서」 + 📜 「실제 역사」 */
+#runBox { margin: 6px 2px 0; padding: 8px 10px; border-radius: 10px; background: rgba(255,250,236,.75); border: 1px dashed #c9a96c; font-size: clamp(14px, 1.2vw, 16px); line-height: 1.5; word-break: keep-all; text-align: left; }
+.run-label { display: block; font-size: 12px; color: #8a6b4a; margin-bottom: 2px; }
+#realLabel { margin: 8px 0 0; font-size: 13px; color: #6b3a2a; text-align: center; }
+#card.record .por-wrap { flex: 0 0 22%; }
+#card.record #text { min-height: 0; font-size: clamp(15px, 1.3vw, 18px); }
+#card.record .who-line { margin-top: 4px; }
+#year { position: absolute; top: 14px; right: 64px; font-size: 12px; color: #8a6b4a; }
+#card.scroll:not(.record) .por-wrap { flex: 1 1 0; }
+/* 하늘에 먹으로 쓰는 글씨 */
+#skyText { position: absolute; left: 0; right: 0; top: 9vh; text-align: center; z-index: 4; pointer-events: none; font-family: 'JKTitle', serif; font-size: clamp(64px, 11vw, 150px); color: rgba(30,26,30,.88); letter-spacing: .1em; opacity: 0; text-shadow: 0 0 18px rgba(255,255,255,.35); }
+body:not(.portrait) #skyText { right: var(--panel-w); }
+#skyText.show { animation: inkWrite 4.2s ease-out forwards; }
+@keyframes inkWrite { 0% { opacity: 0; clip-path: inset(0 100% 0 0); filter: blur(6px); } 25% { opacity: 1; filter: blur(0); } 55% { clip-path: inset(0 0 0 0); } 80% { opacity: 1; } 100% { opacity: 0; clip-path: inset(0 0 0 0); } }
+/* 성문 글자 빛 (仁·義·禮) */
+.b-label.glyph { background: none; box-shadow: none; border: 0; font-size: 46px; color: #fff3c4; text-shadow: 0 0 12px #ffcf5a, 0 0 28px #ffb12e; }
+.b-label.glyph::after { display: none; }

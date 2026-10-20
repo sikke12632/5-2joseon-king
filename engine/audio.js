@@ -127,6 +127,22 @@
     o.start(t);
     o.stop(t + 0.25);
   };
+  // 늦게 지음: 망치 소리 몇 번
+  A.hammer = function () {
+    if (!ok()) return;
+    const c = A.ctx;
+    for (let i = 0; i < 4; i++) {
+      const t = c.currentTime + 0.35 + i * 0.32 + Math.random() * 0.05;
+      const o = c.createOscillator(),
+        g = c.createGain();
+      o.type = 'triangle';
+      o.frequency.setValueAtTime(700 + Math.random() * 120, t);
+      env(g, t, 0.002, 0.16, 0.06);
+      o.connect(g).connect(A.master);
+      o.start(t);
+      o.stop(t + 0.1);
+    }
+  };
   // 카드 넘김: 종이 스치는 소리
   A.swipe = function (dir) {
     if (!ok()) return;

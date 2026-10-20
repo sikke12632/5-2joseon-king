@@ -37,13 +37,17 @@
     $('#whoTitle').textContent = v.tag || '';
     $('#whoTitle').style.display = v.tag ? '' : 'none';
     $('#text').textContent = v.text || '';
+    $('#runBox').style.display = v.run ? '' : 'none';
+    $('#runText').textContent = v.run || '';
+    $('#realLabel').style.display = v.record ? '' : 'none';
     $('#chL').textContent = v.single || v.left || '';
     $('#chR').textContent = v.single || v.right || '';
     $('#hintL').textContent = '← ' + (v.single || v.left || '');
     $('#hintR').textContent = (v.single || v.right || '') + ' →';
-    $('#turn').textContent = v.turn || '';
+    $('#turn').textContent = [v.year, v.turn].filter(Boolean).join(' · ');
     $('#outside').style.display = v.outside ? '' : 'none';
     card.classList.toggle('scroll', !!v.scroll);
+    card.classList.toggle('record', !!v.record);
     card.style.transition = 'none';
     card.style.transform = 'translate(0, 40px) rotateY(80deg) scale(0.96)';
     card.style.opacity = '0';

@@ -42,12 +42,11 @@
     const gaps = Math.max(1, hist.length - 1);
     const slots = Array.from({ length: gaps }, () => []);
     shuffle(required.slice(), rnd).forEach((c, i) => slots[(Math.floor(rnd() * gaps) + i) % gaps].push(c.id));
-    const [mn, mx] = stage.dailyGap || [0, 1];
-    for (const s of slots) {
-      const n = mn + Math.floor(rnd() * (mx - mn + 1));
-      for (let k = 0; k < n && optional.length; k++) s.push(optional.shift().id);
-      shuffle(s, rnd);
-    }
+    // 무작위 칸(설계서 10-2: 왕마다 5~8칸)
+    const [mn, mx] = stage.randomSlots || [5, 8];
+    const n = mn + Math.floor(rnd() * (mx - mn + 1));
+    for (let k = 0; k < n && optional.length; k++) slots[Math.floor(rnd() * gaps)].push(optional.shift().id);
+    for (const s of slots) shuffle(s, rnd);
     const deck = [];
     hist.forEach((c, i) => {
       deck.push(c.id);
@@ -91,6 +90,10 @@
     run.pending = null;
     run.built = run.builtBefore ? run.builtBefore.slice() : [];
     run.builtBefore = run.built.slice();
+    run.states = {};
+    run.flags = Object.assign({}, run.flagsBefore || {});
+    run.flagsBefore = Object.assign({}, run.flags);
+    run.grown = run.grownBefore || 0;
     run.stageStats = { edge: false, falls: run.stageStats && run.stageStats.stage === stageId ? run.stageStats.falls : 0, stage: stageId };
     run.waiting = null;
     G.state = 'play';
@@ -111,8 +114,15 @@
     W.reset();
     W.setSky(st.sky);
     W.state.title = false;
-    for (const k in st.prebuilt || {}) W.buildInstant(k, st.prebuilt[k]);
-    for (const k of G.run.built) W.buildInstant(k);
+    for (const k in st.prebuilt || {}) {
+      const v = era.map.buildings[k];
+      W.buildInstant(k, st.prebuilt[k]);
+      if (v && v.grow && G.run.grown) W.growVillage(k, v.grow * G.run.grown, true);
+    }
+    for (const k of G.run.built) W.buildInstant(k, undefined, (G.run.states || {})[k]);
+    const fl = G.run.flags || {};
+    if (fl.boats) W.fxBoats(true);
+    if (fl.flag) W.fxFlag(true);
     W.state.people = G.run.vals.people !== undefined ? G.run.vals.people : 50;
     setTOD(true);
     W.camTo(W.CAM_PLAY, restoring ? 1.2 : 2.4);
@@ -151,6 +161,7 @@
       scroll: c.type === 'scroll',
       outside: !!c.outside,
       turn: `${run.pos + 1} / ${run.deck.length}`,
+      year: c.year || '',
       fx: c.single ? null : { left: c.left.fx, right: c.right.fx },
       hand: st.tutorial && run.pos < st.tutorial && S.meta.cardsPlayed < 12,
     });
@@ -160,7 +171,7 @@
   function showRecord() {
     const p = G.run.pending;
     const v = roleView('sagwan');
-    Object.assign(v, { text: p.text, single: '기록을 넘긴다', scroll: true, turn: '사관 기록', fx: null, outside: false });
+    Object.assign(v, { text: p.text, run: p.run || '', single: '기록을 넘긴다', scroll: true, record: true, turn: '실제 역사', fx: null, outside: !!p.outside, year: p.year || '' });
     Cards.show(v);
   }
 
@@ -192,18 +203,25 @@
         W.shake(0.5);
         Cards.shake();
       }
-      if (side.result) Cards.toast(side.result);
+      if (side.result && !c.record) Cards.toast(side.result, Math.max(2600, side.result.length * 70));
     }
     S.meta.cardsPlayed++;
+    W.cardPassed();
     if (c.type === 'daily') run.used.push(c.id);
-    // 짓기: 들어주면 바로, 거절하면 사관 기록 뒤에(기록이 없으면 조금 늦게)
+    // 짓기: 이름 있는 건물은 어느 쪽을 골라도 역사대로 선다. 고른 방식은 건물 상태로 남는다(설계서 7-4).
     let wait = 700;
     const builds = c.build || [];
-    if (builds.length) {
-      if (dir > 0 || c.single || !c.record) wait = Math.max(wait, doBuilds(builds, dir > 0 || c.single ? 350 : 1100));
+    const state = side && side.state;
+    if (builds.length) wait = Math.max(wait, doBuilds(builds, 350, state));
+    cardFx(c, state);
+    // 이름 없는 마을은 카드마다 조금씩 자란다
+    for (const k in era.map.buildings) {
+      const v = era.map.buildings[k];
+      if (v.kind === 'village' && v.grow && !builds.includes(k)) setTimeout(() => W.growVillage(k, v.grow), 600);
     }
+    run.grown = (run.grown || 0) + 1;
     run.pos++;
-    if (c.record) run.pending = { text: c.record, build: dir < 0 && !c.single ? builds : [] };
+    if (c.record) run.pending = { text: c.record, run: side ? side.result : '', outside: !!c.outside, year: c.year, build: [] };
     setTOD(false);
     const bad = era.gauges.find((g) => run.vals[g.key] <= 0 || run.vals[g.key] >= 100);
     save();
@@ -214,19 +232,50 @@
     }, Math.max(wait, c.single ? 500 : 900));
   }
   // 건물을 차례로 세우고, 다 설 때까지 걸리는 시간(ms)을 돌려준다
-  function doBuilds(keys, delay) {
+  function doBuilds(keys, delay, stateIn) {
     let t = delay;
     let end = 0;
-    for (const k of keys) {
-      if (G.run.built.includes(k)) continue;
+    keys.forEach((k, idx) => {
+      if (G.run.built.includes(k)) return;
       G.run.built.push(k);
+      // 건물 상태는 그 카드의 첫 건물에만(설계서 7-4 건물별 정리)
+      const state = idx === 0 ? stateIn : null;
+      if (state) {
+        G.run.states = G.run.states || {};
+        G.run.states[k] = state;
+        const bs = (S.meta.buildStates = S.meta.buildStates || {});
+        (bs[k] = bs[k] || {})[state] = 1;
+      }
       const at = t;
-      setTimeout(() => W.build(k), at);
+      setTimeout(() => W.build(k, { state }), at);
       const kind = era.map.buildings[k] && era.map.buildings[k].kind;
       end = Math.max(end, at + (kind === 'village' || kind === 'wall' ? 2200 : 1300));
       t += 900;
-    }
+    });
     return end;
+  }
+
+  // 카드 연출 (설계서 3장 연출 칸): 왕기, 짐배, 하늘 글씨, 성문 글자 빛
+  function cardFx(c, state) {
+    const f = c.fx || {};
+    const run = G.run;
+    run.flags = run.flags || {};
+    if (f.flag) {
+      run.flags.flag = true;
+      setTimeout(() => W.fxFlag(true), 500);
+    }
+    if (f.boats) {
+      run.flags.boats = true;
+      setTimeout(() => W.fxBoats(true), 600);
+    }
+    if (f.skyText) setTimeout(() => W.fxSkyText(f.skyText), 400);
+    if (f.glyphs) {
+      const keys = c.build || [];
+      for (const k in f.glyphs) {
+        const i = keys.indexOf(k);
+        W.fxGlyph(k, f.glyphs[k], 350 + Math.max(0, i) * 900 + 900 + (state === 'late' ? 1800 : 0));
+      }
+    }
   }
 
   /* ---------- 실각 ---------- */
@@ -300,6 +349,8 @@
       const si = stageIndex(st.id);
       const nst = era.stages[si + 1];
       run.builtBefore = run.built.slice();
+      run.flagsBefore = Object.assign({}, run.flags || {});
+      run.grownBefore = run.grown || 0;
       if (nst && nst.ready) {
         G.startStage(nst.id, next);
         return;

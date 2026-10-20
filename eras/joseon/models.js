@@ -592,6 +592,8 @@
   }
 
   const M = (JK.eraModels = JK.eraModels || {});
+  // 왕별 모형 파일(models-taejo.js 등)이 쓰는 도구
+  JK.kit = { roof, hall, platform, archFace, gatePavilion, C };
   M.gyeongbok = gyeongbokgung;
   M.jongmyo = jongmyo;
   M.sungnye = sungnyemun;
@@ -762,6 +764,13 @@
       b.ball(0, 1.22, -0.02, 0.06, 1, col('#2a221d'));
       b.cyl(0, 1.03, 0, 0.205, 0.205, 0.03, 18, col('#2a221d'));
     },
+    // 아이: 땋은 머리와 붉은 댕기
+    braid(b) {
+      const k = col('#2a2420');
+      b.ball(0, 1.04, -0.01, 0.205, 2, k, 0.6);
+      b.cylAB([0, 0.98, -0.19], [0, 0.62, -0.27], 0.035, 0.03, 6, k);
+      b.box(0, 0.6, -0.27, 0.06, 0.08, 0.02, col('#c0392b'));
+    },
     bun(b) {
       const k = col('#2a2420');
       b.ball(0, 1.04, 0, 0.205, 2, k, 0.62);
@@ -845,6 +854,10 @@
       b.box(-0.12, 0.62, 0.25, 0.04, 0.3, 0.03, col('#3b4f7a'));
       b.ball(0, 0.62, -0.3, 0.22, 1, col('#3b5384'), 0.85);
       b.ball(0, 0.78, -0.33, 0.06, 1, col('#2d3f66'));
+    },
+    broom(b) {
+      b.cylAB([0.3, 0.2, 0.25], [0.18, 0.95, 0.3], 0.014, 0.014, 5, col('#8a5a3b'));
+      b.cylAB([0.33, -0.02, 0.24], [0.3, 0.2, 0.25], 0.07, 0.025, 6, col('#c9a466'));
     },
     // 사관의 두루마리
     scroll(b) {
