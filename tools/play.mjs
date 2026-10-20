@@ -40,6 +40,12 @@ export default async function (t) {
   }
   console.log('상태', await t.eval('__jk.G.state'), '| 지은 것', await t.eval("__jk.G.run.built.join(',')"), '| 상태', await t.eval('JSON.stringify(__jk.G.run.states)'));
   if (process.env.QUIZ !== '0') {
+    // 비교 화면(10-10-5) → 퀴즈
+    try {
+      await t.waitFor("!document.querySelector('#compare').classList.contains('hide')", 9000);
+      console.log('비교 화면', await t.eval("document.querySelector('#cmpTrueN').textContent"));
+      await t.eval("document.querySelector('#btnCmpNext').click()");
+    } catch {}
     for (let q = 0; q < 3; q++) {
       try { await t.waitFor("!document.querySelector('#quiz').classList.contains('hide')", 9000); } catch { break; }
       await t.eval(`(()=>{const q=JK.era.data.quizzes.find(x=>x.question===document.querySelector('#qText').textContent);[...document.querySelectorAll('.q-opt')].find(b=>b.textContent===q.answer).click();})()`);

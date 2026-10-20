@@ -104,8 +104,9 @@
   function setupDebug() {
     const el = $('#debug');
     el.classList.remove('hide');
-    el.innerHTML = '<pre id="dbgText"></pre><div class="dbg-btns"><button id="dbgFall">실각 보기</button><button id="dbgBuild">모두 짓기</button><button id="dbgSkip">끝까지</button><button id="dbgLose">문맥 잃기 시험</button></div>';
+    el.innerHTML = '<pre id="dbgText"></pre><div class="dbg-btns"><button id="dbgFall">실각 보기</button><button id="dbgEnd">진엔딩 보기</button><button id="dbgBuild">모두 짓기</button><button id="dbgSkip">끝까지</button><button id="dbgLose">문맥 잃기 시험</button></div>';
     $('#dbgFall').onclick = () => JK.Game.debugFall();
+    $('#dbgEnd').onclick = () => JK.Game.debugEnding('true');
     $('#dbgBuild').onclick = () => JK.Game.debugBuildAll();
     $('#dbgSkip').onclick = () => JK.Game.debugSkip();
     $('#dbgLose').onclick = () => {

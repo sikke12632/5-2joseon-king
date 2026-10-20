@@ -62,6 +62,17 @@
     $('#hintR').textContent = (lock.right ? '🔒 ' : '') + (v.single || v.right || '') + ' →';
     $('#hintL').classList.toggle('locked', !!lock.left);
     $('#hintR').classList.toggle('locked', !!lock.right);
+    // 잠긴 이유는 늘 보이게(버튼 줄 아래). 두 쪽 이유가 같으면 한 줄로
+    if (lock.left || lock.right) {
+      const same = lock.left && lock.right && lock.left === lock.right;
+      $('#chanceL').textContent = lock.left ? `🔒 ${lock.left}` : '';
+      $('#chanceR').textContent = same ? '' : lock.right ? `🔒 ${lock.right}` : '';
+      $('#chance').style.display = '';
+      $('#chance').classList.toggle('one', !!same);
+    } else $('#chance').classList.remove('one');
+    // 실제 경로가 잠긴 까닭인 게이지 아이콘을 깜빡인다(10-11-5)
+    const need = new Set((v.need || []).map((x) => x.key));
+    for (const el of document.querySelectorAll('.gauge')) el.classList.toggle('need', need.has(el.dataset.key));
     // 카드 아래 '다른 길' 버튼(위로 끌거나 누르기)
     const ab = $('#altBtn');
     ab.style.display = v.alt ? '' : 'none';
@@ -76,9 +87,11 @@
     // 위기 카드: [게임 속 일] 표시, 버튼 아래 무너질 확률, 비슷한 실제 일(작게)
     $('#gameTag').style.display = v.game ? '' : 'none';
     $('#gameTag').classList.toggle('shift', !!v.outside);
-    $('#chanceL').textContent = (v.chance && v.chance.left) || '';
-    $('#chanceR').textContent = (v.chance && v.chance.right) || '';
-    $('#chance').style.display = v.chance ? '' : 'none';
+    if (!(lock.left || lock.right)) {
+      $('#chanceL').textContent = (v.chance && v.chance.left) || '';
+      $('#chanceR').textContent = (v.chance && v.chance.right) || '';
+      $('#chance').style.display = v.chance ? '' : 'none';
+    }
     const sim = $('#similar');
     sim.style.display = v.similar ? '' : 'none';
     if (v.similar) sim.innerHTML = `<b>비슷한 실제 일</b> ${v.similar.out_of_textbook ? '<span class="tag-out">교과서 밖</span> ' : ''}${esc(v.similar.text)}`;
@@ -280,6 +293,7 @@
     if (dir === -1 && lock.left) return refuse(lock.left);
     C.busy = true;
     C.hand(false);
+    $('#altBtn').style.display = 'none';
     card.style.transition = 'transform .45s cubic-bezier(.5,0,.9,.4), opacity .45s';
     card.style.transform = dir === 2 ? 'translate(0, -120%) rotate(-4deg)' : `translate(${dir * 130}%, 18%) rotate(${dir * 28}deg)`;
     card.style.opacity = '0';

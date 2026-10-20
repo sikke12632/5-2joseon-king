@@ -137,6 +137,8 @@
     run.choices = {};
     run.seenRun = [];
     // 역사 분기(10-10): 이 왕에서 고른 다른 길, 바뀌는 뒤 카드, 서지 않은 실제 건물(다음 왕에서 합류), 위기 확률 배율
+    run.route = run.route || {};
+    run.route[stageId] = {}; // 진엔딩 판정(10-11): 이 왕의 사건마다 same/diff/open/life. 실각해 다시 하면 다시 한 기록으로
     run.altPick = {};
     run.altCards = [];
     run.variants = {};
@@ -179,6 +181,7 @@
     refreshWarn(true);
     for (const k in G.run.damaged || {}) W.setBuildState(k, 'damaged', 0);
     JK.UI.setStage(st);
+    refreshSeal();
   }
   function setTOD(instant) {
     const st = stageOf(G.run.stage);
@@ -348,8 +351,15 @@
       const L = real['lock_' + sk];
       if (L && JK.Cond.test(L.when, cctx(run))) lock[sk] = L.reason || '지금은 고를 수 없다';
     }
+    // 난이도별 실제 경로 요구(10-11-2): 못 채우면 좌우 두 버튼이 함께 잠기고, 다른 길은 조건 없이 열린다
+    const need = real.require && real.require[G.diffId()];
+    const realShut = !!need && !JK.Cond.test(need, cctx(run));
+    if (realShut) {
+      const why = (real.require_reason || '지금은 실제 역사대로 갈 수 없다') + needHint(run, need);
+      lock.right = lock.left = why;
+    }
     const alts = c.paths.alt || [];
-    let ai = alts.findIndex((a) => JK.Cond.test(a.unlock, cctx(run)));
+    let ai = realShut ? 0 : alts.findIndex((a) => JK.Cond.test(a.unlock, cctx(run)));
     const full = run.altCards.length >= (branchCfg().maxPerStage || 3);
     const open = ai >= 0 && !full;
     if (ai < 0) ai = 0;
@@ -360,10 +370,47 @@
       delete lock[size('right') <= size('left') ? 'right' : 'left'];
     }
     run.shownAlt = a ? { card: c.id, idx: ai, open } : null;
-    const out = { lock };
+    const out = { lock, need: realShut ? missingGauges(run, need) : [] };
     if (a) out.alt = { label: a.label, locked: !open, reason: open ? '' : full ? branchCfg().fullReason || '이미 나라가 많이 흔들렸다' : a.lock_reason || '' };
     if (a && open) out.fxAlt = ((s) => s)(Object.fromEntries(Object.entries(a.effects || {}).map(([k, x]) => [k, G.effect(k, x, run.vals)])));
     return out;
+  }
+  // 잠긴 이유에 붙는 단서(10-11-5): 새싹 "국고 8 더" / 보통 "(국고)" / 성군·실록 없음
+  function missingGauges(run, expr) {
+    const out = [];
+    for (const m of expr.matchAll(/gauge\((\w+)\)\s*>=\s*(\d+)/g)) if (run.vals[m[1]] < +m[2]) out.push({ key: m[1], more: +m[2] - run.vals[m[1]] });
+    return out;
+  }
+  function needHint(run, expr) {
+    const mode = ((era.trueEnding || {}).needHint || {})[G.diffId()] || 'none';
+    const miss = missingGauges(run, expr);
+    const name = (k) => era.gauges.find((g) => g.key === k).name;
+    const prev = [...expr.matchAll(/real\((\w+)\)/g)].filter((m) => !JK.Cond.test(m[0], cctx(run))).map((m) => (cardsById[m[1]] || {}).event || m[1]);
+    if (mode === 'none' || (!miss.length && !prev.length)) return '';
+    const parts = miss.map((x) => (mode === 'number' ? `${name(x.key)} ${x.more} 더` : name(x.key)));
+    for (const p of prev) parts.push(`앞의 「${p}」을 실제대로`);
+    return ` (${parts.join(', ')})`;
+  }
+  // 진엔딩 셈(10-11): 판 전체에서 실제대로 지난 사건 수와, 진엔딩이 아직 가능한지
+  function routeSummary(run) {
+    let same = 0,
+      counted = 0,
+      broken = false;
+    for (const st in run.route || {})
+      for (const id in run.route[st]) {
+        const r = run.route[st][id];
+        if (r === 'life') continue;
+        counted++;
+        if (r === 'diff') broken = true;
+        else same++;
+      }
+    const total = (era.trueEnding || {}).totalEvents || counted;
+    return { same, counted, total, broken, left: Math.max(0, total - counted) };
+  }
+  G.routeSummary = () => routeSummary(G.run);
+  function refreshSeal() {
+    const r = routeSummary(G.run);
+    JK.UI.setSeal && JK.UI.setSeal(r);
   }
   // 이번 왕의 "나의 역사 vs 실제 역사" 기록(기록관에 짧게 남기고, 글은 볼 때 데이터에서 다시 만든다)
   function compareEntry(run, st) {
@@ -377,7 +424,7 @@
       if (b && b[0] && run.states[b[0]]) states[h.id] = run.states[b[0]];
     }
     const log = (run.crisisLog || []).filter((x) => x.stage === st.id);
-    return { d: new Date().toISOString().slice(0, 10), st: st.id, ch, ap: Object.assign({}, run.altPick), bs: states, held: log.filter((x) => !x.fell).map((x) => [x.name, Math.round(x.p * 100)]), fell: log.filter((x) => x.fell).length };
+    return { d: new Date().toISOString().slice(0, 10), st: st.id, ch, ap: Object.assign({}, run.altPick), bs: states, tr: routeSummary(run), alts: run.stats.alt || 0, held: log.filter((x) => !x.fell).map((x) => [x.name, Math.round(x.p * 100)]), fell: log.filter((x) => x.fell).length };
   }
   G.compareEntry = () => compareEntry(G.run, stageOf(G.run.stage));
   // 도박 쪽 버튼은 수치 대신 '?'(이기면·지면 움직이는 게이지 모두)
@@ -415,6 +462,16 @@
     const alt = isAlt ? c.paths.alt[run.shownAlt.idx] : null;
     const side = c.single ? null : isAlt ? alt : c.choices[sideKey];
     if (!c.single) run.choices[c.id] = sideKey;
+    // 진엔딩 셈(10-11-1): 보통 사건은 좌우 = 실제대로, 다른 길 = 다름 / 판단 사건은 좌우 어느 쪽이든 실제대로 / 생명 사건은 셈에서 뺌
+    if (c.kind === 'history' && !c.single) {
+      const et = c.event_type || 'normal';
+      const before = routeSummary(run).broken;
+      run.route[run.stage][c.id] = et === 'life' ? 'life' : isAlt ? 'diff' : et === 'judge' ? 'open' : 'same';
+      if (!before && routeSummary(run).broken) {
+        JK.UI.setSeal && JK.UI.setSeal(routeSummary(run), true);
+        setTimeout(() => Cards.toast((era.trueEnding || {}).brokenText || '이번 판의 진엔딩은 멀어졌어요', 2600), 3000);
+      }
+    }
     if (c.paths) {
       const mp = (S.meta.paths = S.meta.paths || {});
       (mp[c.id] = mp[c.id] || {})[isAlt ? alt.id : 'real'] = 1;
@@ -703,6 +760,15 @@
     const lastStage = !era.stages[stageIndex(st.id) + 1];
     if (lastStage && (run.stats.held || 0) >= 5) got.push('held5');
     if (lastStage && !(run.stats.alt || 0)) got.push('allReal');
+    // 엔딩(10-11-3·6): 마지막 왕까지 마치면 진엔딩(난이도별 칭호) 또는 다른 조선의 한양
+    const route = routeSummary(run);
+    let ending = null;
+    if (lastStage && !route.broken) {
+      ending = 'true';
+      got.push('true:' + (run.easiest || G.diffId()));
+    } else if (lastStage && (run.stats.alt || 0) >= ((era.trueEnding || {}).otherEndingAlts || 5)) ending = 'other';
+    if (lastStage && (run.stats.alt || 0) >= 10) got.push('alt10');
+    if (lastStage && route.counted && Math.abs(route.same / route.counted - 0.5) <= 0.05) got.push('half');
     W.setTOD(Math.min(1, st.tod[1] + 0.06));
     const qs = pickQuiz(st.id, run.stageSeed);
     // 나의 역사 vs 실제 역사(10-10-5): 퀴즈 바로 앞. 기록관에도 남긴다
@@ -740,6 +806,12 @@
       run.flagsBefore = Object.assign({}, run.flags || {});
       run.flagsRunBefore = Object.assign({}, run.flagsRun || {});
       run.grownBefore = run.grown || 0;
+      if (ending) {
+        S.meta.endings = S.meta.endings || {};
+        (S.meta.endings[ending] = S.meta.endings[ending] || {})[run.easiest || G.diffId()] = new Date().toISOString().slice(0, 10);
+        S.saveMeta();
+        JK.UI.showEnding(ending, { diff: run.easiest || G.diffId(), route, titles: newTitles });
+      }
       if (nst && nst.ready) {
         G.startStage(nst.id, next);
         return;
@@ -765,9 +837,9 @@
     const out = [];
     let outside = 0;
     for (const q of pool) {
-      if (out.length >= 3) break;
+      if (out.length >= ((era.quiz || {}).perStage || 3)) break;
       if (q.out_of_textbook) {
-        if (outside >= 1) continue;
+        if (outside >= ((era.quiz || {}).outsidePerRound || 1)) continue;
         outside++;
       }
       out.push(q);
@@ -794,6 +866,10 @@
     G.run.pending = null;
     Cards.hide();
     showCurrent();
+  };
+  // 점검 상자: 엔딩 자리 미리 보기(기록에 남지 않음)
+  G.debugEnding = function (kind) {
+    JK.UI.showEnding(kind || 'true', { diff: G.diffId(), route: G.run ? routeSummary(G.run) : { same: 46, counted: 46, total: 46 }, titles: [], preview: true });
   };
   // 시험용: 데이터에 없는 카드를 잠시 등록한다(새로 고치면 사라짐)
   G.debugAddCard = function (c) {

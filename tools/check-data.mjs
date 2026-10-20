@@ -189,7 +189,9 @@ for (const q of D.quizzes) {
 for (const st of stageIds) {
   const n = D.quizzes.filter((q) => q.stage === st).length;
   const o = D.quizzes.filter((q) => q.stage === st && q.out_of_textbook).length;
-  if (n && o > 2) err(st, `교과서 밖 퀴즈 ${o}문항 (왕당 2문항 이하)`);
+  // 담임 결정(9-3 #4): 왕당 문항 풀에서 교과서 밖은 6문항까지(한 번에 나오는 3문항 가운데는 많아야 1 — 엔진이 지킴)
+  const omax = (era.quiz || {}).outsidePoolMax || 6;
+  if (n && o > omax) err(st, `교과서 밖 퀴즈 ${o}문항 (왕당 ${omax}문항 이하)`);
 }
 
 /* ---------- 복습 사이트와 퀴즈 중복 ---------- */

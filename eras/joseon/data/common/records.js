@@ -249,6 +249,55 @@
   "rule": "explorer"
  },
  {
+  "id": "true-sprout",
+  "name": "실록을 따른 새싹 임금",
+  "hint": "다섯 왕의 사건을 모두 실제대로",
+  "cond": "진엔딩(sprout)",
+  "rule": "true:sprout"
+ },
+ {
+  "id": "true-normal",
+  "name": "실록의 임금",
+  "hint": "다섯 왕의 사건을 모두 실제대로",
+  "cond": "진엔딩(normal)",
+  "rule": "true:normal"
+ },
+ {
+  "id": "true-sage",
+  "name": "참된 성군",
+  "hint": "다섯 왕의 사건을 모두 실제대로",
+  "cond": "진엔딩(sage)",
+  "rule": "true:sage"
+ },
+ {
+  "id": "true-annals",
+  "name": "실록 그 자체",
+  "hint": "다섯 왕의 사건을 모두 실제대로",
+  "cond": "진엔딩(annals)",
+  "rule": "true:annals"
+ },
+ {
+  "id": "other-alt10",
+  "name": "새 길을 연 임금",
+  "hint": "다른 길을 아주 많이",
+  "cond": "한 판에서 다른 길 10개 이상(한 왕 최대 3개라 4~5왕에 걸쳐야 함)",
+  "rule": "alt10"
+ },
+ {
+  "id": "other-altEvery",
+  "name": "다섯 갈래의 임금",
+  "hint": "왕마다 다른 길 하나씩",
+  "cond": "다섯 왕 모두에서 다른 길을 1개 이상 고르고 완주",
+  "rule": "altEvery"
+ },
+ {
+  "id": "other-half",
+  "name": "반쯤 같은 실록",
+  "hint": "반은 같고 반은 다르게",
+  "cond": "실제대로 지난 사건이 정확히 절반 안팎(45~55%)",
+  "rule": "half"
+ },
+ {
   "id": "crisis-held5",
   "name": "위기를 넘긴 임금",
   "hint": "위기를 여러 번 넘겨 보라",

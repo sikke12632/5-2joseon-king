@@ -376,3 +376,44 @@ body:not(.portrait) #zoneAlert { left: calc((100% - var(--panel-w)) / 2); }
 /* 같은 위기 쉬는 중: 아이콘 옆 ⏳남은 장수 (10-8-4) */
 .g-cd { position: absolute; top: -6px; left: -8px; font-size: 11px; line-height: 1; padding: 2px 4px; border-radius: 999px; background: rgba(255,248,232,.92); color: #6b3a2a; display: none; pointer-events: none; box-shadow: 0 1px 3px rgba(0,0,0,.3); }
 .gauge.cd .g-cd { display: block; }
+/* 진엔딩(10-11): 금빛 실록 도장 · 비교 화면 N/전체 · 엔딩 자리 · 모자란 게이지 깜빡임 */
+#trueSeal { display: none; width: 34px; height: 34px; border-radius: 8px; border: 2.5px solid #c99a2e; color: #a0741a; background: radial-gradient(circle at 35% 30%, #fff6d6, #f3d98a); font: 13px/1 'JKTitle', serif; place-items: center; box-shadow: 0 2px 6px rgba(0,0,0,.25); position: relative; transform: rotate(-6deg); flex: none; }
+body.playing #trueSeal { display: grid; }
+#trueSeal.broken { filter: grayscale(.85) brightness(.9); }
+#trueSeal.broken::after { content: ''; position: absolute; inset: 3px; background: linear-gradient(120deg, transparent 47%, #5a3a1a 48%, #5a3a1a 51%, transparent 52%), linear-gradient(40deg, transparent 60%, #5a3a1a 61%, #5a3a1a 63%, transparent 64%); }
+#trueSeal.crack { animation: sealCrack 1s ease-out; }
+@keyframes sealCrack { 0% { transform: rotate(-6deg) scale(1.6); } 30% { transform: rotate(8deg) scale(1.3); } 100% { transform: rotate(-6deg) scale(1); } }
+.gauge.need .g-icon { animation: needBlink .7s ease-in-out infinite; }
+@keyframes needBlink { 50% { filter: drop-shadow(0 0 10px #ffd36a); transform: scale(1.12); } }
+#cmpTrue { text-align: center; margin: 2px 0 10px; padding: 8px; border-radius: 12px; background: linear-gradient(#fff4cf, #f6e3a6); border: 2px solid #d9b14d; }
+#cmpTrue.broken { background: #efe6d6; border-color: #b9a88a; }
+.ct-label { font-size: 13px; color: #7b5b1e; }
+#cmpTrueN { font-family: 'JKTitle', serif; font-size: 36px; color: #8a5a10; line-height: 1.1; }
+#cmpTrue.broken #cmpTrueN { color: #7a6a52; }
+#cmpTrueLeft { font-size: 14px; color: #5a4630; word-break: keep-all; }
+.c-note { font-size: 11px; color: #8a7a62; margin-left: 6px; }
+#ending { z-index: 60; }
+.end-box { width: min(460px, 100%); text-align: center; background: #f6ecd4; box-shadow: 0 0 0 4px #d9b14d, 0 20px 50px rgba(0,0,0,.45); }
+#ending.other .end-box { box-shadow: 0 0 0 4px #b23b30, 0 20px 50px rgba(0,0,0,.45); }
+.end-scrolls { position: relative; height: 70px; }
+.end-scrolls .es { position: absolute; top: 8px; width: 46%; padding: 10px 0; border-radius: 8px; background: #efe3c4; box-shadow: inset 0 8px 0 #c9a96c, inset 0 -8px 0 #c9a96c; font: 15px 'JKTitle', serif; color: #5a3a1a; }
+.end-scrolls .mine { left: 2%; animation: scrollL 1.6s .3s ease-in-out forwards; }
+.end-scrolls .real { right: 2%; animation: scrollR 1.6s .3s ease-in-out forwards; }
+#ending.other .end-scrolls .es { animation: none; }
+@keyframes scrollL { to { left: 27%; opacity: .0; } }
+@keyframes scrollR { to { right: 27%; } }
+.end-seal { width: 64px; height: 64px; margin: -6px auto 4px; border-radius: 12px; border: 4px solid #c99a2e; color: #a0741a; background: radial-gradient(circle at 35% 30%, #fff6d6, #f3d98a); font: 24px/56px 'JKTitle', serif; transform: rotate(-8deg) scale(0); animation: stampIn .6s 1.8s cubic-bezier(.2,1.6,.4,1) forwards; }
+#ending.other .end-seal { border-color: #b23b30; color: #b23b30; background: #fbe9e4; }
+#endKind { font-family: 'JKTitle', serif; font-size: 18px; color: #7b5b1e; }
+#endTitle { font-family: 'JKTitle', serif; font-size: 28px; color: #8a5a10; }
+#endDiff, #endCount, #endPreview { font-size: 14px; color: #6a5440; }
+#endLine { font-family: 'JKTitle', serif; font-size: 18px; margin: 8px 0; }
+.rec-shelf .book { display: inline-block; margin: 2px 4px 2px 0; padding: 3px 10px; border-radius: 4px; font-size: 13px; color: #fff; }
+.rec-shelf .book.true { background: linear-gradient(#e2b94a, #b88a22); }
+.rec-shelf .book.other { background: linear-gradient(#c45a4a, #8d2f2a); }
+.rec-shelf .off { color: #a9977a; font-size: 14px; }
+#altBtn { pointer-events: auto; position: relative; z-index: 3; }
+body.over #altBtn, #deck:not(.show) ~ #altBtn { pointer-events: none; }
+#chance.one { justify-content: center; }
+#chance.one span { max-width: 100%; }
+#chance span:not(:empty) { background: rgba(38,30,26,.78); color: #ffe6d6; padding: 2px 9px; border-radius: 999px; text-shadow: none; }

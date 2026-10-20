@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>조선의 왕</title>
 <!-- 배포할 때마다 ?v= 숫자를 올린다(캐시) -->
-<link rel="stylesheet" href="engine/engine.css?v=7">
+<link rel="stylesheet" href="engine/engine.css?v=12">
 </head>
 <body>
 <div id="app">
@@ -15,7 +15,7 @@
   <div id="zoneAlert" role="status"></div>
 
   <div id="hud">
-    <div id="stage"><span class="seal" id="stageSeal"></span><span id="stageName"></span></div>
+    <div id="stage"><span class="seal" id="stageSeal"></span><span id="stageName"></span><span id="trueSeal" title="진엔딩: 실제 역사대로">實錄</span></div>
     <div class="topbtns">
       <button id="btnHome" class="ibtn" aria-label="첫 화면" title="첫 화면으로">
         <svg viewBox="0 0 24 24"><path d="M12 3.5L2.5 11.5h2.8V20h5v-5.2h3.4V20h5v-8.5h2.8z"/></svg>
@@ -99,11 +99,26 @@
   <div id="compare" class="modal hide">
     <div class="m-box c-box">
       <div class="c-head"><span id="cmpKing"></span><h3>나의 역사 vs 실제 역사</h3></div>
+      <div id="cmpTrue"><div class="ct-label">실제 역사와 같은 사건</div><div id="cmpTrueN"></div><div id="cmpTrueLeft"></div></div>
       <div class="c-cols"><div class="c-col-h">나의 실록</div><div class="c-col-h">실제 실록</div></div>
       <div id="cmpRows"></div>
       <div id="cmpSum"></div>
       <div id="cmpMerge"></div>
       <div class="btns"><button id="btnCmpNext">사관이 실제 역사를 묻습니다 →</button></div>
+    </div>
+  </div>
+
+  <div id="ending" class="modal hide">
+    <div class="m-box end-box">
+      <div class="end-scrolls"><div class="es mine">나의 실록</div><div class="es real">실제 실록</div></div>
+      <div class="end-seal">實錄</div>
+      <div id="endKind"></div>
+      <div id="endTitle"></div>
+      <div id="endDiff"></div>
+      <p id="endLine"></p>
+      <div id="endCount"></div>
+      <div id="endPreview" class="small">(미리 보기 — 특별 연출은 다섯 왕이 모두 들어온 뒤 채워요)</div>
+      <div class="btns"><button data-close="ending">닫기</button></div>
     </div>
   </div>
 
@@ -130,6 +145,7 @@
       <h4>위기 도감</h4><ul id="recCrisis" class="cx-crisis"></ul>
       <h4>버틴 위기</h4><ul id="recHeld" class="rec-held"></ul>
       <h4>갈림길</h4><ul id="recPaths" class="rec-paths"></ul>
+      <h4>서가</h4><div id="recShelf" class="rec-shelf"></div>
       <h4>기록관 — 나의 역사 vs 실제 역사</h4><ul id="recArchive" class="rec-archive"></ul>
       <button data-close="records" class="close">닫기</button>
     </div>
@@ -163,28 +179,28 @@
   <div id="lost" class="hide"><p>그래픽을 다시 불러오는 중…</p></div>
   <div id="loading"><p>섬을 띄우는 중…</p></div>
 </div>
-<script src="engine/lib/three.min.js?v=7"></script>
-<script src="engine/toy.js?v=7"></script>
-<script src="engine/props.js?v=7"></script>
-<script src="eras/joseon/map.js?v=7"></script>
-<script src="eras/joseon/models.js?v=7"></script>
-<script src="eras/joseon/models-taejo.js?v=7"></script>
-<script src="eras/joseon/era.js?v=7"></script>
+<script src="engine/lib/three.min.js?v=12"></script>
+<script src="engine/toy.js?v=12"></script>
+<script src="engine/props.js?v=12"></script>
+<script src="eras/joseon/map.js?v=12"></script>
+<script src="eras/joseon/models.js?v=12"></script>
+<script src="eras/joseon/models-taejo.js?v=12"></script>
+<script src="eras/joseon/era.js?v=12"></script>
 <!-- 데이터: 공통 + 왕별 (왕이 늘면 그 왕 폴더의 두 줄을 더한다) -->
-<script src="eras/joseon/data/common/roles.js?v=7"></script>
-<script src="eras/joseon/data/common/records.js?v=7"></script>
-<script src="eras/joseon/data/common/daily.js?v=7"></script>
-<script src="eras/joseon/data/taejo/cards.js?v=7"></script>
-<script src="eras/joseon/data/taejo/quizzes.js?v=7"></script>
-<script src="engine/save.js?v=7"></script>
-<script src="engine/world.js?v=7"></script>
-<script src="engine/audio.js?v=7"></script>
-<script src="engine/cards.js?v=7"></script>
-<script src="engine/quiz.js?v=7"></script>
-<script src="engine/cond.js?v=7"></script>
-<script src="engine/crisis.js?v=7"></script>
-<script src="engine/game.js?v=7"></script>
-<script src="engine/ui.js?v=7"></script>
-<script src="engine/main.js?v=7"></script>
+<script src="eras/joseon/data/common/roles.js?v=12"></script>
+<script src="eras/joseon/data/common/records.js?v=12"></script>
+<script src="eras/joseon/data/common/daily.js?v=12"></script>
+<script src="eras/joseon/data/taejo/cards.js?v=12"></script>
+<script src="eras/joseon/data/taejo/quizzes.js?v=12"></script>
+<script src="engine/save.js?v=12"></script>
+<script src="engine/world.js?v=12"></script>
+<script src="engine/audio.js?v=12"></script>
+<script src="engine/cards.js?v=12"></script>
+<script src="engine/quiz.js?v=12"></script>
+<script src="engine/cond.js?v=12"></script>
+<script src="engine/crisis.js?v=12"></script>
+<script src="engine/game.js?v=12"></script>
+<script src="engine/ui.js?v=12"></script>
+<script src="engine/main.js?v=12"></script>
 </body>
 </html>

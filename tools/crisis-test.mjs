@@ -84,7 +84,8 @@ export default async function (t) {
       break;
     }
     await t.eval(`__jk.G.run.crisisRest=0`);
-    await t.eval('__jk.G.commit(-1)');
+    // 실제 경로가 잠긴 역사 카드(10-11)면 열린 쪽으로
+    await t.eval(`__jk.G.commit(JK.Cards.isLocked(-1) ? (JK.Cards.isLocked(1) ? 2 : 1) : -1)`);
     await t.sleep(1500);
   }
   ok('후속 KT01b가 왔다', seen.includes('KT01b'), seen.join(' → '));

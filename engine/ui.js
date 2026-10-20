@@ -224,19 +224,45 @@
     const row = compareRows(entry).find((r) => ids.includes(r.c.id) && r.same === false);
     return row ? `나의 역사: ${row.mine.label} — ${row.mine.text} / 실제 역사: ${row.real.text}` : '';
   };
+  // 화면 위 금빛 실록 도장(10-11-3): 진엔딩이 멀어지면 금이 간다
+  UI.setSeal = function (r, crackNow) {
+    const el = $('#trueSeal');
+    if (!el) return;
+    el.classList.toggle('broken', !!r.broken);
+    el.title = r.broken ? '이번 판의 진엔딩은 멀어졌어요' : `실제 역사와 같은 사건 ${r.same} / ${r.counted}`;
+    if (crackNow) {
+      el.classList.remove('crack');
+      void el.offsetWidth;
+      el.classList.add('crack');
+    }
+  };
   UI.showCompare = function (entry, o) {
     o = o || {};
     const st = era.stages.find((s) => s.id === entry.st);
     const rows = compareRows(entry);
     $('#cmpKing').textContent = `${st.king} · ${entry.d}`;
+    // 맨 위에 크게: 실제 역사와 같은 사건 N / 지금까지 지난 사건(10-11-4), 그 아래 진엔딩까지 남은 것
+    const tr = entry.tr;
+    $('#cmpTrue').style.display = tr ? '' : 'none';
+    if (tr) {
+      const si = era.stages.findIndex((s) => s.id === entry.st);
+      const nst = era.stages[si + 1];
+      const toOther = Math.max(0, ((era.trueEnding || {}).otherEndingAlts || 5) - (entry.alts || 0));
+      $('#cmpTrueN').textContent = `${tr.same} / ${tr.counted}`;
+      $('#cmpTrueLeft').textContent = tr.broken
+        ? `이번 판은 진엔딩이 멀어졌어요. 대신 다른 역사 칭호를 노려 보세요${toOther ? `: 「다른 조선」까지 다른 길 ${toOther}개 더` : ''}.`
+        : `진엔딩까지: 남은 사건 ${tr.left}개를 실제대로.${nst ? ` 다음 왕은 ${nst.king}.` : ''}`;
+      $('#cmpTrue').classList.toggle('broken', !!tr.broken);
+    }
     const box = $('#cmpRows');
     box.innerHTML = '';
     for (const r of rows) {
       const el = document.createElement('div');
       el.className = 'c-row ' + (r.same === null ? 'none' : r.same ? 'same' : 'diff');
+      const et = r.c.event_type;
       const stTag = r.mine.state && r.mine.state !== 'smooth' ? ` <span class="bst ${r.mine.state}">${STATE_NAME[r.mine.state]} 지음</span>` : '';
       el.innerHTML =
-        `<div class="c-ev"><b>${esc(r.ev)}</b>${r.same === null ? '' : `<span class="c-stamp">${r.same ? '같은 길' : '실제와 달라요'}</span>`}</div>` +
+        `<div class="c-ev"><b>${esc(r.ev)}</b>${r.same === null ? '' : `<span class="c-stamp">${r.same ? (et === 'judge' ? '실제대로(어느 쪽이든)' : '같은 길') : '실제와 달라요'}</span>`}${et === 'life' && r.same === false ? '<span class="c-note">진엔딩 셈에서 빼요</span>' : ''}</div>` +
         `<div class="c-mine">${r.mine.path ? `<span class="c-path">${esc(r.mine.path)} · ${esc(r.mine.label)}</span>` : ''}${esc(r.mine.text)}${stTag}</div>` +
         `<div class="c-real">${r.real.year ? `<span class="c-year">${esc(r.real.year)}</span> ` : ''}${esc(r.real.text)}${r.real.src ? ` <span class="c-src">(${esc(r.real.src)})</span>` : ''}</div>`;
       box.appendChild(el);
@@ -260,6 +286,26 @@
     };
     $('#compare').scrollTop = 0;
     open('#compare');
+  };
+
+  /* ---------- 엔딩 자리 (설계서 10-11-3·6) ----------
+   * kind: 'true' 진엔딩 / 'other' 다른 조선의 한양. 특별 연출(두루마리가 겹쳐 하나, 다섯 왕 건물이 차례로 빛남, 카메라가 한 바퀴)은
+   * 다섯 왕이 모두 들어온 뒤 채운다. 지금은 두루마리 겹침·금빛 도장·사관 문장·칭호·카메라 한 바퀴까지.
+   */
+  UI.showEnding = function (kind, o) {
+    o = o || {};
+    const d = era.difficulty[o.diff] || {};
+    const t = era.data.titles.find((x) => x.rule === 'true:' + o.diff);
+    const el = $('#ending');
+    el.classList.toggle('other', kind !== 'true');
+    $('#endKind').textContent = kind === 'true' ? '진엔딩' : '다른 조선의 한양';
+    $('#endTitle').textContent = kind === 'true' ? (t ? `「${t.name}」` : '') : '';
+    $('#endDiff').textContent = `${d.icon || ''} ${d.name || ''}`;
+    $('#endLine').textContent = kind === 'true' ? '이 임금의 실록은 실제와 같았다.' : '이 실록은 실제와 달랐지만, 이 또한 한 임금의 길이었다.';
+    $('#endCount').textContent = o.route ? `실제 역사와 같은 사건 ${o.route.same} / ${o.route.counted}` : '';
+    $('#endPreview').style.display = o.preview ? '' : 'none';
+    W.setOrbit(true);
+    open('#ending');
   };
 
   /* ---------- 다음 왕 준비 중 ---------- */
@@ -365,6 +411,11 @@
       ra.appendChild(li);
     }
     if (!ra.children.length) ra.innerHTML = '<li class="off">왕 하나를 끝내면 비교 기록이 남아요.</li>';
+    // 서가: 진엔딩 금빛 실록(난이도 색 띠) · 다른 조선의 한양 붉은 실록 (10-11-3)
+    const en = m.endings || {};
+    const shelf = [];
+    for (const k of ['true', 'other']) for (const dId in en[k] || {}) shelf.push(`<span class="book ${k} ${dId}" title="${en[k][dId]}">${k === 'true' ? '금빛 실록' : '붉은 실록'} · ${esc((era.difficulty[dId] || {}).name || dId)}</span>`);
+    $('#recShelf').innerHTML = shelf.length ? shelf.join('') : '<span class="off">아직 엔딩을 본 실록이 없어요.</span>';
     list($('#recTitles'), D.titles, (t) => m.titles[t.id], (t) => `「${t.name}」`, (t) => `？？？ — ${t.hint}`);
     open('#records');
   };

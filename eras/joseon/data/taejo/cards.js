@@ -67,6 +67,7 @@
   },
   "against": "right",
   "grain": "balance",
+  "event_type": "life",
   "event": "정몽주",
   "paths": {
    "real": {
@@ -145,9 +146,17 @@
    }
   },
   "grain": "balance",
+  "event_type": "normal",
   "event": "유교 원리",
   "paths": {
    "real": {
+    "require": {
+     "sprout": "gauge(nobles) >= 20",
+     "normal": "gauge(nobles) >= 35",
+     "sage": "gauge(nobles) >= 45 && gauge(people) >= 30",
+     "annals": "gauge(nobles) >= 50 && gauge(people) >= 35"
+    },
+    "require_reason": "유교를 따르는 신하들의 힘이 모자란다",
     "how_right": "한꺼번에 바꾼다",
     "how_left": "천천히 바꾼다"
    },
@@ -231,9 +240,17 @@
    }
   },
   "grain": "complex",
+  "event_type": "normal",
   "event": "국호",
   "paths": {
    "real": {
+    "require": {
+     "sprout": "gauge(army) >= 15",
+     "normal": "gauge(army) >= 30",
+     "sage": "gauge(army) >= 40 && gauge(nobles) >= 30 && real(T02)",
+     "annals": "gauge(army) >= 45 && gauge(nobles) >= 35 && real(T02)"
+    },
+    "require_reason": "명과의 외교를 받쳐 줄 힘이 모자란다",
     "how_right": "서둘러 보낸다",
     "how_left": "예물 갖춰 보낸다"
    },
@@ -316,6 +333,7 @@
    }
   },
   "grain": "complex",
+  "event_type": "normal",
   "event": "천도",
   "paths": {
    "real": {
@@ -327,6 +345,13 @@
      "when": "gauge(treasury) < 20",
      "reason": "곳간이 비어 도읍을 옮길 수 없다"
     },
+    "require": {
+     "sprout": "gauge(treasury) >= 20",
+     "normal": "gauge(treasury) >= 30",
+     "sage": "gauge(treasury) >= 40 && gauge(people) >= 35",
+     "annals": "gauge(treasury) >= 45 && gauge(people) >= 40 && real(T03)"
+    },
+    "require_reason": "곳간과 백성의 힘으로 도읍을 옮길 수 없다",
     "how_right": "서둘러 옮긴다",
     "how_left": "차근차근 옮긴다"
    },
@@ -436,6 +461,7 @@
    }
   },
   "grain": "complex",
+  "event_type": "normal",
   "event": "경복궁",
   "paths": {
    "real": {
@@ -444,6 +470,13 @@
      "reason": "곳간이 모자라 크게 지을 수 없다",
      "reason_auto": true
     },
+    "require": {
+     "sprout": "gauge(treasury) >= 15",
+     "normal": "gauge(treasury) >= 25",
+     "sage": "gauge(treasury) >= 35 && real(T04)",
+     "annals": "gauge(treasury) >= 40 && gauge(people) >= 30 && real(T04)"
+    },
+    "require_reason": "새 궁궐을 지을 곳간이 모자란다",
     "how_right": "크게 짓는다",
     "how_left": "알맞게 짓는다"
    },
@@ -542,9 +575,17 @@
    }
   },
   "grain": "complex",
+  "event_type": "normal",
   "event": "종묘·사직",
   "paths": {
    "real": {
+    "require": {
+     "sprout": "gauge(nobles) >= 20",
+     "normal": "gauge(nobles) >= 30",
+     "sage": "gauge(nobles) >= 40 && gauge(treasury) >= 25",
+     "annals": "gauge(nobles) >= 45 && gauge(treasury) >= 30 && real(T05)"
+    },
+    "require_reason": "예법을 받쳐 줄 신하와 곳간이 모자란다",
     "how_right": "서둘러 짓는다",
     "how_left": "농사철 뒤에 짓는다"
    },
@@ -640,6 +681,7 @@
    }
   },
   "grain": "seed",
+  "event_type": "normal",
   "event": "도성",
   "paths": {
    "real": {
@@ -647,6 +689,13 @@
      "when": "gauge(people) < 20",
      "reason": "백성이 너무 지쳤다"
     },
+    "require": {
+     "sprout": "gauge(people) >= 20",
+     "normal": "gauge(people) >= 30",
+     "sage": "gauge(people) >= 40 && gauge(treasury) >= 30",
+     "annals": "gauge(people) >= 45 && gauge(treasury) >= 35 && real(T04)"
+    },
+    "require_reason": "성을 쌓을 백성의 힘이 모자란다",
     "how_right": "농한기에 쌓는다",
     "how_left": "나눠서 쌓는다"
    },
@@ -761,9 +810,17 @@
    }
   },
   "grain": "complex",
+  "event_type": "normal",
   "event": "성균관",
   "paths": {
    "real": {
+    "require": {
+     "sprout": "gauge(nobles) >= 15",
+     "normal": "gauge(nobles) >= 30",
+     "sage": "gauge(nobles) >= 40 && gauge(treasury) >= 25",
+     "annals": "gauge(nobles) >= 45 && gauge(treasury) >= 30 && real(T02)"
+    },
+    "require_reason": "인재를 기를 곳간과 신하가 모자란다",
     "how_right": "크게 세운다",
     "how_left": "작게 시작한다"
    },
@@ -843,6 +900,7 @@
   },
   "against": "left",
   "grain": "balance",
+  "event_type": "life",
   "event": "왕자의 난",
   "paths": {
    "real": {

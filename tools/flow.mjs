@@ -22,7 +22,7 @@ export default async function (t) {
   console.log('덱', await t.eval("__jk.G.run.deck.join(' ')"));
   let i = 0, shots = 0;
   for (let n = 0; n < 60; n++) {
-    await t.waitFor(ready + " || !document.querySelector('#quiz').classList.contains('hide')", 15000);
+    await t.waitFor(ready + " || !document.querySelector('#quiz').classList.contains('hide') || !document.querySelector('#compare').classList.contains('hide')", 15000);
     const st = await t.eval("__jk.G.state");
     if (st !== 'play') break;
     const info = await t.eval("(()=>{const r=__jk.G.run;return (r.pending?'[기록]':r.deck[r.pos])+' '+JSON.stringify(r.vals)})()");
@@ -55,6 +55,11 @@ export default async function (t) {
     console.log('다시 도전 뒤:', await t.eval("__jk.G.state+' pos '+__jk.G.run.pos+' vals '+JSON.stringify(__jk.G.run.vals)+' built '+__jk.G.run.built.join(',')+' ink '+__jk.W.state.ink+' 실각기록 '+JSON.stringify(__jk.S.meta.falls)"));
     return;
   }
+  // 왕을 마치면 먼저 "나의 역사 vs 실제 역사" 비교 화면(10-10-5) → 사관 퀴즈
+  await t.waitFor("!document.querySelector('#compare').classList.contains('hide')", 9000);
+  console.log('비교 화면:', await t.eval("document.querySelector('#cmpTrueN').textContent+' · '+document.querySelector('#cmpSum').textContent.slice(0,40)"));
+  if (OUT) await t.shot(OUT + '/p0-5-비교.png');
+  await t.eval("document.querySelector('#btnCmpNext').click()");
   // 사관 퀴즈: 첫 문항은 정답, 둘째는 오답, 셋째 정답
   for (let q = 0; q < 3; q++) {
     await t.waitFor("!document.querySelector('#quiz').classList.contains('hide')", 9000);

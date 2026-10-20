@@ -280,6 +280,19 @@ def records():
                 if not rule:
                     continue
                 titles.append({'id': 'path-' + rule.replace(':', '-'), 'name': name, 'hint': ahint.get(rule, '이번 판의 다른 길'), 'cond': r[1], 'rule': rule})
+    # 진엔딩 칭호(난이도별, 10-11-3) · 다른 역사 칭호(10-11-6)
+    if '#### 10-11-3.' in src:
+        for r in table_after('#### 10-11-3.'):
+            if r[0].startswith('칭호'):
+                for d, name in zip(DIFFS, re.findall(r'「([^」]+)」', r[1])):
+                    titles.append({'id': 'true-' + d, 'name': name, 'hint': '다섯 왕의 사건을 모두 실제대로', 'cond': f'진엔딩({d})', 'rule': 'true:' + d})
+    if '#### 10-11-6.' in src:
+        other = {'새 길을 연 임금': 'alt10', '다섯 갈래의 임금': 'altEvery', '반쯤 같은 실록': 'half'}
+        ohint = {'alt10': '다른 길을 아주 많이', 'altEvery': '왕마다 다른 길 하나씩', 'half': '반은 같고 반은 다르게'}
+        for r in table_after('#### 10-11-6.'):
+            name = r[0].replace('*', '').strip()
+            if name in other:
+                titles.append({'id': 'other-' + other[name], 'name': name, 'hint': ohint[other[name]], 'cond': r[1], 'rule': other[name]})
     # 위기 칭호 3개 (10-8-7). 힌트는 설계서에 없어 조건을 짧게 가린 말로 둔다
     hint = {'held5': '위기를 여러 번 넘겨 보라', 'heldAtEnd': '끝에서 돌아온 임금', 'cancel3': '버틴 뒤 바로 고쳐라'}
     for r in table_after('#### 10-8-7.'):
@@ -416,6 +429,8 @@ def to105(c):
     g = grain_of(c) if not c.get('single') else None
     if g:
         o['grain'] = g
+    if c['type'] == 'history':
+        o['event_type'] = EVENT_TYPE.get(c['id'], 'normal')
     if c['id'] in ALT and c['type'] == 'history':
         p = json.loads(json.dumps(ALT[c['id']]))
         o['event'] = p.pop('event')
@@ -426,6 +441,7 @@ def to105(c):
             parts = [x.strip() for x in tr.rstrip('.').split(',') if not re.search(r'카드|스테이지|위기 ×|×\d', x)]
             a['this_run'] = (', '.join(parts) or tr.rstrip('.')) + '.'
             a.pop('result_text', None)
+        p['real'].update(REQUIRE.get(c['id'], {}))
         p['real']['how_right'] = c['right']['label']
         p['real']['how_left'] = c['left']['label']
         o['paths'] = p
@@ -517,6 +533,54 @@ def alt_paths():
 
 
 ALT, ALT_TITLES = alt_paths()
+
+
+# ---------- 실제 역사 경로와 진엔딩 (10-11) ----------
+DIFFS = ['sprout', 'normal', 'sage', 'annals']
+
+
+def event_types():
+    """10-11-1 표: 열린 사건(판단)·(생명)의 카드 id. 나머지 역사 사건은 보통 사건"""
+    out = {}
+    if '#### 10-11-1.' not in src:
+        return out
+    for r in table_after('#### 10-11-1.'):
+        kind = 'judge' if '판단' in r[0] else 'life' if '생명' in r[0] else None
+        if kind:
+            for cid in re.findall(r'\b([A-Z]\d{2})\b', r[1]):
+                out[cid] = kind
+    return out
+
+
+def need_expr(cell):
+    """'양반 45 이상 + 백성 30 이상 + **T02 실제대로**' → 'gauge(nobles) >= 45 && gauge(people) >= 30 && real(T02)'"""
+    terms = []
+    for part in cell.replace('*', '').split('+'):
+        m = re.search(r'(백성|양반|국고|국방)\s*(\d+)\s*이상', part)
+        if m:
+            terms.append(f'gauge({FULL_GAUGE[m.group(1)]}) >= {m.group(2)}')
+        m = re.search(r'([A-Z]\d{2})\s*실제대로', part)
+        if m:
+            terms.append(f'real({m.group(1)})')
+    return ' && '.join(terms)
+
+
+def real_requires():
+    out = {}
+    if '#### 10-11-2.' not in src:
+        return out
+    for r in table_after('#### 10-11-2.'):
+        m = re.match(r'([A-Z]\d{2})\s', r[0])
+        if not m or len(r) < 6 or '열린 사건' in r[1]:
+            continue
+        req = {d: need_expr(c) for d, c in zip(DIFFS, r[1:5]) if need_expr(c)}
+        reason = re.search(r'["“](.+?)["”]', r[5])
+        out[m.group(1)] = {'require': req, 'require_reason': reason.group(1) if reason else ''}
+    return out
+
+
+EVENT_TYPE = event_types()
+REQUIRE = real_requires()
 
 
 # ---------- 위기 카드 (10-8-5): 예고 NT·위기 KT·후속 KTb, 모두 [게임 속 일] ----------

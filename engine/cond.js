@@ -7,6 +7,7 @@
  *   gauge(people) < 30  게이지 비교 (< <= > >= == !=)
  *   device(S) >= 5     왕별 장치 값
  *   run_count >= 10    지금까지 시작한 판 수
+ *   real(T02)          이번 왕에서 그 사건을 실제 경로(좌우 버튼)로 지났다(10-11)
  *   stage(taejo)  diff(sprout)
  *   &&  ||  !  ( )
  */
@@ -141,6 +142,7 @@
     gauge: (c, key) => (c.run && c.run.vals ? c.run.vals[key] : 50),
     device: (c, key) => (c.run && c.run.device ? c.run.device[key] || 0 : 0),
     stage: (c, id) => !!(c.run && c.run.stage === id),
+    real: (c, id) => !!(c.run && c.run.choices && (c.run.choices[id] === 'right' || c.run.choices[id] === 'left')),
     diff: (c, id) => JK.Game && JK.Game.diffId() === id,
   };
   Cond.funcs = FUNCS;

@@ -151,14 +151,25 @@
       gambleWin: { sprout: 0.7, normal: 0.6, sage: 0.5, annals: 0.45 },
       marks: { gift: '🌸', mire: '☁', seed: '🌱' },
     },
+    // 사관 퀴즈 (설계서 4-1·9-3 결정 4): 왕이 바뀔 때 3문항, 그 가운데 교과서 밖은 많아야 1문항. 왕당 문항 풀에서 교과서 밖은 6문항까지
+    quiz: { perStage: 3, outsidePerRound: 1, outsidePoolMax: 6 },
     // 역사 분기 (설계서 10-10-2): 한 왕에서 다른 길은 최대 3개. 넘으면 남은 다른 길은 잠긴다
     branch: { maxPerStage: 3, fullReason: '이미 나라가 많이 흔들렸다' },
+    // 진엔딩 (설계서 10-11): 다섯 왕 역사 사건(생명 사건 빼고)을 모두 실제대로. totalEvents는 10-11-4의 "46장"(다섯 왕 집필이 끝나면 데이터에서 센다)
+    //  needHint 잠긴 실제 경로 이유에 붙이는 말(10-11-5): number 모자란 숫자 / gauge 게이지 이름 / none 이유 문장만
+    trueEnding: {
+      totalEvents: 46,
+      needHint: { sprout: 'number', normal: 'gauge', sage: 'none', annals: 'none' },
+      brokenText: '이번 판의 진엔딩은 멀어졌어요',
+      otherEndingAlts: 5,
+    },
     // 난이도 (설계서 10-7). 역사·카드 순서·「실제 역사」는 난이도와 무관하고, 숫자와 도움말만 바뀐다.
     //  mult 게이지 변화 배율 · safe 안전 구간(이 값 아래/100−값 위에서 실각 쪽 변화에 k를 곱함)
     //  warn 위험 경고(이 값 이하·100−값 이상에서 깜빡임) · preview 미리보기 · carry 다음 왕이 이어받는 몫
     //  quizOptions 보기 수 · quizRetry 틀리면 한 번 더 · quizBonus 정답 하나당 50 쪽으로 당김
     //  afterFall 실각 뒤(reset50 시작 게이지 50 + 처음 3장 큰 미리보기 / same 그대로 / run 판 전체 처음부터)
     //  hint 사관의 귀띔(full / gauge / none) · stage 왕별 장치 숫자(P1~P4에서 씀) · unlock 열리는 때
+    //  scoreMult 오늘의 덱 점수 배율 — 담임 결정(9-3 #3)으로 "나중 후보". 엔진은 쓰지 않는다(서버·점수 경쟁 없음, 기기 저장 + 기록 코드만)
     difficultyDefault: 'normal',
     difficulty: {
       sprout: {
