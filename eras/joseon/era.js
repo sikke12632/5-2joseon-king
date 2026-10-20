@@ -64,7 +64,8 @@
       // 10-8-3 ②③ 실각 확률 = 구간 기본값 × 대응 배율 × 난이도 배율 (+ 후속 가산), 상한 95%
       fall: {
         base: { warn: 0.05, danger: 0.15, cliff: 0.35, end: 0.6 },
-        response: { strong: 0.5, light: 0.75, weakStrong: 0.75, weakLight: 1.0 },
+        // 대응 배율(담임 결정 2026-10-21: 처음 강한 ×0.5·가벼운 ×0.75에서 올림). 대응에 쓰는 게이지가 이미 위험 이하면 weak*
+        response: { strong: 0.75, light: 1.0, weakStrong: 1.0, weakLight: 1.25 },
         diff: { sprout: 0.5, normal: 1.0, sage: 1.2, annals: 1.4 },
         followAdd: { sprout: 0.05, normal: 0.1, sage: 0.1, annals: 0.15 },
         cap: 0.95,

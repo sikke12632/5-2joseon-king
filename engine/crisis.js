@@ -172,7 +172,7 @@
     // 대응에 쓰는 게이지(문제 게이지가 아닌, 깎이는 게이지)가 이미 위험 이하이면 대응이 약해진다
     let weak = false;
     for (const k in side.effects || {}) if (k !== card.gauge && side.effects[k] < 0 && RANK[C.zoneOf(vals[k]).level] >= 2) weak = true;
-    const R = F.response || { strong: 0.5, light: 0.75, weakStrong: 0.75, weakLight: 1.0 };
+    const R = F.response || { strong: 0.75, light: 1.0, weakStrong: 1.0, weakLight: 1.25 };
     const mult = strong ? (weak ? R.weakStrong : R.strong) : weak ? R.weakLight : R.light;
     const dm = byDiff(F.diff, 1);
     const step = card.level === 'followup' ? card.step || 2 : 1;
