@@ -261,4 +261,72 @@
     }
     return b.build();
   };
+
+  /* ---------- 다른 길(설계서 10-10-7) — 이름 없는 장식만. 실제 이름을 붙이지 않는다 ---------- */
+  // 작은 기와 궁궐: 옛 집을 고쳐 씀(T05) · 개경에 머묾(T04)
+  M.altPalace = function () {
+    const b = new JK.Builder();
+    const W = 1.15,
+      D = 0.85;
+    b.box(0, 0.01, 0, W * 2, 0.02, D * 2, C.stoneWarm, { noBottom: true });
+    b.ao(0, 0.25, 0.72);
+    wallRect(b, W, D, 0.18, 0.2);
+    b.push().t(0, 0, -0.2);
+    lectureHall(b, 1.25, true);
+    b.pop();
+    b.push().t(-0.72, 0, 0.32).ry(Math.PI / 2);
+    dormRow(b, 0.6, 0.9);
+    b.pop();
+    // 정문
+    b.push().t(0, 0, D);
+    b.box(0, 0.13, 0, 0.36, 0.26, 0.09, C.door, { noBottom: true });
+    b.push().t(0, 0.26, 0);
+    roof(b, { type: 'gable', w: 0.24, d: 0.11, h: 0.08, nu: 3, nv: 2, dens: 30, soffit: false, ridgeW: 0.018 });
+    b.pop();
+    b.pop();
+    return b.build();
+  };
+  // 큰 절: 법당 + 돌탑 (불교와 함께 다스린다, T02)
+  M.altTemple = function () {
+    const b = new JK.Builder();
+    b.ao(0, 0.25, 0.72);
+    b.box(0, 0.01, 0, 1.2, 0.02, 1.0, C.stoneWarm, { noBottom: true });
+    b.push().t(0, 0, -0.18);
+    platform(b, 0.9, 0.46, 0.08, { steps: true });
+    b.push().t(0, 0.08, 0);
+    const t = hall(b, { bw: 0.36, bd: 0.17, h: 0.22, nx: 3, nz: 2, glow: true, wall: C.door, colR: 0.02 });
+    b.ao(0, 0, 1);
+    b.push().t(0, t, 0);
+    roof(b, { type: 'paljak', w: 0.52, d: 0.3, h: 0.26, r: 0.3, lift: 0.09, out: 0.04, nu: 10, nv: 4, dens: 30, bw: 0.38, bd: 0.19, v1: 0.55 });
+    b.pop();
+    b.pop();
+    b.pop();
+    // 돌탑(층마다 지붕돌)
+    b.push().t(0, 0, 0.3);
+    b.box(0, 0.04, 0, 0.18, 0.08, 0.18, C.stoneDark, { top: C.stone, noBottom: true });
+    let y = 0.08;
+    for (let i = 0; i < 5; i++) {
+      const s = 0.1 - i * 0.012;
+      b.box(0, y + 0.03, 0, s, 0.06, s, C.stone, { noBottom: true });
+      b.box(0, y + 0.07, 0, s * 1.55, 0.018, s * 1.55, C.stoneDark, { top: C.stone });
+      y += 0.08;
+    }
+    b.cyl(0, y, 0, 0.012, 0.006, 0.08, 5, C.stoneDark);
+    b.pop();
+    return b.build();
+  };
+  // 고을 향교 여럿(고을 향교부터 세운다, T08): 향교를 조금 작게
+  M.altHyanggyo = function () {
+    const b = new JK.Builder();
+    b.push().s(0.62, 0.62, 0.62);
+    b.box(0, 0.01, 0, 1.2, 0.02, 1.0, C.stoneWarm, { noBottom: true });
+    b.ao(0, 0.22, 0.72);
+    wallRect(b, 0.6, 0.5, 0.15, 0.12);
+    b.push().t(0, 0, -0.2);
+    lectureHall(b, 0.68, true);
+    b.pop();
+    hongsal(b, 0, 0.5, 0, 0.22);
+    b.pop();
+    return b.build();
+  };
 })();

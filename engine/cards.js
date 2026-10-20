@@ -17,12 +17,13 @@
       const el = document.createElement('div');
       el.className = 'gauge';
       el.dataset.key = g.key;
-      el.innerHTML = `<div class="g-icon"><svg class="g-bg" viewBox="0 0 24 24">${g.icon}</svg><div class="g-fillwrap"><svg class="g-fill" viewBox="0 0 24 24">${g.icon}</svg></div></div><div class="g-dot"></div><div class="g-fu" title="후속 위기 예약"><svg viewBox="0 0 24 16"><path d="M6 15a5 5 0 0 1-.6-10A6 6 0 0 1 17 4.2 4.5 4.5 0 1 1 18.5 15z"/></svg></div><div class="g-name">${g.name}</div>`;
+      el.innerHTML = `<div class="g-icon"><svg class="g-bg" viewBox="0 0 24 24">${g.icon}</svg><div class="g-fillwrap"><svg class="g-fill" viewBox="0 0 24 24">${g.icon}</svg></div></div><div class="g-dot"></div><div class="g-fu" title="후속 위기 예약"><svg viewBox="0 0 24 16"><path d="M6 15a5 5 0 0 1-.6-10A6 6 0 0 1 17 4.2 4.5 4.5 0 1 1 18.5 15z"/></svg></div><div class="g-cd" title="같은 위기가 쉬는 장수"></div><div class="g-name">${g.name}</div>`;
       gw.appendChild(el);
     }
     card = $('#card');
     deck = $('#deck');
     setupDrag();
+    $('#altBtn').addEventListener('click', () => !C.busy && fly(2));
     window.addEventListener('keydown', onKey);
   };
 
@@ -51,10 +52,25 @@
     // 4단계 결과("~했지만 → … → … → …")는 화살표마다 줄을 바꾼다
     $('#runText').textContent = (v.run || '').replace(/\s*→\s*/g, '\n→ ');
     $('#realLabel').style.display = v.record ? '' : 'none';
-    $('#chL').textContent = v.single || v.left || '';
-    $('#chR').textContent = v.single || v.right || '';
-    $('#hintL').textContent = '← ' + (v.single || v.left || '');
-    $('#hintR').textContent = (v.single || v.right || '') + ' →';
+    // 잠긴 쪽(10-10-1): 회색 + 🔒 + 이유. 그쪽으로는 끌어도 넘어가지 않는다
+    const lock = v.lock || {};
+    $('#chL').textContent = lock.left ? `🔒 ${lock.left}` : v.single || v.left || '';
+    $('#chR').textContent = lock.right ? `🔒 ${lock.right}` : v.single || v.right || '';
+    $('#chL').classList.toggle('locked', !!lock.left);
+    $('#chR').classList.toggle('locked', !!lock.right);
+    $('#hintL').textContent = '← ' + (lock.left ? '🔒 ' : '') + (v.single || v.left || '');
+    $('#hintR').textContent = (lock.right ? '🔒 ' : '') + (v.single || v.right || '') + ' →';
+    $('#hintL').classList.toggle('locked', !!lock.left);
+    $('#hintR').classList.toggle('locked', !!lock.right);
+    // 카드 아래 '다른 길' 버튼(위로 끌거나 누르기)
+    const ab = $('#altBtn');
+    ab.style.display = v.alt ? '' : 'none';
+    if (v.alt) {
+      $('#altLabel').textContent = v.alt.label;
+      $('#altWhy').textContent = v.alt.locked ? `🔒 ${v.alt.reason}` : '';
+      ab.classList.toggle('locked', !!v.alt.locked);
+      ab.disabled = false;
+    }
     $('#turn').textContent = [v.year, v.turn].filter(Boolean).join(' · ');
     $('#outside').style.display = v.outside ? '' : 'none';
     // 위기 카드: [게임 속 일] 표시, 버튼 아래 무너질 확률, 비슷한 실제 일(작게)
@@ -121,9 +137,15 @@
   };
   // 게이지 구간(10-8-4): 경고 = 노랑 천천히, 위험 = 빨강, 벼랑 = 빨강 빠르게, 끝 = 아이콘에 금. 낮음/높음 표시
   // followups: 후속 위기 예약 → 아이콘 옆 작은 먹구름
-  C.setZones = function (zones, followups) {
+  // cooldown: 같은 위기의 쉬는 장수 → 아이콘 옆 ⏳남은 장수(경고 깜빡임은 그대로)
+  C.setZones = function (zones, followups, cooldown) {
     const fu = {};
     for (const f of followups || []) fu[f.gauge] = 1;
+    const cd = {};
+    for (const k in cooldown || {}) {
+      const g = k.split(':')[0];
+      cd[g] = Math.max(cd[g] || 0, cooldown[k]);
+    }
     for (const g of gauges) {
       const el = document.querySelector(`.gauge[data-key="${g.key}"]`);
       const z = zones[g.key] || { level: 'stable' };
@@ -134,6 +156,8 @@
       el.classList.toggle('zone-low', z.side === 'low');
       el.classList.toggle('zone-high', z.side === 'high');
       el.classList.toggle('fu', !!fu[g.key]);
+      el.classList.toggle('cd', !!cd[g.key] && !fu[g.key]);
+      el.querySelector('.g-cd').textContent = cd[g.key] ? `⏳${cd[g.key]}` : '';
     }
   };
   // 위기 사건 동안 그 게이지 아이콘이 흔들림(quake) / 버텼으면 "후—" 하며 원래 색으로(relief)
@@ -185,10 +209,10 @@
   // 미리보기(난이도별, 설계서 10-7): arrows ▲▼+크기 / dots 점 크기(레인즈) / flat 같은 크기 점 / none 없음
   function preview(dir) {
     const mode = (view && view.preview) || 'dots';
-    const fx = mode !== 'none' && view && view.fx ? (dir > 0 ? view.fx.right : dir < 0 ? view.fx.left : null) : null;
+    const fx = mode !== 'none' && view && view.fx ? (dir === 2 ? view.fxAlt : dir > 0 ? view.fx.right : dir < 0 ? view.fx.left : null) : null;
     // 선물 🌸 · 수렁 ☁ · 씨앗 🌱: 끄는 동안 카드 위에 작은 표시
     const gm = $('#grainMark');
-    const mk = dir && view && view.grainMark ? view.grainMark[dir > 0 ? 'right' : 'left'] : '';
+    const mk = dir && dir !== 2 && view && view.grainMark ? view.grainMark[dir > 0 ? 'right' : 'left'] : '';
     gm.textContent = mode !== 'none' ? mk || '' : '';
     gm.classList.toggle('show', !!gm.textContent);
     for (const g of gauges) {
@@ -218,57 +242,82 @@
 
   /* ---------- 결과 글 ---------- */
   let toastTimer = 0;
-  C.toast = function (t, ms) {
+  // badge: 결과 글 아래 작은 표시(예: "실제 역사와 달라졌어요 📜")
+  C.toast = function (t, ms, badge) {
     const el = $('#result');
-    el.textContent = t;
+    el.innerHTML = esc(t) + (badge ? `<span class="r-badge">${esc(badge)}</span>` : '');
     el.classList.add('show');
     clearTimeout(toastTimer);
     toastTimer = setTimeout(() => el.classList.remove('show'), ms || 2600);
   };
 
   /* ---------- 끌기 ---------- */
-  function setChoice(dx) {
+  function setChoice(dx, dy) {
     const th = threshold();
     const k = Math.min(1, Math.abs(dx) / th);
-    $('#chL').style.opacity = dx < -8 ? (0.35 + k * 0.65).toFixed(2) : 0;
-    $('#chR').style.opacity = dx > 8 ? (0.35 + k * 0.65).toFixed(2) : 0;
-    preview(Math.abs(dx) > 18 ? Math.sign(dx) : 0);
+    const up = view && view.alt && (dy || 0) < -30 && Math.abs(dx) < 40;
+    $('#chL').style.opacity = !up && dx < -8 ? (0.35 + k * 0.65).toFixed(2) : 0;
+    $('#chR').style.opacity = !up && dx > 8 ? (0.35 + k * 0.65).toFixed(2) : 0;
+    $('#altBtn').classList.toggle('hot', !!up);
+    preview(up ? 2 : Math.abs(dx) > 18 ? Math.sign(dx) : 0);
   }
   function threshold() {
     return Math.min(120, card.clientWidth * 0.32);
   }
+  // 잠긴 쪽으로 넘기려 하면 되돌아오며 이유를 보여 준다
+  function refuse(reason) {
+    card.style.transition = 'transform .35s cubic-bezier(.2,1.4,.4,1)';
+    card.style.transform = '';
+    setChoice(0);
+    C.shake();
+    if (reason) C.toast('🔒 ' + reason, 2200);
+    C.busy = false;
+  }
   function fly(dir) {
+    const lock = (view && view.lock) || {};
+    if (dir === 2 && (!view.alt || view.alt.locked)) return refuse(view.alt && view.alt.reason);
+    if (dir === 1 && lock.right) return refuse(lock.right);
+    if (dir === -1 && lock.left) return refuse(lock.left);
     C.busy = true;
     C.hand(false);
     card.style.transition = 'transform .45s cubic-bezier(.5,0,.9,.4), opacity .45s';
-    card.style.transform = `translate(${dir * 130}%, 18%) rotate(${dir * 28}deg)`;
+    card.style.transform = dir === 2 ? 'translate(0, -120%) rotate(-4deg)' : `translate(${dir * 130}%, 18%) rotate(${dir * 28}deg)`;
     card.style.opacity = '0';
     setChoice(0);
     if (JK.Audio) JK.Audio.swipe(dir);
     onCommit(dir);
   }
   C.commit = (dir) => !C.busy && fly(dir);
+  C.isLocked = (dir) => {
+    const lock = (view && view.lock) || {};
+    return dir === 2 ? !view || !view.alt || view.alt.locked : dir > 0 ? !!lock.right : !!lock.left;
+  };
   function setupDrag() {
     card.addEventListener('pointerdown', (e) => {
       if (C.busy) return;
-      dragging = { x0: e.clientX, y0: e.clientY, dx: 0, id: e.pointerId };
+      dragging = { x0: e.clientX, y0: e.clientY, dx: 0, dy: 0, id: e.pointerId };
       card.setPointerCapture(e.pointerId);
       card.style.transition = 'none';
     });
     card.addEventListener('pointermove', (e) => {
       if (!dragging || e.pointerId !== dragging.id) return;
       const dx = e.clientX - dragging.x0;
-      const dy = (e.clientY - dragging.y0) * 0.25;
+      const rawDy = e.clientY - dragging.y0;
+      // 다른 길이 있는 카드는 위로도 끌린다
+      const dy = view && view.alt && rawDy < 0 ? rawDy * 0.8 : rawDy * 0.25;
       dragging.dx = dx;
+      dragging.dy = rawDy;
       card.style.transform = `translate(${dx}px, ${dy}px) rotate(${dx * 0.07}deg)`;
-      setChoice(dx);
+      setChoice(dx, rawDy);
       if (Math.abs(dx) > 30) C.hand(false);
     });
     const up = (e) => {
       if (!dragging || e.pointerId !== dragging.id) return;
-      const dx = dragging.dx;
+      const dx = dragging.dx,
+        dy = dragging.dy;
       dragging = null;
-      if (Math.abs(dx) > threshold()) fly(Math.sign(dx));
+      if (view && view.alt && dy < -threshold() && Math.abs(dx) < threshold() * 0.6) fly(2);
+      else if (Math.abs(dx) > threshold()) fly(Math.sign(dx));
       else {
         card.style.transition = 'transform .35s cubic-bezier(.2,1.4,.4,1)';
         card.style.transform = '';
@@ -281,6 +330,7 @@
   }
   function onKey(e) {
     if (C.busy || document.querySelector('.modal:not(.hide)')) return;
+    if (e.key === 'ArrowUp' && view && view.alt) return fly(2);
     if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
       const dir = e.key === 'ArrowRight' ? 1 : -1;
       C.busy = true;

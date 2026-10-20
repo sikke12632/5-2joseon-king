@@ -49,39 +49,47 @@ export default async function (t) {
   await t.eval(`(()=>{JK.Crisis._fc=JK.Crisis.fallChance;JK.Crisis.fallChance=function(){const r=JK.Crisis._fc.apply(null,arguments);r.p=0;return r;};})()`);
   await t.eval('__jk.G.commit(1)');
   await t.sleep(900);
-  const held = JSON.parse(await t.eval(`JSON.stringify({show:document.querySelector('#held').classList.contains('show'), line:document.querySelector('#heldLine').textContent, people:__jk.G.run.vals.people, followups:__jk.G.run.followups, cooldown:__jk.G.run.cooldown, damaged:__jk.G.run.damaged, held:__jk.G.run.stats.held, log:__jk.G.run.crisisLog.length, title:!!JK.Save.meta.titles['crisis-heldAtEnd'], meta:JK.Save.meta.crisis})`));
+  const held = JSON.parse(await t.eval(`JSON.stringify({show:document.querySelector('#held').classList.contains('show'), line:document.querySelector('#heldLine').textContent, people:__jk.G.run.vals.people, pending:__jk.G.run.pendingFollow, hourglass:document.querySelector('.gauge[data-key="people"] .g-cd').textContent, cooldown:__jk.G.run.cooldown, damaged:__jk.G.run.damaged, held:__jk.G.run.stats.held, log:__jk.G.run.crisisLog.length, title:!!JK.Save.meta.titles['crisis-heldAtEnd'], meta:JK.Save.meta.crisis})`));
   ok('"버팀" 도장', held.show, held.line);
-  ok('후속 예약(거리 15 이하)', held.followups.length === 1, JSON.stringify(held.followups));
-  ok('쿨다운', held.cooldown['people:low'] > 0, JSON.stringify(held.cooldown));
+  ok('후속 위기를 걸어 둠(쉬는 장수가 끝날 때 거리 15 이하면 옴)', !!(held.pending['people:low']), JSON.stringify(held.pending));
+  ok('같은 위기 쉬는 장수(보통 백성 낮음 5) · ⏳ 표시', held.cooldown['people:low'] >= 4 && /⏳/.test(held.hourglass), JSON.stringify(held.cooldown) + ' ' + held.hourglass);
+  ok('수습 뒤 강한 대응 +20', held.people === 20, held.people);
   ok('끝 구간 수습 → 벼랑 끝의 임금', held.title);
   ok('영구 기록(위기 도감)', held.meta.held.KT01 === 1, JSON.stringify(held.meta));
   await t.sleep(1600);
   if (OUT) await t.shot(`${OUT}/crisis-held.png`);
   ok('손상(위험 이하에서 수습)', Object.keys(held.damaged).length === 1, JSON.stringify(held.damaged));
-  ok('먹구름(후속 예약 표시)', await t.eval(`document.querySelector('.gauge[data-key="people"]').classList.contains('fu')`));
+  // 수습 직후 최소 거리 8(10-8-3 ⑤-1)
+  const minD = await t.eval(`(()=>{const r=JSON.parse(JSON.stringify(__jk.G.run)); r.vals.people=0; JK.Crisis.afterHeld(r, __jk.G.card('KT01')); const a=r.vals.people; r.vals.army=99; JK.Crisis.afterHeld(r, __jk.G.card('KT08')); return a+','+r.vals.army;})()`);
+  ok('수습 직후 최소 거리 8', minD === '8,92', minD);
 
   console.log('4) 저장·이어하기에 위기 상태가 남는다');
   await t.sleep(1500);
   await fresh();
   await t.eval("document.querySelector('#btnContinue').click()");
   await t.waitFor('JK.Cards.isReady()', 15000);
-  const back = JSON.parse(await t.eval(`JSON.stringify({cooldown:__jk.G.run.cooldown, followups:__jk.G.run.followups, damaged:__jk.G.run.damaged, fu:document.querySelector('.gauge[data-key="people"]').classList.contains('fu')})`));
-  ok('이어하기 뒤 쿨다운·후속·손상', back.cooldown['people:low'] > 0 && back.followups.length === 1 && Object.keys(back.damaged).length === 1 && back.fu, JSON.stringify(back));
+  const back = JSON.parse(await t.eval(`JSON.stringify({cooldown:__jk.G.run.cooldown, pending:__jk.G.run.pendingFollow, damaged:__jk.G.run.damaged, hg:document.querySelector('.gauge[data-key="people"] .g-cd').textContent})`));
+  ok('이어하기 뒤 쉬는 장수·걸어 둔 후속·손상·⏳', back.cooldown['people:low'] > 0 && back.pending['people:low'] && Object.keys(back.damaged).length === 1 && /⏳/.test(back.hg), JSON.stringify(back));
 
-  console.log('5) 후속 위기는 정해진 장수 안에 반드시 / 쿨다운 중에는 같은 위기 안 터짐');
+  console.log('5) 쉬는 동안 같은 위기 안 터짐 / 쉬는 장수가 끝났을 때 거리 15 이하면 후속이 바로');
   await t.eval(`JK.era.crisis.chance = {warn:1,danger:1,cliff:1,end:1,cap:1}`);
   let seen = [];
-  for (let i = 0; i < 4; i++) {
+  for (let i = 0; i < 10; i++) {
     await t.waitFor('JK.Cards.isReady()', 10000);
     const id = await t.eval(`(()=>{const r=__jk.G.run; r.vals.people=Math.min(r.vals.people,12); return r.pending?'(기록)':r.deck[r.pos];})()`);
     seen.push(id);
-    if (id === 'KT01b') break;
+    if (id === 'KT01b') {
+      if (OUT) await t.shot(`${OUT}/crisis-followup.png`);
+      seen.push('먹구름=' + (await t.eval(`document.querySelector('.gauge[data-key="people"]').classList.contains('fu')`)));
+      break;
+    }
     await t.eval(`__jk.G.run.crisisRest=0`);
     await t.eval('__jk.G.commit(-1)');
     await t.sleep(1500);
   }
   ok('후속 KT01b가 왔다', seen.includes('KT01b'), seen.join(' → '));
-  ok('쿨다운 중 KT01 다시 안 옴', !seen.slice(0, -1).includes('KT01'));
+  ok('쉬는 동안 KT01 다시 안 옴', !seen.includes('KT01'));
+  ok('후속 위기 카드에 먹구름', seen.includes('먹구름=true'));
 
   console.log('6) 위기 사건 → 실각(무너진 위기 표시)');
   await t.eval(`(()=>{JK.Crisis._fc=JK.Crisis._fc||JK.Crisis.fallChance;JK.Crisis.fallChance=function(){const r=JK.Crisis._fc.apply(null,arguments);r.p=1;return r;};})()`);

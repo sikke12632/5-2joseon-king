@@ -47,7 +47,7 @@
     const zones = C.zones(run.vals);
     const D = JK.Game.diff();
     const showUI = D.warn !== 0; // 실록 도전은 아이콘 경고를 숨긴다(10-7)
-    Cards.setZones(showUI ? zones : {}, run.followups || []);
+    Cards.setZones(showUI ? zones : {}, run.followups || [], run.cooldown || {});
     const prev = run.zones || {};
     if (!quiet && showUI) {
       for (const k in zones) {
@@ -61,18 +61,6 @@
           break;
         }
       }
-    }
-    // 후속 예약이 걸린 게이지가 거리 16 이상으로 돌아오면 후속 취소(10-8-3 ⑤)
-    if (run.followups) {
-      const keep = [];
-      for (const f of run.followups) {
-        if (zones[f.gauge].d >= (cfg().followupCancelAt || 16)) {
-          run.stats.followupsCancelled = (run.stats.followupsCancelled || 0) + 1;
-          continue;
-        }
-        keep.push(f);
-      }
-      run.followups = keep;
     }
     run.zones = zones;
     // 세계 반응: 구간 + 지금 벌어진 위기 사건
@@ -116,13 +104,25 @@
   // 카드를 넘긴 뒤 부른다. 다음 자리에 끼워 넣을 카드 id(없으면 null)
   C.pick = function (run, rnd, prevZones) {
     const zones = run.zones || C.zones(run.vals);
-    // 쿨다운 줄이기
-    for (const key in run.cooldown || {}) if (--run.cooldown[key] <= 0) delete run.cooldown[key];
+    // 같은 위기의 쉬는 장수 줄이기. 끝났을 때 문제 게이지가 아직 거리 15 이하이면 후속 위기를 바로 다음 카드에(10-8-3 ⑤)
+    run.followups = run.followups || [];
+    run.pendingFollow = run.pendingFollow || {};
+    for (const key in run.cooldown || {}) {
+      if (--run.cooldown[key] > 0) continue;
+      delete run.cooldown[key];
+      const pf = run.pendingFollow[key];
+      if (!pf) continue;
+      delete run.pendingFollow[key];
+      const z = zones[pf.gauge];
+      if (z && z.side === pf.side && z.d <= (cfg().followupIfAtMost || 15)) run.followups.push(Object.assign({ at: run.pos }, pf));
+      else run.stats.followupsCancelled = (run.stats.followupsCancelled || 0) + 1; // 쉬는 동안 고쳐서 후속 취소
+    }
     // 1) 후속 위기가 기한이 되었으면 반드시
-    if (run.followups && run.followups.length) {
-      const due = run.followups.find((f) => f.at <= run.pos);
+    if (run.followups.length) {
+      // 끼운 후속은 그 카드를 넘길 때(resolve)까지 목록에 남겨 아이콘 옆 먹구름이 보이게 한다
+      const due = run.followups.find((f) => f.at <= run.pos && !f.inserted);
       if (due) {
-        run.followups = run.followups.filter((f) => f !== due);
+        due.inserted = true;
         const fc = era.data.cards.find((x) => x.id === due.card);
         if (fc) {
           run.followStep = Object.assign({}, run.followStep, { [due.gauge]: due.step });
@@ -148,13 +148,16 @@
     }
     if (!best) return null;
     const ch = cfg().chance || {};
-    const p = Math.min(ch.cap || 0.95, (ch[best.z.level] || 0) * (JK.Game.diff().crisisMult || 1));
+    // 다른 길(10-10-2)이 바꾼 위기 확률(예: 성 없이 문만 → 국방 낮음 ×1.5)
+    const alt = (run.crisisMult || {})[best.k + ':' + best.z.side] || 1;
+    const p = Math.min(ch.cap || 0.95, (ch[best.z.level] || 0) * (JK.Game.diff().crisisMult || 1) * alt);
     if (rnd() >= p) return null;
     const card = era.data.cards.find((x) => x.kind === 'crisis' && x.level === 'event' && x.gauge === best.k && x.side === best.z.side && x.stages.includes(run.stage));
     if (!card) return null;
-    // 쉬는 장수: 끝 구간에서는 1
+    // 전체 쉬는 장수: 다른 게이지가 끝 구간이면 1
     const rest = cfg().rest || {};
-    run.crisisRest = best.z.level === 'end' ? rest.end || 1 : byDiff(rest, 3);
+    const otherEnd = Object.keys(zones).some((k) => k !== best.k && zones[k].level === 'end');
+    run.crisisRest = otherEnd ? rest.end || 1 : byDiff(rest, 3);
     return card.id;
   };
 
@@ -196,25 +199,31 @@
   C.resolve = function (run, card, sideKey, vals0, rnd) {
     const r = C.fallChance(card, sideKey, vals0);
     const fell = rnd() < r.p;
+    if (card.level === 'followup') run.followups = (run.followups || []).filter((f) => f.gauge !== card.gauge);
     const rec = { card: card.id, name: card.name || card.who.name, gauge: card.gauge, side: card.side, value: vals0[card.gauge], choice: card.choices[sideKey].label, p: r.p, level: r.level, stage: run.stage };
     run.crisisLog = (run.crisisLog || []).concat(Object.assign({ fell }, rec));
     if (fell) return Object.assign({ fell: true }, rec);
-    // 수습: 쿨다운, 손상(위험 이하에서 수습하면), 후속 예약
+    // 수습: 같은 위기의 쉬는 장수(후속을 수습했으면 +2), 손상(위험 이하에서 수습하면)
     run.cooldown = run.cooldown || {};
-    run.cooldown[card.gauge + ':' + card.side] = byDiff(cfg().cooldown, 6);
+    const key = card.gauge + ':' + card.side;
+    run.cooldown[key] = byDiff((cfg().cooldown || {})[key], 5) + (card.level === 'followup' ? cfg().cooldownAfterFollowup || 0 : 0);
     run.stats.held = (run.stats.held || 0) + 1;
     if (r.level === 'end') run.stats.heldAtEnd = (run.stats.heldAtEnd || 0) + 1;
     if (RANK[r.level] >= 2) damage(run, card);
     return Object.assign({ fell: false }, rec);
   };
-  // 효과가 들어간 뒤 부른다: 아직 거리 15 이하이면 후속 위기 예약
+  // 효과가 들어간 뒤 부른다: ① 문제 게이지를 최소 거리 8까지(10-8-3 ⑤-1) ② 쉬는 장수가 끝나면 볼 후속 위기를 걸어 둔다
   C.afterHeld = function (run, card) {
-    const z = C.zoneOf(run.vals[card.gauge]);
+    const min = cfg().minAfterHeld || 0;
+    const v = run.vals[card.gauge];
+    if (card.side === 'low' && v < min) run.vals[card.gauge] = min;
+    if (card.side === 'high' && v > 100 - min) run.vals[card.gauge] = 100 - min;
     const step = card.level === 'followup' ? (card.step || 2) + 1 : 2;
     const next = era.data.cards.find((x) => x.kind === 'crisis' && x.level === 'followup' && x.gauge === card.gauge && x.side === card.side && x.stages.includes(run.stage));
-    if (!next || z.d > (cfg().followupIfAtMost || 15) || step > (cfg().followupMaxStep || 3)) return;
-    const within = byDiff((cfg().followup || {}).within, 3);
-    run.followups = (run.followups || []).filter((f) => f.gauge !== card.gauge).concat({ gauge: card.gauge, side: card.side, card: next.id, at: run.pos + within, step });
+    run.pendingFollow = run.pendingFollow || {};
+    const key = card.gauge + ':' + card.side;
+    if (next && step <= (cfg().followupMaxStep || 3)) run.pendingFollow[key] = { gauge: card.gauge, side: card.side, card: next.id, step };
+    else delete run.pendingFollow[key];
   };
   function damage(run, card) {
     let targets = (card.damage && card.damage.targets) || [];

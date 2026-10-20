@@ -83,6 +83,28 @@ for (const c of D.cards) {
     if (c.similar && c.similar.out_of_textbook && !hasSource(c.similar.sources)) err(id, '비슷한 실제 일이 [교과서 밖]인데 출처 없음');
   }
   checkCond(id, 'conditions', c.conditions);
+  // 역사 분기(10-10): 다른 길 열림 조건·실제 경로 잠김 조건·세울 건물·바뀌는 카드
+  if (c.paths) {
+    for (const sk of ['lock_right', 'lock_left']) {
+      const L = (c.paths.real || {})[sk];
+      if (!L) continue;
+      checkCond(id, `paths.real.${sk}`, L.when);
+      if (!L.reason) warn(id, `${sk} 잠김 이유 없음`);
+      if (L.reason_auto) warn(id, `${sk} 잠김 이유가 설계서에 없어 임시 문장: "${L.reason}"`);
+    }
+    for (const a of c.paths.alt || []) {
+      if (!a.label) err(id, '다른 길 버튼 글 없음');
+      else if (a.label.length > LABEL_MAX) err(id, `다른 길 버튼 글 ${a.label.length}자: ${a.label}`);
+      if (!a.unlock) warn(id, `다른 길 ${a.label}: 열림 조건 없음(늘 열림)`);
+      checkCond(id, `다른 길 ${a.label} unlock`, a.unlock);
+      if (!a.this_run) err(id, `다른 길 ${a.label}: 「이번 판에서」 없음`);
+      for (const k in a.effects || {}) if (!gaugeKeys.includes(k)) err(id, `다른 길 효과에 없는 게이지: ${k}`);
+      for (const b of a.build || []) if (!era.map.buildings[b]) err(id, `다른 길 build에 없는 건물: ${b}`);
+      for (const k in a.crisis_mult || {}) if (!/^(people|nobles|treasury|army):(low|high)$/.test(k)) err(id, `crisis_mult 키 이상: ${k}`);
+      for (const [from, to] of Object.entries(a.variants || {})) if (!D.cards.some((x) => x.id === to)) warn(id, `다른 길 변형판 ${to}(${from} 대신) 아직 없음 — 원래 카드가 나온다`);
+    }
+    if ((c.paths.alt || []).length > 2) err(id, '다른 길은 사건 하나에 최대 2개');
+  }
   // 결(10-9): 위기·예고·사관 빼고 모두. 역사 사건 카드에는 도박형을 쓰지 않는다
   const GRAINS = ['balance', 'complex', 'gift', 'mire', 'seed', 'gamble'];
   if (c.kind !== 'crisis' && c.kind !== 'sagwan') {
@@ -135,7 +157,7 @@ for (const c of D.cards.filter((x) => x.kind === 'crisis' && x.level === 'event'
     if (!D.cards.some((x) => x.kind === 'crisis' && x.level === lv && x.gauge === c.gauge && x.side === c.side && x.stages.some((st) => c.stages.includes(st)))) warn(c.id, `같은 게이지·방향의 ${lv === 'warn' ? '예고' : '후속'} 카드 없음`);
 }
 // 위기 숫자(10-8): 엔진이 읽는 칸
-for (const k of ['zones', 'chance', 'rest', 'fall', 'followup', 'cooldown', 'forewarnMax']) if (!(era.crisis || {})[k]) err('era.crisis', `${k} 없음`);
+for (const k of ['zones', 'chance', 'rest', 'fall', 'followupIfAtMost', 'cooldown', 'forewarnMax']) if (!(era.crisis || {})[k]) err('era.crisis', `${k} 없음`);
 // 교과서 밖 역사 카드는 왕마다 절반을 넘지 않게
 for (const st of stageIds) {
   const h = D.cards.filter((c) => (c.stages || []).includes(st) && c.kind === 'history');

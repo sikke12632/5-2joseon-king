@@ -154,6 +154,10 @@ def block_cards():
                 c['direction'] = s[3:].strip()
             elif s.startswith('주의:'):
                 c['note'] = s[3:].strip()
+            elif s.startswith('↑ 다른 길'):
+                am = re.match(r'↑ 다른 길 \[([^\]]+)\].*?이번 판에서:\s*(.*?)\s*→\s*실제 역사와 달라졌어요', s)
+                if am:
+                    c['altLine'] = {'label': am.group(1).strip(), 'this_run': am.group(2).strip().rstrip('.') + '.'}
             elif s.startswith('결:'):
                 g = s[2:].strip().split()[0] if s[2:].strip() else ''
                 if g in GRAIN:
@@ -263,6 +267,19 @@ def records():
         if not r[0].isdigit():
             continue
         titles.append({'id': 'title' + r[0].zfill(2), 'name': r[1], 'hint': r[3] if r[3] != '—' else '', 'cond': r[2], 'rule': rules.get(r[1], 'later')})
+    # 다른 길 칭호 (10-10-6): 실록과 같이 / 다른 조선 / 다른 길마다 / 갈림길 탐험가
+    if '#### 10-10-6.' in src:
+        ahint = {'allReal': '실제 역사의 길을 끝까지', 'alt5': '다른 길을 여러 번', 'explorer': '갈림길을 모두 걸어 보라'}
+        for r in table_after('#### 10-10-6.'):
+            if len(r) < 2:
+                continue
+            for name in [x.strip() for x in r[0].split('·')]:
+                rule = {'실록과 같이': 'allReal', '다른 조선': 'alt5', '갈림길 탐험가': 'explorer'}.get(name)
+                if not rule and name in ALT_TITLES:
+                    rule = 'flag:' + ALT_TITLES[name]
+                if not rule:
+                    continue
+                titles.append({'id': 'path-' + rule.replace(':', '-'), 'name': name, 'hint': ahint.get(rule, '이번 판의 다른 길'), 'cond': r[1], 'rule': rule})
     # 위기 칭호 3개 (10-8-7). 힌트는 설계서에 없어 조건을 짧게 가린 말로 둔다
     hint = {'held5': '위기를 여러 번 넘겨 보라', 'heldAtEnd': '끝에서 돌아온 임금', 'cancel3': '버틴 뒤 바로 고쳐라'}
     for r in table_after('#### 10-8-7.'):
@@ -399,6 +416,19 @@ def to105(c):
     g = grain_of(c) if not c.get('single') else None
     if g:
         o['grain'] = g
+    if c['id'] in ALT and c['type'] == 'history':
+        p = json.loads(json.dumps(ALT[c['id']]))
+        o['event'] = p.pop('event')
+        for a in p['alt']:
+            line = c.get('altLine') or {}
+            tr = line.get('this_run') or a['result_text'].split('.')[0] + '.'
+            # 설계서 줄에 섞인 설계 메모(뒤 카드·스테이지·위기 배율)는 화면 글에서 뺀다 — 아이용 문장은 집필 때 따로
+            parts = [x.strip() for x in tr.rstrip('.').split(',') if not re.search(r'카드|스테이지|위기 ×|×\d', x)]
+            a['this_run'] = (', '.join(parts) or tr.rstrip('.')) + '.'
+            a.pop('result_text', None)
+        p['real']['how_right'] = c['right']['label']
+        p['real']['how_left'] = c['left']['label']
+        o['paths'] = p
     if c.get('record'):
         o['real_history'] = c['record']
     o['out_of_textbook'] = bool(c.get('outside'))
@@ -418,6 +448,75 @@ def to105(c):
     if c.get('note'):
         o['caution'] = c['note']
     return o
+
+
+# ---------- 역사 분기 (10-10-3): 다른 길 ----------
+# 표의 열림·잠김 조건(한국어)을 조건 식(engine/cond.js)으로 옮긴 것과, 표에 적힌 섬 모습(10-10-7)을 건물 키로 옮긴 것.
+# 표의 글(버튼·이유·이번 판·플래그·합류 문장)은 아래 alt_paths()가 설계서에서 직접 읽는다.
+#  reason_auto: 설계서에 잠김 이유 문장이 없어 엔진 화면용으로 지은 짧은 문장(담임 확인 필요)
+ALT_FX = {
+    'T01': {'unlock': 'gauge(nobles) >= 60 && gauge(army) <= 50', 'variants': {'T02': 'T02v1'}},
+    'T02': {'unlock': 'gauge(people) >= 60', 'build': ['altTemple'], 'variants': {'T08': 'T08v1'}},
+    'T03': {'unlock': 'gauge(nobles) >= 55'},
+    'T04': {'unlock': 'gauge(treasury) <= 35 || gauge(nobles) >= 65', 'build': ['altPalace'],
+            'lock_right': {'when': 'gauge(treasury) < 20', 'reason': '곳간이 비어 도읍을 옮길 수 없다'},
+            'lock_left': {'when': 'gauge(treasury) < 20', 'reason': '곳간이 비어 도읍을 옮길 수 없다'},
+            'variants': {'T05': 'T05v1', 'T06': 'T06v1', 'T07': 'T07v1'}},
+    'T05': {'unlock': 'gauge(treasury) <= 30 || gauge(people) <= 30', 'build': ['altPalace'], 'skip': ['CT04'],
+            'lock_right': {'when': 'gauge(treasury) < 15', 'reason': '곳간이 모자라 크게 지을 수 없다', 'reason_auto': True}},
+    'T06': {'unlock': 'gauge(nobles) <= 35', 'crisis_mult': {'nobles:low': 1.3}},
+    'T07': {'unlock': 'gauge(army) >= 70', 'build': ['heungin', 'donui', 'sungnye', 'sukjeong'], 'crisis_mult': {'army:low': 1.5}, 'skip': ['CT05', 'C01a'],
+            'lock_right': {'when': 'gauge(people) < 20', 'reason': '백성이 너무 지쳤다'}},
+    'T08': {'unlock': 'gauge(people) >= 55', 'build': ['altHyanggyo']},
+    'T09': {'unlock': 'gauge(nobles) >= 45 && gauge(army) >= 45 && gauge(army) <= 65 && !flag(F_정몽주)'},
+}
+FULL_GAUGE = {'백성': 'people', '양반': 'nobles', '국고': 'treasury', '국방': 'army'}
+
+
+def alt_paths():
+    out, titles_by_flag = {}, {}
+    if '#### 10-10-3.' not in src:
+        return out, titles_by_flag
+    for r in table_after('#### 10-10-3.'):
+        if len(r) < 8:
+            continue
+        m = re.match(r'([A-Z]\d{2})\s+(.*)', r[0])
+        if not m:
+            continue
+        cid, event = m.group(1), m.group(2).strip()
+        label = re.search(r'\*\*(.+?)\*\*', r[2]).group(1)
+        reason = re.search(r'🔒\s*["“](.+?)["”]', r[3])
+        fx = {}
+        for g, sign, n in re.findall(r'(백성|양반|국고|국방)\s*([+\-−])(\d+)', r[5]):
+            fx[FULL_GAUGE[g]] = int(n) * (-1 if sign in '-−' else 1)
+        flag = re.search(r'`(F_[^`]+)`', r[6])
+        for t in re.findall(r'칭호 「([^」]+)」', r[6]):
+            if flag:
+                titles_by_flag[t] = flag.group(1)
+        merge = re.search(r'["“](.+?)["”]', r[7])
+        alt = {'id': cid + 'a1', 'label': label, 'effects': fx, 'lock_reason': reason.group(1) if reason else ''}
+        if flag:
+            alt['set_flag'] = flag.group(1)
+        if merge:
+            alt['merge_text'] = merge.group(1)
+        if '실제 역사:' in r[7]:
+            real = r[7].split('실제 역사:', 1)[1].strip()
+            alt['merge_real'] = {'text': re.split(r'\(\[교과서 밖\]|\(지도서', real)[0].strip(), 'sources': src105(sources(real)), 'out_of_textbook': '[교과서 밖]' in real}
+        alt['result_text'] = r[5]
+        ex = ALT_FX.get(cid, {})
+        alt['unlock'] = ex.get('unlock', '')
+        for k in ('build', 'skip', 'variants', 'crisis_mult'):
+            if ex.get(k):
+                alt[k] = ex[k]
+        real = {}
+        for k in ('lock_right', 'lock_left'):
+            if ex.get(k):
+                real[k] = ex[k]
+        out[cid] = {'event': event, 'real': real, 'alt': [alt]}
+    return out, titles_by_flag
+
+
+ALT, ALT_TITLES = alt_paths()
 
 
 # ---------- 위기 카드 (10-8-5): 예고 NT·위기 KT·후속 KTb, 모두 [게임 속 일] ----------
@@ -515,6 +614,13 @@ for st in STAGES:
         if q['stage'] != st:
             continue
         e = {'id': q['id'], 'stage': q['stage'], 'question': q['q'], 'answer': q['answer'], 'wrong': q['wrong'], 'sources': src105(q['source']), 'sources_text': q['sourceText'], 'out_of_textbook': bool(q.get('outside')), 'checked_against_review_site': False}
+        # 이어진 사건: 근거 칸이 카드를 가리키면 그 카드, 아니면 같은 지도서 쪽을 쓰는 역사 카드(10-10-5 퀴즈와 잇기)
+        about = [x for x in re.findall(r'\b([A-Z]\d{2})\b', q['sourceText']) if x in CARDS_BY_ID]
+        if not about:
+            qp = {s.get('page') for s in q['source'] if s.get('page')}
+            about = [c['id'] for c in cards if c['type'] == 'history' and c.get('stage') == st and qp & {s.get('page') for s in c.get('source', []) if s.get('page')}]
+        if about:
+            e['about'] = about
         qq.append(e)
     open(os.path.join(d, 'quizzes.js'), 'w', encoding='utf-8', newline='\n').write(js(f"D.quizzes.push(...{json.dumps(qq, ensure_ascii=False, indent=1)});"))
 common = os.path.join(OUT, 'common')

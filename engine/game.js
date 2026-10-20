@@ -127,6 +127,7 @@
     run.crisisRest = 0;
     run.damaged = {};
     run.followups = [];
+    run.pendingFollow = {};
     run.followStep = {};
     run.cooldown = {};
     run.forewarned = {};
@@ -135,6 +136,12 @@
     // 조건 식(engine/cond.js)이 읽는 이번 왕의 기록
     run.choices = {};
     run.seenRun = [];
+    // 역사 분기(10-10): 이 왕에서 고른 다른 길, 바뀌는 뒤 카드, 서지 않은 실제 건물(다음 왕에서 합류), 위기 확률 배율
+    run.altPick = {};
+    run.altCards = [];
+    run.variants = {};
+    run.altSkipped = [];
+    run.crisisMult = {};
     run.flagsRun = Object.assign({}, run.flagsRunBefore || {});
     G.state = 'play';
     setupWorld(st, false);
@@ -276,6 +283,9 @@
       } else run.deck.splice(run.pos, 1);
     }
     if (run.pos >= run.deck.length) return stageClear();
+    // 다른 길 때문에 바뀐 뒤 카드(변형판). 변형판 카드가 아직 없으면 원래 카드 그대로
+    const vid = run.variants && run.variants[run.deck[run.pos]];
+    if (vid && cardsById[vid]) run.deck[run.pos] = vid;
     const c = cardsById[run.deck[run.pos]];
     const st = stageOf(run.stage);
     const v = roleView(c.who.doll, c.who.name);
@@ -299,6 +309,8 @@
       }
     }
     if (!run.seenRun.includes(c.id)) run.seenRun.push(c.id);
+    // 역사 분기(10-10-1): 실제 경로 잠김 · 아래 '다른 길' 버튼(열림 조건) · 막다른 길 금지
+    if (c.paths && c.choices) Object.assign(v, pathView(run, c));
     Object.assign(v, {
       crisis: c.kind === 'crisis' ? c.level : '',
       text: c.line,
@@ -326,6 +338,48 @@
       if (JK.Audio) JK.Audio.gong();
     }
   }
+  /* ---------- 역사 분기 (설계서 10-10) ---------- */
+  const branchCfg = () => era.branch || {};
+  const cctx = (run) => ({ run, meta: S.meta });
+  function pathView(run, c) {
+    const real = c.paths.real || {};
+    const lock = {};
+    for (const sk of ['right', 'left']) {
+      const L = real['lock_' + sk];
+      if (L && JK.Cond.test(L.when, cctx(run))) lock[sk] = L.reason || '지금은 고를 수 없다';
+    }
+    const alts = c.paths.alt || [];
+    let ai = alts.findIndex((a) => JK.Cond.test(a.unlock, cctx(run)));
+    const full = run.altCards.length >= (branchCfg().maxPerStage || 3);
+    const open = ai >= 0 && !full;
+    if (ai < 0) ai = 0;
+    const a = alts[ai];
+    // 막다른 길 금지: 세 버튼이 모두 잠기면 실제 경로의 가벼운 방식(움직임이 작은 쪽) 하나를 연다
+    if (lock.right && lock.left && !open) {
+      const size = (sk) => Object.values(c.choices[sk].effects || {}).reduce((s, x) => s + Math.abs(x), 0);
+      delete lock[size('right') <= size('left') ? 'right' : 'left'];
+    }
+    run.shownAlt = a ? { card: c.id, idx: ai, open } : null;
+    const out = { lock };
+    if (a) out.alt = { label: a.label, locked: !open, reason: open ? '' : full ? branchCfg().fullReason || '이미 나라가 많이 흔들렸다' : a.lock_reason || '' };
+    if (a && open) out.fxAlt = ((s) => s)(Object.fromEntries(Object.entries(a.effects || {}).map(([k, x]) => [k, G.effect(k, x, run.vals)])));
+    return out;
+  }
+  // 이번 왕의 "나의 역사 vs 실제 역사" 기록(기록관에 짧게 남기고, 글은 볼 때 데이터에서 다시 만든다)
+  function compareEntry(run, st) {
+    const hist = era.data.cards.filter((x) => x.kind === 'history' && x.stages.includes(st.id)).sort((a, b) => a.order - b.order);
+    const ch = {};
+    for (const h of hist) if (run.choices[h.id]) ch[h.id] = run.choices[h.id];
+    const states = {};
+    for (const h of hist) {
+      const sk = run.choices[h.id];
+      const b = sk && sk !== 'alt' && h.choices[sk].build;
+      if (b && b[0] && run.states[b[0]]) states[h.id] = run.states[b[0]];
+    }
+    const log = (run.crisisLog || []).filter((x) => x.stage === st.id);
+    return { d: new Date().toISOString().slice(0, 10), st: st.id, ch, ap: Object.assign({}, run.altPick), bs: states, held: log.filter((x) => !x.fell).map((x) => [x.name, Math.round(x.p * 100)]), fell: log.filter((x) => x.fell).length };
+  }
+  G.compareEntry = () => compareEntry(G.run, stageOf(G.run.stage));
   // 도박 쪽 버튼은 수치 대신 '?'(이기면·지면 움직이는 게이지 모두)
   function previewFx(c, sideKey, scaled) {
     if (!(c.gamble && c.gamble.side === sideKey)) return scaled(c.choices[sideKey]);
@@ -355,9 +409,16 @@
       return setTimeout(showCurrent, 600);
     }
     const c = cardsById[run.deck[run.pos]];
-    const sideKey = dir > 0 ? 'right' : 'left';
-    const side = c.single ? null : c.choices[sideKey];
+    // dir 2 = 카드 아래 '다른 길'(10-10)
+    const isAlt = dir === 2 && c.paths && run.shownAlt && run.shownAlt.card === c.id && run.shownAlt.open;
+    const sideKey = isAlt ? 'alt' : dir > 0 ? 'right' : 'left';
+    const alt = isAlt ? c.paths.alt[run.shownAlt.idx] : null;
+    const side = c.single ? null : isAlt ? alt : c.choices[sideKey];
     if (!c.single) run.choices[c.id] = sideKey;
+    if (c.paths) {
+      const mp = (S.meta.paths = S.meta.paths || {});
+      (mp[c.id] = mp[c.id] || {})[isAlt ? alt.id : 'real'] = 1;
+    }
     const prevZones = run.zones || {};
     // 도박형(10-9): 도박 쪽을 고르면 이 자리에서 굴려 이기면 win, 지면 lose 효과
     let gres = null;
@@ -422,11 +483,14 @@
           Cards.shake();
         }
       }
-      if (sideEff.this_run && !c.real_history) setTimeout(() => Cards.toast(sideEff.this_run, Math.max(2600, sideEff.this_run.length * 70)), gres ? 1100 : 0);
+      if (sideEff.this_run && (!c.real_history || isAlt)) setTimeout(() => Cards.toast(sideEff.this_run, Math.max(2600, sideEff.this_run.length * 70), isAlt ? '실제 역사와 달라졌어요 📜' : ''), gres ? 1100 : 0);
+      if (isAlt) takeAlt(run, c, alt);
       // 수습("버텼다!"): 붉은 도장 "버팀", 북 세 번, 아이콘이 원래 색으로. 아직 거리 15 이하면 후속 예약
       if (cres) {
         run.eventScene = null;
         JK.Crisis.afterHeld(run, c);
+        Cards.setGauges(run.vals);
+        W.state.people = run.vals.people;
         W.camTo(W.CAM_PLAY, 1.6);
         W.state.alarm = 0;
         Cards.held(c.name, `무너질 확률 ${Math.round(cres.p * 100)}%에서 버텼다!`, 2400);
@@ -451,7 +515,9 @@
     const builds = (side ? side.build : c.fx && c.fx.build) || [];
     const state = side && side.build_state;
     if (builds.length) wait = Math.max(wait, doBuilds(builds, against ? 1300 : 350, state));
-    cardFx(c, state, builds);
+    // 다른 길에서는 실제 경로의 연출(하늘 글씨·짐배 등)을 하지 않는다
+    if (!isAlt) cardFx(c, state, builds);
+    else if (alt.fx) cardFx({ fx: alt.fx }, null, builds);
     // 이름 없는 마을은 카드마다 조금씩 자란다
     for (const k in era.map.buildings) {
       const v = era.map.buildings[k];
@@ -472,7 +538,8 @@
         run.deck.splice(run.pos, 0, due.card);
       }
     }
-    if (c.real_history) run.pending = { text: c.real_history, run: side ? side.this_run : '', against, outside: !!c.out_of_textbook, year: c.year };
+    // 실제 경로는 「실제 역사」 두루마리. 다른 길은 그 자리에서 길게 보여 주지 않고 비교 화면에서 한꺼번에(10-10-5)
+    if (c.real_history && !isAlt) run.pending = { text: c.real_history, run: side ? side.this_run : '', against, outside: !!c.out_of_textbook, year: c.year };
     setTOD(false);
     save();
     S.saveMeta();
@@ -484,6 +551,14 @@
     let end = 0;
     keys.forEach((k, idx) => {
       if (G.run.built.includes(k)) return;
+      const def = era.map.buildings[k] || {};
+      // 같은 자리를 쓰는 건물: conflicts가 서 있으면 짓지 않고, replaces는 치우고 짓는다
+      if ((def.conflicts || []).some((x) => G.run.built.includes(x))) return;
+      for (const r of def.replaces || []) {
+        if (!G.run.built.includes(r)) continue;
+        G.run.built = G.run.built.filter((x) => x !== r);
+        setTimeout(() => W.disposeBuilding(r), t);
+      }
       G.run.built.push(k);
       // 건물 상태는 그 카드의 첫 건물에만(설계서 7-4 건물별 정리)
       const state = idx === 0 && stateIn ? stateIn : 'smooth';
@@ -566,6 +641,24 @@
     const v = Object.assign({}, G.run.vals, { treasury: 4 });
     fall('treasury', 0, true, { name: c ? c.name : '국고 위기', value: 4, choice: c ? c.choices.left.label : '', p: c ? JK.Crisis.fallChance(c, 'left', v).p : 0.3 });
   };
+  // 다른 길을 고름(10-10): 깃발·뒤 카드·위기 배율·합류할 건물·칭호
+  function takeAlt(run, c, alt) {
+    run.altPick[c.id] = run.shownAlt.idx;
+    run.altCards.push(c.id);
+    run.stats.alt = (run.stats.alt || 0) + 1;
+    if (alt.set_flag) run.flagsRun[alt.set_flag] = true;
+    Object.assign(run.variants, alt.variants || {});
+    for (const k in alt.crisis_mult || {}) run.crisisMult[k] = (run.crisisMult[k] || 1) * alt.crisis_mult[k];
+    if (alt.skip && alt.skip.length) run.deck = run.deck.slice(0, run.pos + 1).concat(run.deck.slice(run.pos + 1).filter((id) => !alt.skip.includes(id)));
+    // 실제 경로라면 섰을 건물: 이번 왕 동안은 서지 않고, 다음 왕 시작 때 합류
+    for (const k of (c.choices.right.build || []).concat(c.choices.left.build || [])) if (!run.altSkipped.includes(k) && !(alt.build || []).includes(k)) run.altSkipped.push(k);
+    const rules = [];
+    if (alt.set_flag) rules.push('flag:' + alt.set_flag);
+    if (run.stats.alt >= 5) rules.push('alt5');
+    const all = era.data.cards.filter((x) => x.paths).flatMap((x) => x.paths.alt.map((a) => [x.id, a.id]));
+    if (all.length && all.every(([cid, aid]) => (S.meta.paths[cid] || {})[aid])) rules.push('explorer');
+    titleNow(rules);
+  }
   // 위기 칭호는 이룬 그 자리에서 준다(10-8-7)
   function titleNow(rules) {
     const got = awardTitles(rules);
@@ -609,9 +702,16 @@
     if (!run.stageStats.falls) got.push('noFallStage');
     const lastStage = !era.stages[stageIndex(st.id) + 1];
     if (lastStage && (run.stats.held || 0) >= 5) got.push('held5');
+    if (lastStage && !(run.stats.alt || 0)) got.push('allReal');
     W.setTOD(Math.min(1, st.tod[1] + 0.06));
     const qs = pickQuiz(st.id, run.stageSeed);
-    JK.Quiz.run(qs, { options: D.quizOptions, retry: D.quizRetry }, (res) => {
+    // 나의 역사 vs 실제 역사(10-10-5): 퀴즈 바로 앞. 기록관에도 남긴다
+    const entry = compareEntry(run, st);
+    S.meta.archive = [entry].concat(S.meta.archive || []).slice(0, 20);
+    S.saveMeta();
+    const explain = (q) => JK.UI.compareLine(entry, q.about || []);
+    JK.UI.showCompare(entry, { onNext: () => quizStep() });
+    const quizStep = () => JK.Quiz.run(qs, { options: D.quizOptions, retry: D.quizRetry, explain }, (res) => {
       const right = res.filter(Boolean).length;
       run.stats.quiz.asked += res.length;
       run.stats.quiz.right += right;
@@ -633,7 +733,9 @@
       // 이 왕에서 지은 것과 그 모습(상태)은 판 기록으로 남는다(엔딩 "나의 한양"·기록관용)
       run.history = run.history || [];
       run.history.push({ stage: st.id, vals: Object.assign({}, run.vals), built: run.built.filter((k) => !run.builtBefore.includes(k)).map((k) => [k, run.states[k] || 'smooth']) });
-      run.builtBefore = run.built.slice();
+      // 합류(10-10-2): 다른 길로 생긴 장식은 치우고, 서지 않은 실제 건물은 다음 왕 시작 때 서 있다
+      const isAltKey = (k) => (era.map.buildings[k.split(':')[0]] || {}).alt;
+      run.builtBefore = [...new Set(run.built.filter((k) => !isAltKey(k)).concat(run.altSkipped || []))];
       run.statesBefore = {};
       run.flagsBefore = Object.assign({}, run.flags || {});
       run.flagsRunBefore = Object.assign({}, run.flagsRun || {});
@@ -653,7 +755,13 @@
   }
   function pickQuiz(stageId, seed) {
     const rnd = JK.rng(seed + 17);
-    const pool = shuffle(era.data.quizzes.filter((q) => q.stage === stageId), rnd);
+    // 다른 길로 간 사건과 이어진 문항은 뽑힐 확률 ×2(10-10-5): 가중치 순서 섞기
+    const alts = (G.run && G.run.altCards) || [];
+    const pool = era.data.quizzes
+      .filter((q) => q.stage === stageId)
+      .map((q) => ({ q, k: Math.pow(rnd(), 1 / ((q.about || []).some((id) => alts.includes(id)) ? 2 : 1)) }))
+      .sort((a, b) => b.k - a.k)
+      .map((x) => x.q);
     const out = [];
     let outside = 0;
     for (const q of pool) {

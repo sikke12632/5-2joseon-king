@@ -333,3 +333,46 @@ body:not(.portrait) #zoneAlert { left: calc((100% - var(--panel-w)) / 2); }
 #luck.won #luckText { color: #2f6a3a; }
 #luck.lost #luckText { color: #8d2f2a; }
 #luck.lost .coin { filter: grayscale(.6) brightness(.85); }
+/* 역사 분기(10-10): 잠긴 버튼 · 다른 길 버튼 · 달라졌어요 표시 · 비교 화면 */
+.choice.locked { color: #8a8a8a !important; background: rgba(240,240,240,.92) !important; border-color: #aaa !important; }
+#hint span.locked { color: #b9b2a6; }
+#altBtn { display: flex; flex-direction: column; align-items: center; gap: 0; margin: 2px auto 0; padding: 5px 16px 6px; border-radius: 14px; border: 2px dashed #c9a96c; background: rgba(255,248,232,.92); color: #6b3a2a; font-family: inherit; font-size: 14px; cursor: pointer; transition: transform .15s, box-shadow .15s, background .15s; max-width: 92%; }
+#altBtn .ab-up { font-size: 11px; color: #8a6b4a; letter-spacing: .05em; }
+#altLabel { font-family: 'JKTitle', serif; font-size: 16px; }
+#altWhy { font-size: 12px; color: #7d6a55; }
+#altWhy:empty { display: none; }
+#altBtn.hot { transform: translateY(-4px) scale(1.04); box-shadow: 0 0 0 4px rgba(201,169,108,.45); background: #fff4dc; }
+#altBtn.locked { border-style: solid; border-color: #bbb; background: rgba(236,236,236,.9); color: #888; }
+#altBtn.locked #altLabel { text-decoration: line-through; text-decoration-color: rgba(0,0,0,.25); }
+#deck:not(.show) ~ #altBtn { opacity: 0; pointer-events: none; }
+.r-badge { display: block; margin-top: 4px; font-size: 13px; color: #ffe2a8; }
+#compare { z-index: 46; }
+.c-box { width: min(760px, 100%); max-height: 92vh; overflow-y: auto; background: #f3e7c9; box-shadow: 0 16px 40px rgba(40,25,10,.4), inset 0 14px 0 #c9a96c, inset 0 -14px 0 #c9a96c; padding-top: 22px; padding-bottom: 22px; }
+.c-head { text-align: center; }
+.c-head span { font-size: 13px; color: #7b5b3e; }
+.c-head h3 { margin: 2px 0 8px; }
+.c-cols, .c-row { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 12px; }
+.c-col-h { font-family: 'JKTitle', serif; font-size: 17px; text-align: center; color: #6b3a2a; border-bottom: 2px solid #c9a96c; padding-bottom: 2px; }
+.c-row { padding: 7px 0; border-bottom: 1px dashed #d4bf92; font-size: 14px; line-height: 1.45; word-break: keep-all; }
+.c-ev { grid-column: 1 / -1; display: flex; justify-content: space-between; align-items: center; }
+.c-ev b { font-family: 'JKTitle', serif; font-weight: normal; font-size: 16px; }
+.c-stamp { font-family: 'JKTitle', serif; font-size: 13px; padding: 0 8px; border-radius: 6px; transform: rotate(-4deg); }
+.c-row.same .c-stamp { color: #2f6a3a; border: 2px solid #2f6a3a; }
+.c-row.diff .c-stamp { color: #b23b30; border: 2px solid #b23b30; background: rgba(255,236,230,.8); }
+.c-row.diff .c-mine { background: rgba(255,236,230,.6); border-radius: 8px; padding: 2px 6px; }
+.c-path { display: block; font-size: 12px; color: #8a6b4a; }
+.c-year { font-size: 12px; color: #8a6b4a; }
+.c-src { font-size: 11px; color: #9a8466; }
+#cmpSum { margin-top: 10px; text-align: center; font-size: 15px; }
+#cmpMerge p { font-size: 14px; margin: 4px 0; }
+#cmpMerge small { color: #7b6650; }
+.pth { display: inline-block; font-size: 12px; padding: 1px 7px; margin: 2px 2px 0; border-radius: 999px; background: #e9e2d2; color: #a9977a; }
+.pth.on { background: #e7f1e4; color: #2f5f3a; }
+.pth.alt.on { background: #f6e1da; color: #8d2f2a; }
+.rec-archive .arc { width: 100%; text-align: left; border: 0; background: none; font: inherit; cursor: pointer; color: inherit; padding: 0; }
+.rec-archive small { color: #8a7a62; }
+#qFeedback { white-space: pre-line; }
+.c-row.none .c-mine { color: #a9977a; }
+/* 같은 위기 쉬는 중: 아이콘 옆 ⏳남은 장수 (10-8-4) */
+.g-cd { position: absolute; top: -6px; left: -8px; font-size: 11px; line-height: 1; padding: 2px 4px; border-radius: 999px; background: rgba(255,248,232,.92); color: #6b3a2a; display: none; pointer-events: none; box-shadow: 0 1px 3px rgba(0,0,0,.3); }
+.gauge.cd .g-cd { display: block; }

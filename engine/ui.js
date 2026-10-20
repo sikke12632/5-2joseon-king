@@ -202,6 +202,66 @@
     open('#fall');
   };
 
+  /* ---------- 나의 역사 vs 실제 역사 (설계서 10-10-5) ----------
+   * entry: { st, ch{카드: right|left|alt}, ap{카드: 다른 길 번호}, bs{카드: 건물 상태}, held[[이름, %]], fell }
+   */
+  const card = (id) => era.data.cards.find((c) => c.id === id);
+  const firstStep = (t) => String(t || '').split('→')[0].trim();
+  function compareRows(entry) {
+    const hist = era.data.cards.filter((x) => x.kind === 'history' && x.stages.includes(entry.st)).sort((a, b) => a.order - b.order);
+    return hist.map((c) => {
+      const sk = entry.ch[c.id];
+      const alt = sk === 'alt' && c.paths ? c.paths.alt[entry.ap[c.id] || 0] : null;
+      let mine;
+      if (alt) mine = { path: '다른 길', label: alt.label, text: alt.this_run };
+      else if (sk) mine = { path: '실제 경로', label: c.choices[sk].label, text: firstStep(c.choices[sk].this_run), state: entry.bs[c.id] };
+      else mine = { path: '', label: '', text: '이번 판에서 만나지 못했어요' };
+      // same: 같은 길 true / 다른 길 false / 만나지 못함 null
+      return { c, ev: c.event || c.learn || c.id, mine, same: sk ? sk !== 'alt' : null, alt, real: { year: c.year || '', text: c.real_history || '', src: JK.Quiz.sourceLine(c.sources) } };
+    });
+  }
+  UI.compareLine = function (entry, ids) {
+    const row = compareRows(entry).find((r) => ids.includes(r.c.id) && r.same === false);
+    return row ? `나의 역사: ${row.mine.label} — ${row.mine.text} / 실제 역사: ${row.real.text}` : '';
+  };
+  UI.showCompare = function (entry, o) {
+    o = o || {};
+    const st = era.stages.find((s) => s.id === entry.st);
+    const rows = compareRows(entry);
+    $('#cmpKing').textContent = `${st.king} · ${entry.d}`;
+    const box = $('#cmpRows');
+    box.innerHTML = '';
+    for (const r of rows) {
+      const el = document.createElement('div');
+      el.className = 'c-row ' + (r.same === null ? 'none' : r.same ? 'same' : 'diff');
+      const stTag = r.mine.state && r.mine.state !== 'smooth' ? ` <span class="bst ${r.mine.state}">${STATE_NAME[r.mine.state]} 지음</span>` : '';
+      el.innerHTML =
+        `<div class="c-ev"><b>${esc(r.ev)}</b>${r.same === null ? '' : `<span class="c-stamp">${r.same ? '같은 길' : '실제와 달라요'}</span>`}</div>` +
+        `<div class="c-mine">${r.mine.path ? `<span class="c-path">${esc(r.mine.path)} · ${esc(r.mine.label)}</span>` : ''}${esc(r.mine.text)}${stTag}</div>` +
+        `<div class="c-real">${r.real.year ? `<span class="c-year">${esc(r.real.year)}</span> ` : ''}${esc(r.real.text)}${r.real.src ? ` <span class="c-src">(${esc(r.real.src)})</span>` : ''}</div>`;
+      box.appendChild(el);
+    }
+    const same = rows.filter((r) => r.same === true).length,
+      diff = rows.filter((r) => r.same === false).length;
+    const titles = era.data.titles.filter((t) => t.rule.startsWith('flag:') && rows.some((r) => r.alt && 'flag:' + r.alt.set_flag === t.rule)).map((t) => `「${t.name}」`);
+    $('#cmpSum').innerHTML =
+      `<b>같은 길 ${same} · 다른 길 ${diff}</b>` +
+      (titles.length ? `<br>다른 길 칭호: ${titles.join(' ')}` : '') +
+      `<br>위기 기록: ${entry.held.length ? entry.held.map(([n, p]) => `${esc(n)}(${p}%에서 버팀)`).join(', ') : '버틴 위기 없음'}${entry.fell ? ` · 무너짐 ${entry.fell}번` : ''}`;
+    // 합류 문장(10-10-2): 다른 길로 간 일이 다음 임금 때 어떻게 큰 줄기로 돌아오는지
+    const merges = rows.filter((r) => r.alt && r.alt.merge_text);
+    $('#cmpMerge').innerHTML = merges.length
+      ? '<h4>그 뒤의 이야기</h4>' + merges.map((r) => `<p>${esc(r.alt.merge_text)}${r.alt.merge_real ? `<br><small>실제 역사: ${esc(r.alt.merge_real.text)}${r.alt.merge_real.out_of_textbook ? ' <span class="tag-out">교과서 밖</span>' : ''}</small>` : ''}</p>`).join('')
+      : '';
+    $('#btnCmpNext').textContent = o.view ? '닫기' : '사관이 실제 역사를 묻습니다 →';
+    $('#btnCmpNext').onclick = () => {
+      $('#compare').classList.add('hide');
+      if (o.onNext) o.onNext();
+    };
+    $('#compare').scrollTop = 0;
+    open('#compare');
+  };
+
   /* ---------- 다음 왕 준비 중 ---------- */
   UI.showComingSoon = function (w) {
     const from = era.stages.find((s) => s.id === w.from);
@@ -282,6 +342,29 @@
       rh.appendChild(li);
     }
     if (!rh.children.length) rh.innerHTML = '<li class="off">아직 버틴 위기가 없어요.</li>';
+    // 갈림길 도감(10-10-6): 사건마다 실제 경로와 다른 길, 가 본 길에 도장
+    const rp = $('#recPaths');
+    rp.innerHTML = '';
+    const mp = m.paths || {};
+    for (const c of D.cards.filter((x) => x.paths)) {
+      const li = document.createElement('li');
+      const seen = mp[c.id] || {};
+      li.innerHTML = `<b>${esc(c.event || c.id)}</b> <span class="pth ${seen.real ? 'on' : ''}">실제 경로</span>` + c.paths.alt.map((a) => `<span class="pth alt ${seen[a.id] ? 'on' : ''}">${seen[a.id] ? esc(a.label) : '？？？'}</span>`).join('');
+      rp.appendChild(li);
+    }
+    // 기록관: 왕마다 남긴 비교(누르면 다시 보기)
+    const ra = $('#recArchive');
+    ra.innerHTML = '';
+    for (const e of m.archive || []) {
+      const st = era.stages.find((x) => x.id === e.st);
+      const rows = compareRows(e);
+      const li = document.createElement('li');
+      li.className = 'on';
+      li.innerHTML = `<button class="arc">${st ? esc(st.king) : ''} · 같은 길 ${rows.filter((r) => r.same === true).length} · 다른 길 ${rows.filter((r) => r.same === false).length} <small>${e.d}</small></button>`;
+      li.querySelector('button').onclick = () => UI.showCompare(e, { view: true });
+      ra.appendChild(li);
+    }
+    if (!ra.children.length) ra.innerHTML = '<li class="off">왕 하나를 끝내면 비교 기록이 남아요.</li>';
     list($('#recTitles'), D.titles, (t) => m.titles[t.id], (t) => `「${t.name}」`, (t) => `？？？ — ${t.hint}`);
     open('#records');
   };

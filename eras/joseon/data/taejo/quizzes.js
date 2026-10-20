@@ -22,7 +22,10 @@
   ],
   "sources_text": "지도서 232(교과서 74 연표)",
   "out_of_textbook": false,
-  "checked_against_review_site": false
+  "checked_against_review_site": false,
+  "about": [
+   "T02"
+  ]
  },
  {
   "id": "QT02",
@@ -42,7 +45,13 @@
   ],
   "sources_text": "지도서 233(교과서 75)",
   "out_of_textbook": false,
-  "checked_against_review_site": false
+  "checked_against_review_site": false,
+  "about": [
+   "T04",
+   "T05",
+   "T06",
+   "T07"
+  ]
  },
  {
   "id": "QT03",
@@ -62,7 +71,13 @@
   ],
   "sources_text": "지도서 233(교과서 75)",
   "out_of_textbook": false,
-  "checked_against_review_site": false
+  "checked_against_review_site": false,
+  "about": [
+   "T04",
+   "T05",
+   "T06",
+   "T07"
+  ]
  },
  {
   "id": "QT04",
@@ -82,7 +97,13 @@
   ],
   "sources_text": "지도서 233(교과서 75)",
   "out_of_textbook": false,
-  "checked_against_review_site": false
+  "checked_against_review_site": false,
+  "about": [
+   "T04",
+   "T05",
+   "T06",
+   "T07"
+  ]
  },
  {
   "id": "QT05",
@@ -102,7 +123,13 @@
   ],
   "sources_text": "지도서 233(교과서 75)",
   "out_of_textbook": false,
-  "checked_against_review_site": false
+  "checked_against_review_site": false,
+  "about": [
+   "T04",
+   "T05",
+   "T06",
+   "T07"
+  ]
  },
  {
   "id": "QT06",
@@ -122,7 +149,13 @@
   ],
   "sources_text": "지도서 233(교과서 75)",
   "out_of_textbook": false,
-  "checked_against_review_site": false
+  "checked_against_review_site": false,
+  "about": [
+   "T04",
+   "T05",
+   "T06",
+   "T07"
+  ]
  },
  {
   "id": "QT07",
@@ -142,7 +175,13 @@
   ],
   "sources_text": "지도서 233(교과서 75)",
   "out_of_textbook": false,
-  "checked_against_review_site": false
+  "checked_against_review_site": false,
+  "about": [
+   "T04",
+   "T05",
+   "T06",
+   "T07"
+  ]
  },
  {
   "id": "QT08",
@@ -162,7 +201,13 @@
   ],
   "sources_text": "지도서 233(교과서 75)",
   "out_of_textbook": false,
-  "checked_against_review_site": false
+  "checked_against_review_site": false,
+  "about": [
+   "T04",
+   "T05",
+   "T06",
+   "T07"
+  ]
  },
  {
   "id": "QT09",
@@ -182,7 +227,10 @@
   ],
   "sources_text": "지도서 245(교과서 81)",
   "out_of_textbook": false,
-  "checked_against_review_site": false
+  "checked_against_review_site": false,
+  "about": [
+   "T08"
+  ]
  },
  {
   "id": "QT10",
@@ -202,7 +250,10 @@
   ],
   "sources_text": "지도서 232(교과서 74 그림)",
   "out_of_textbook": false,
-  "checked_against_review_site": false
+  "checked_against_review_site": false,
+  "about": [
+   "T02"
+  ]
  },
  {
   "id": "QT13",
@@ -242,7 +293,10 @@
   ],
   "sources_text": "실록·백과(왕자의 난) — 설계서 T09",
   "out_of_textbook": true,
-  "checked_against_review_site": false
+  "checked_against_review_site": false,
+  "about": [
+   "T09"
+  ]
  },
  {
   "id": "QT12",
@@ -267,7 +321,10 @@
   ],
   "sources_text": "조선왕조실록(T03)",
   "out_of_textbook": true,
-  "checked_against_review_site": false
+  "checked_against_review_site": false,
+  "about": [
+   "T03"
+  ]
  }
 ]);
 })();

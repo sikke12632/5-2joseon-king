@@ -67,6 +67,31 @@
   },
   "against": "right",
   "grain": "balance",
+  "event": "정몽주",
+  "paths": {
+   "real": {
+    "how_right": "찾아가 설득한다",
+    "how_left": "설득을 멈춘다"
+   },
+   "alt": [
+    {
+     "id": "T01a1",
+     "label": "정몽주를 곁에 둔다",
+     "effects": {
+      "nobles": 10,
+      "army": -10
+     },
+     "lock_reason": "고려를 따르는 신하들의 힘이 모자란다",
+     "set_flag": "F_정몽주",
+     "merge_text": "정몽주는 끝내 새 나라의 벼슬을 받지 않고 물러났다(이번 판).",
+     "unlock": "gauge(nobles) >= 60 && gauge(army) <= 50",
+     "variants": {
+      "T02": "T02v1"
+     },
+     "this_run": "정몽주가 반대하는 대신으로 남는다."
+    }
+   ]
+  },
   "real_history": "정몽주는 끝내 뜻을 굽히지 않았고, 1392년 이방원 쪽 사람들에 의해 세상을 떠났다. 두 사람이 시조(하여가·단심가)를 주고받았다는 이야기와 그 장소가 선죽교라는 이야기는 뒷날 전해진 것이다.",
   "out_of_textbook": true,
   "sources": [
@@ -120,6 +145,34 @@
    }
   },
   "grain": "balance",
+  "event": "유교 원리",
+  "paths": {
+   "real": {
+    "how_right": "한꺼번에 바꾼다",
+    "how_left": "천천히 바꾼다"
+   },
+   "alt": [
+    {
+     "id": "T02a1",
+     "label": "불교와 함께 다스린다",
+     "effects": {
+      "nobles": -10,
+      "people": 10
+     },
+     "lock_reason": "백성들의 지지가 더 필요하다",
+     "set_flag": "F_불교",
+     "merge_text": "그래도 나라를 다스리는 뼈대는 점점 유교로 바뀌어 갔다(이번 판).",
+     "unlock": "gauge(people) >= 60",
+     "build": [
+      "altTemple"
+     ],
+     "variants": {
+      "T08": "T08v1"
+     },
+     "this_run": "큰 절이 남고 성균관이 작아진다."
+    }
+   ]
+  },
   "real_history": "조선은 유교 사상을 나라를 다스리는 기본 원리로 삼았다.",
   "out_of_textbook": false,
   "sources": [
@@ -178,6 +231,28 @@
    }
   },
   "grain": "complex",
+  "event": "국호",
+  "paths": {
+   "real": {
+    "how_right": "서둘러 보낸다",
+    "how_left": "예물 갖춰 보낸다"
+   },
+   "alt": [
+    {
+     "id": "T03a1",
+     "label": "고려 이름을 쓴다",
+     "effects": {
+      "army": -10,
+      "nobles": 5
+     },
+     "lock_reason": "옛 신하들의 바람이 모자란다",
+     "set_flag": "F_국호",
+     "merge_text": "다음 임금 때 나라 이름을 조선으로 고쳤다(이번 판).",
+     "unlock": "gauge(nobles) >= 55",
+     "this_run": "태조 동안 깃발이 고려."
+    }
+   ]
+  },
   "real_history": "1392년 11월 두 이름을 적어 보냈고, 명은 ‘조선’이 오래되고 아름다운 이름이라며 골랐다. 1393년 2월 나라 이름이 조선으로 정해졌다. (조선 안에서 이미 ‘조선’으로 마음을 정해 두었다고 보는 견해도 있다.)",
   "out_of_textbook": true,
   "sources": [
@@ -241,6 +316,61 @@
    }
   },
   "grain": "complex",
+  "event": "천도",
+  "paths": {
+   "real": {
+    "lock_right": {
+     "when": "gauge(treasury) < 20",
+     "reason": "곳간이 비어 도읍을 옮길 수 없다"
+    },
+    "lock_left": {
+     "when": "gauge(treasury) < 20",
+     "reason": "곳간이 비어 도읍을 옮길 수 없다"
+    },
+    "how_right": "서둘러 옮긴다",
+    "how_left": "차근차근 옮긴다"
+   },
+   "alt": [
+    {
+     "id": "T04a1",
+     "label": "개경에 머문다",
+     "effects": {
+      "treasury": 10,
+      "nobles": 5,
+      "army": -10
+     },
+     "lock_reason": "개경에 남자는 목소리가 아직 작다",
+     "set_flag": "F_개경",
+     "merge_text": "이번 판에서는 도읍이 개경에 머물렀다.",
+     "merge_real": {
+      "text": "도읍은 1399년 정종 때 개경으로 돌아갔다가 1405년 태종 때 다시 한양으로 옮겨졌다",
+      "sources": [
+       {
+        "type": "web",
+        "title": "백과 '정종'",
+        "url": "https://encykorea.aks.ac.kr/Article/E0050884"
+       },
+       {
+        "type": "web",
+        "title": "우리역사넷",
+        "url": "https://contents.history.go.kr/mobile/kc/view.do?levelId=kc_i306100&code=kc_age_30"
+       }
+      ],
+      "out_of_textbook": true
+     },
+     "unlock": "gauge(treasury) <= 35 || gauge(nobles) >= 65",
+     "build": [
+      "altPalace"
+     ],
+     "variants": {
+      "T05": "T05v1",
+      "T06": "T06v1",
+      "T07": "T07v1"
+     },
+     "this_run": "섬이 개경 모습."
+    }
+   ]
+  },
   "real_history": "1394년, 조선은 한강이 흐르고 바다가 가까워 물자를 나르기 좋은 한양으로 도읍을 옮겼다.",
   "out_of_textbook": false,
   "sources": [
@@ -306,6 +436,40 @@
    }
   },
   "grain": "complex",
+  "event": "경복궁",
+  "paths": {
+   "real": {
+    "lock_right": {
+     "when": "gauge(treasury) < 15",
+     "reason": "곳간이 모자라 크게 지을 수 없다",
+     "reason_auto": true
+    },
+    "how_right": "크게 짓는다",
+    "how_left": "알맞게 짓는다"
+   },
+   "alt": [
+    {
+     "id": "T05a1",
+     "label": "옛 집을 고쳐 쓴다",
+     "effects": {
+      "people": 10,
+      "treasury": 10,
+      "nobles": -10
+     },
+     "lock_reason": "아직 새 궁궐을 지을 힘이 있다",
+     "set_flag": "F_궁궐",
+     "merge_text": "다음 임금 때에야 경복궁이 세워졌다(이번 판).",
+     "unlock": "gauge(treasury) <= 30 || gauge(people) <= 30",
+     "build": [
+      "altPalace"
+     ],
+     "skip": [
+      "CT04"
+     ],
+     "this_run": "경복궁이 서지 않는다."
+    }
+   ]
+  },
   "real_history": "1395년 경복궁이 완성되었다. ‘덕으로 나라를 다스려 오래 큰 복을 누리라’는 뜻의 이름은 정도전이 지었다.",
   "out_of_textbook": false,
   "sources": [
@@ -378,6 +542,30 @@
    }
   },
   "grain": "complex",
+  "event": "종묘·사직",
+  "paths": {
+   "real": {
+    "how_right": "서둘러 짓는다",
+    "how_left": "농사철 뒤에 짓는다"
+   },
+   "alt": [
+    {
+     "id": "T06a1",
+     "label": "제사 터를 미룬다",
+     "effects": {
+      "nobles": -15
+     },
+     "lock_reason": "예법을 따지는 신하들이 아직 많다",
+     "set_flag": "F_종묘",
+     "merge_text": "종묘와 사직단은 다음 임금 때 세워졌다(이번 판).",
+     "unlock": "gauge(nobles) <= 35",
+     "crisis_mult": {
+      "nobles:low": 1.3
+     },
+     "this_run": "종묘·사직단이 서지 않는다."
+    }
+   ]
+  },
   "real_history": "종묘(경복궁 동쪽)와 사직단(서쪽)은 조선이 유교의 나라임을 보여 주는 곳이 되었다.",
   "out_of_textbook": false,
   "sources": [
@@ -452,6 +640,44 @@
    }
   },
   "grain": "seed",
+  "event": "도성",
+  "paths": {
+   "real": {
+    "lock_right": {
+     "when": "gauge(people) < 20",
+     "reason": "백성이 너무 지쳤다"
+    },
+    "how_right": "농한기에 쌓는다",
+    "how_left": "나눠서 쌓는다"
+   },
+   "alt": [
+    {
+     "id": "T07a1",
+     "label": "성 없이 문만 세운다",
+     "effects": {
+      "treasury": 15
+     },
+     "lock_reason": "성 없이 지킬 만큼 군사가 강하지 않다",
+     "set_flag": "F_성곽",
+     "merge_text": "다음 임금 때 도성을 쌓았다(이번 판).",
+     "unlock": "gauge(army) >= 70",
+     "build": [
+      "heungin",
+      "donui",
+      "sungnye",
+      "sukjeong"
+     ],
+     "skip": [
+      "CT05",
+      "C01a"
+     ],
+     "crisis_mult": {
+      "army:low": 1.5
+     },
+     "this_run": "성곽 없이 문만."
+    }
+   ]
+  },
   "real_history": "1396년 한양 도성이 쌓였다(첫 공사 약 12만 명, 장마에 무너진 곳을 고친 둘째 공사 약 8만 명). 흥인지문(인)·돈의문(의)·숭례문(예)에 유교 덕목을 담았다.",
   "out_of_textbook": false,
   "sources": [
@@ -535,6 +761,31 @@
    }
   },
   "grain": "complex",
+  "event": "성균관",
+  "paths": {
+   "real": {
+    "how_right": "크게 세운다",
+    "how_left": "작게 시작한다"
+   },
+   "alt": [
+    {
+     "id": "T08a1",
+     "label": "고을 향교부터 세운다",
+     "effects": {
+      "nobles": -10,
+      "people": 10
+     },
+     "lock_reason": "지방 백성들의 바람이 아직 작다",
+     "set_flag": "F_향교",
+     "merge_text": "성균관은 다음 임금 때 세워졌다(이번 판).",
+     "unlock": "gauge(people) >= 55",
+     "build": [
+      "altHyanggyo"
+     ],
+     "this_run": "성균관 대신 고을 향교 여럿."
+    }
+   ]
+  },
   "real_history": "태조는 한양에 문묘와 성균관을 세웠다. 성균관은 오늘날의 대학교에 해당하는 최고 교육 기관이다.",
   "out_of_textbook": false,
   "sources": [
@@ -592,6 +843,28 @@
   },
   "against": "left",
   "grain": "balance",
+  "event": "왕자의 난",
+  "paths": {
+   "real": {
+    "how_right": "아들을 믿는다",
+    "how_left": "정도전을 믿는다"
+   },
+   "alt": [
+    {
+     "id": "T09a1",
+     "label": "형제를 화해시킨다",
+     "effects": {
+      "nobles": 10,
+      "army": -5
+     },
+     "lock_reason": "형제들 사이의 믿음이 모자란다",
+     "set_flag": "F_양위",
+     "merge_text": "태조는 다툼 없이 왕위를 물려주었다(이번 판).",
+     "unlock": "gauge(nobles) >= 45 && gauge(army) >= 45 && gauge(army) <= 65 && !flag(F_정몽주)",
+     "this_run": "왕자의 난 없이 왕위를 물려준다."
+    }
+   ]
+  },
   "real_history": "1398년, 이방원이 군사를 일으켜 정도전 세력을 무너뜨렸다(제1차 왕자의 난). 정도전도 이때 세상을 떠났다. 그해 태조는 둘째 아들(정종)에게 왕위를 물려주었다. 스스로 원해서였는지는 의문이 남아 있다.",
   "out_of_textbook": true,
   "sources": [

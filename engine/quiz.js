@@ -72,7 +72,9 @@
       } else {
         btn.classList.add('wrong');
         const src = Q.sourceLine(q.sources);
-        $('#qFeedback').textContent = `정답은 「${q.answer}」${src ? ` (${src})` : ''}`;
+        // 다른 길로 간 사건이면 비교 화면의 그 줄을 다시 보여 준다(10-10-5)
+        const ex = opts.explain ? opts.explain(q) : '';
+        $('#qFeedback').textContent = `정답은 「${q.answer}」${src ? ` (${src})` : ''}${ex ? '\n' + ex : ''}`;
         $('#qFeedback').className = 'no';
       }
       res.push(o.ok && !tried);

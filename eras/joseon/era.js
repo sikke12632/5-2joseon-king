@@ -59,7 +59,7 @@
       forewarnMax: { sprout: 5, normal: 4, sage: 4, annals: 4 },
       // 10-8-3 ① 카드마다 위기가 터질 확률(보통). 난이도 crisisMult를 곱하고 95%가 상한
       chance: { warn: 0.06, danger: 0.18, cliff: 0.4, end: 0.75, cap: 0.95 },
-      // 쉬는 장수(위기 뒤 이 동안 새 위기 없음). 끝 구간에서는 모든 단계 1
+      // 전체 쉬는 장수(어떤 위기든 터진 뒤 이 동안 다른 종류 위기도 없음). 다른 게이지가 끝 구간이면 end(1)
       rest: { sprout: 5, normal: 3, sage: 2, annals: 2, end: 1 },
       // 10-8-3 ②③ 실각 확률 = 구간 기본값 × 대응 배율 × 난이도 배율 (+ 후속 가산), 상한 95%
       fall: {
@@ -71,13 +71,25 @@
       },
       // 위기 카드 버튼 아래: 새싹 숫자 / 보통 말 / 성군·실록 없음
       showChance: { sprout: 'number', normal: 'words', sage: 'none', annals: 'none' },
-      // 10-8-3 ⑤ 후속: 수습 뒤 거리 15 이하면 정해진 장수 안에 반드시. 그 안에 거리 16 이상이면 취소
-      followup: { within: { sprout: 4, normal: 3, sage: 2, annals: 2 } },
+      // 10-8-3 ⑤ 후속: 같은 위기의 쉬는 장수가 끝났을 때 아직 거리 15 이하이면 그 다음 카드에 반드시. 16 이상이면 취소
       followupIfAtMost: 15,
-      followupCancelAt: 16,
       followupMaxStep: 3,
-      // 담임 추가 규칙: 수습한 위기 종류는 이 장수 동안 다시 터지지 않는다 (숫자는 10-8 표가 나오면 바꾼다 — 임시)
-      cooldown: { sprout: 8, normal: 6, sage: 5, annals: 4 },
+      // 같은 위기의 쉬는 장수(담임 추가, 10-8-3 표): 수습하면 같은 게이지·같은 방향 위기는 이 장수 동안 다시 터지지 않는다.
+      // 쉬는 동안에도 경고 연출은 그대로이고 아이콘 옆에 ⏳남은 장수. 후속 위기를 수습한 뒤에는 +2
+      cooldown: {
+        'people:low': { sprout: 8, normal: 5, sage: 4, annals: 3 },
+        'people:high': { sprout: 6, normal: 4, sage: 3, annals: 2 },
+        'nobles:low': { sprout: 9, normal: 6, sage: 4, annals: 3 },
+        'nobles:high': { sprout: 6, normal: 4, sage: 3, annals: 2 },
+        'treasury:low': { sprout: 6, normal: 4, sage: 3, annals: 2 },
+        'treasury:high': { sprout: 6, normal: 4, sage: 3, annals: 2 },
+        'army:low': { sprout: 8, normal: 5, sage: 4, annals: 3 },
+        'army:high': { sprout: 6, normal: 4, sage: 3, annals: 2 },
+        'faction:any': { sprout: 8, normal: 5, sage: 4, annals: 3 },
+      },
+      cooldownAfterFollowup: 2,
+      // 10-8-3 ⑤-1: 수습 직후 문제 게이지는 최소 이 거리까지 올라온다(벼랑·끝에 머물지 않게)
+      minAfterHeld: 8,
       // 구간에 처음 들어설 때 뜨는 짧은 알림
       alerts: {
         people: { low: { warn: '백성들의 불만이 커지고 있사옵니다.', danger: '백성들이 궁궐 앞에 모이고 있사옵니다!', end: '백성의 마음이 바닥났사옵니다!' }, high: { warn: '백성 눈치만 본다는 말이 도옵니다.', danger: '관아 일이 멈추어 가옵니다!', end: '관리들이 손을 놓았사옵니다!' } },
@@ -139,6 +151,8 @@
       gambleWin: { sprout: 0.7, normal: 0.6, sage: 0.5, annals: 0.45 },
       marks: { gift: '🌸', mire: '☁', seed: '🌱' },
     },
+    // 역사 분기 (설계서 10-10-2): 한 왕에서 다른 길은 최대 3개. 넘으면 남은 다른 길은 잠긴다
+    branch: { maxPerStage: 3, fullReason: '이미 나라가 많이 흔들렸다' },
     // 난이도 (설계서 10-7). 역사·카드 순서·「실제 역사」는 난이도와 무관하고, 숫자와 도움말만 바뀐다.
     //  mult 게이지 변화 배율 · safe 안전 구간(이 값 아래/100−값 위에서 실각 쪽 변화에 k를 곱함)
     //  warn 위험 경고(이 값 이하·100−값 이상에서 깜빡임) · preview 미리보기 · carry 다음 왕이 이어받는 몫

@@ -123,7 +123,7 @@
     // 화면에 세워지는 것. kind: single(한 채) | village(마을, 인스턴싱) | wall(도성 성곽)
     // name이 있으면 이름표가 뜬다 → 근거가 있어야 한다(CREDITS.md).
     buildings: {
-      gyeongbok: { kind: 'single', name: '경복궁', model: 'gyeongbok', at: { site: 'gyeongbok' }, label: 2.2, shadowR: [2.4, 1.9] },
+      gyeongbok: { kind: 'single', name: '경복궁', model: 'gyeongbok', at: { site: 'gyeongbok' }, label: 2.2, shadowR: [2.4, 1.9], replaces: ['altPalace'] },
       jongmyo: { kind: 'single', name: '종묘', model: 'jongmyo', at: { site: 'jongmyo' }, label: 1.0, shadowR: [1.6, 1.05] },
       sungnye: { kind: 'single', name: '숭례문', model: 'sungnye', at: { gate: 'sungnye' }, label: 1.4, shadowR: [0.7, 0.4] },
       heungin: { kind: 'single', name: '흥인지문', model: 'heungin', at: { gate: 'heungin' }, label: 1.3, shadowR: [0.8, 0.8] },
@@ -135,10 +135,14 @@
       // 생활 건물 (근거: 설계서 7-1 연출표)
       seodang: { kind: 'single', name: '서당', model: 'seodang', at: { site: 'seodang' }, label: 0.8, shadowR: [0.42, 0.26] },
       hyanggyo: { kind: 'single', name: '향교', model: 'hyanggyo', at: { site: 'hyanggyo' }, rot: -Math.PI / 2, label: 0.9, shadowR: [0.6, 0.5] },
-      seowon: { kind: 'single', name: '서원', model: 'seowon', at: { site: 'seowon' }, rot: Math.PI / 2, label: 0.9, shadowR: [0.6, 0.5] },
+      seowon: { kind: 'single', name: '서원', model: 'seowon', at: { site: 'seowon' }, rot: Math.PI / 2, label: 0.9, shadowR: [0.6, 0.5], conflicts: ['altTemple'] },
       reservoir: { kind: 'single', name: '저수지', model: 'reservoir', at: { site: 'reservoir' }, label: 0.4, shadowR: [0, 0], y: 0.0 },
       bridge: { kind: 'single', name: '돌다리', model: 'bridge', at: { riverPhi: 1.98 }, label: 0.5, shadowR: [0, 0], y: 0.0 },
-      hakdang: { kind: 'spots', name: '학당', model: 'hakdang', sites: ['hak1', 'hak2', 'hak3', 'hak4'], label: 0.8 },
+      hakdang: { kind: 'spots', name: '학당', model: 'hakdang', sites: ['hak1', 'hak2', 'hak3', 'hak4'], label: 0.8, conflicts: ['altHyanggyo'] },
+      // 다른 길(10-10-7): 이름 없는 장식. 그 왕 동안만 있고 다음 왕 시작 때 실제 줄기로 돌아간다
+      altPalace: { kind: 'single', name: '', model: 'altPalace', at: { site: 'gyeongbok' }, label: 0, shadowR: [1.3, 1.0], alt: true },
+      altTemple: { kind: 'single', name: '', model: 'altTemple', at: { site: 'seowon' }, rot: Math.PI / 2, label: 0, shadowR: [0.6, 0.5], alt: true, conflicts: ['seowon'] },
+      altHyanggyo: { kind: 'spots', name: '', model: 'altHyanggyo', sites: ['hak1', 'hak2', 'hak3'], label: 0, alt: true, conflicts: ['hakdang'] },
       // 초가 마을은 이름 없는 장식 무리(연출표 7-1): 처음 몇 채에서 카드마다 조금씩 늘어난다
       choga: { kind: 'village', name: '', grow: 2, model: 'choga', max: 40, focus: [-1.5, 2.6], extra: [[-4.6, 7.0], [-5.6, 6.2], [-1.2, 7.4], [0.6, 7.3], [-7.8, 1.4], [-7.6, 0.3]] },
       giwa: { kind: 'village', name: '기와집 마을', model: 'giwa', max: 30, focus: [1.0, 0.8] },
