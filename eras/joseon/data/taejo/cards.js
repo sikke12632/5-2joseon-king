@@ -66,6 +66,7 @@
    }
   },
   "against": "right",
+  "grain": "balance",
   "real_history": "정몽주는 끝내 뜻을 굽히지 않았고, 1392년 이방원 쪽 사람들에 의해 세상을 떠났다. 두 사람이 시조(하여가·단심가)를 주고받았다는 이야기와 그 장소가 선죽교라는 이야기는 뒷날 전해진 것이다.",
   "out_of_textbook": true,
   "sources": [
@@ -118,6 +119,7 @@
     "this_run": "옛 풍습을 한동안 두었더니, 새 나라를 세운 신하들이 답답해했다."
    }
   },
+  "grain": "balance",
   "real_history": "조선은 유교 사상을 나라를 다스리는 기본 원리로 삼았다.",
   "out_of_textbook": false,
   "sources": [
@@ -175,6 +177,7 @@
     "this_run": "예물을 넉넉히 갖추느라 곳간이 가벼워졌다."
    }
   },
+  "grain": "complex",
   "real_history": "1392년 11월 두 이름을 적어 보냈고, 명은 ‘조선’이 오래되고 아름다운 이름이라며 골랐다. 1393년 2월 나라 이름이 조선으로 정해졌다. (조선 안에서 이미 ‘조선’으로 마음을 정해 두었다고 보는 견해도 있다.)",
   "out_of_textbook": true,
   "sources": [
@@ -237,6 +240,7 @@
     ]
    }
   },
+  "grain": "complex",
   "real_history": "1394년, 조선은 한강이 흐르고 바다가 가까워 물자를 나르기 좋은 한양으로 도읍을 옮겼다.",
   "out_of_textbook": false,
   "sources": [
@@ -301,6 +305,7 @@
     "build_state": "smooth"
    }
   },
+  "grain": "complex",
   "real_history": "1395년 경복궁이 완성되었다. ‘덕으로 나라를 다스려 오래 큰 복을 누리라’는 뜻의 이름은 정도전이 지었다.",
   "out_of_textbook": false,
   "sources": [
@@ -372,6 +377,7 @@
     "build_state": "late"
    }
   },
+  "grain": "complex",
   "real_history": "종묘(경복궁 동쪽)와 사직단(서쪽)은 조선이 유교의 나라임을 보여 주는 곳이 되었다.",
   "out_of_textbook": false,
   "sources": [
@@ -445,6 +451,7 @@
     "build_state": "late"
    }
   },
+  "grain": "seed",
   "real_history": "1396년 한양 도성이 쌓였다(첫 공사 약 12만 명, 장마에 무너진 곳을 고친 둘째 공사 약 8만 명). 흥인지문(인)·돈의문(의)·숭례문(예)에 유교 덕목을 담았다.",
   "out_of_textbook": false,
   "sources": [
@@ -527,6 +534,7 @@
     "build_state": "late"
    }
   },
+  "grain": "complex",
   "real_history": "태조는 한양에 문묘와 성균관을 세웠다. 성균관은 오늘날의 대학교에 해당하는 최고 교육 기관이다.",
   "out_of_textbook": false,
   "sources": [
@@ -583,6 +591,7 @@
    }
   },
   "against": "left",
+  "grain": "balance",
   "real_history": "1398년, 이방원이 군사를 일으켜 정도전 세력을 무너뜨렸다(제1차 왕자의 난). 정도전도 이때 세상을 떠났다. 그해 태조는 둘째 아들(정종)에게 왕위를 물려주었다. 스스로 원해서였는지는 의문이 남아 있다.",
   "out_of_textbook": true,
   "sources": [
@@ -948,7 +957,7 @@
    "right": {
     "label": "창고를 열어 달랜다",
     "effects": {
-     "people": 15,
+     "people": 20,
      "treasury": -20
     },
     "this_run": "곳간 쌀이 수레에 실려 나가자, 사람들이 깃발을 내리고 흩어졌다."
@@ -956,7 +965,7 @@
    "left": {
     "label": "군사로 지킨다",
     "effects": {
-     "people": 10,
+     "people": 12,
      "army": -10
     },
     "this_run": "관아 앞에 군사가 늘어서자 사람들은 물러났지만 원망은 남았다."
@@ -988,7 +997,7 @@
    "right": {
     "label": "관리에게 힘을 싣는다",
     "effects": {
-     "people": -15,
+     "people": -20,
      "treasury": -15
     },
     "this_run": "수령들이 다시 관아 문을 열었지만, 새 일꾼을 들이느라 곳간이 줄었다."
@@ -996,7 +1005,7 @@
    "left": {
     "label": "관리를 타이른다",
     "effects": {
-     "people": -10,
+     "people": -12,
      "nobles": -10
     },
     "this_run": "관리들이 마지못해 붓을 들었다."
@@ -1028,7 +1037,7 @@
    "right": {
     "label": "공신을 불러 달랜다",
     "effects": {
-     "nobles": 15,
+     "nobles": 20,
      "treasury": -20
     },
     "this_run": "벼슬과 땅을 받은 양반들이 모임을 그만두었다."
@@ -1036,7 +1045,7 @@
    "left": {
     "label": "군사로 막는다",
     "effects": {
-     "nobles": 10,
+     "nobles": 12,
      "army": -15
     },
     "this_run": "모임 집 앞에 군사가 서자 모의는 흩어졌지만, 양반들의 눈빛은 차가웠다."
@@ -1068,7 +1077,7 @@
    "right": {
     "label": "대신을 내려보낸다",
     "effects": {
-     "nobles": -15,
+     "nobles": -20,
      "treasury": -15
     },
     "this_run": "힘센 대신 몇이 먼 고을로 떠나고, 새 관리를 들였다."
@@ -1076,7 +1085,7 @@
    "left": {
     "label": "궁궐 호위를 늘린다",
     "effects": {
-     "nobles": -10,
+     "nobles": -12,
      "army": -10
     },
     "this_run": "대신들은 물러섰지만 뒤에서 수군거렸다."
@@ -1113,7 +1122,7 @@
    "right": {
     "label": "궁궐 살림을 줄인다",
     "effects": {
-     "treasury": 15,
+     "treasury": 20,
      "nobles": -20
     },
     "this_run": "전하의 수라상이 줄고 그 쌀이 녹봉이 되었다. 대신들은 체면이 깎였다며 투덜댔다."
@@ -1121,7 +1130,7 @@
    "left": {
     "label": "세금을 더 걷는다",
     "effects": {
-     "treasury": 10,
+     "treasury": 12,
      "people": -15
     },
     "this_run": "곳간은 조금 찼지만 마을마다 한숨이 늘었다."
@@ -1153,7 +1162,7 @@
    "right": {
     "label": "조사해 벌한다",
     "effects": {
-     "treasury": -15,
+     "treasury": -20,
      "nobles": -15
     },
     "this_run": "빼돌린 쌀이 돌아왔고, 관리 몇이 벼슬을 잃었다."
@@ -1161,7 +1170,7 @@
    "left": {
     "label": "곡식을 풀어 버린다",
     "effects": {
-     "treasury": -10,
+     "treasury": -12,
      "army": -5
     },
     "this_run": "곳간이 줄자 다툼도 잦아들었지만, 군량 몫까지 나갔다."
@@ -1193,7 +1202,7 @@
    "right": {
     "label": "군사를 모아 보낸다",
     "effects": {
-     "army": 15,
+     "army": 20,
      "treasury": -20
     },
     "this_run": "군사들이 밤새 달려 바닷가를 지켰고 낯선 배들은 물러갔다."
@@ -1201,7 +1210,7 @@
    "left": {
     "label": "백성을 성으로 모은다",
     "effects": {
-     "army": 10,
+     "army": 12,
      "people": -15
     },
     "this_run": "바닷가 사람들이 짐을 지고 성으로 피했다. 빈 마을은 쓸쓸했다."
@@ -1250,7 +1259,7 @@
    "right": {
     "label": "군권을 거둔다",
     "effects": {
-     "army": -15,
+     "army": -20,
      "nobles": -15
     },
     "this_run": "장수들이 거느린 군사 일부가 나라 군대로 들어왔다. 공신들은 불안해했다."
@@ -1258,7 +1267,7 @@
    "left": {
     "label": "장수에게 상을 준다",
     "effects": {
-     "army": -10,
+     "army": -12,
      "treasury": -15
     },
     "this_run": "장수들은 상을 받고 물러갔지만 군사는 그대로였다."
@@ -1319,7 +1328,7 @@
    "left": {
     "label": "성문을 닫는다",
     "effects": {
-     "people": 10,
+     "people": 12,
      "army": -15
     },
     "this_run": "성문은 닫혔고, 성 밖 원망은 그대로였다."
@@ -1360,7 +1369,7 @@
    "left": {
     "label": "대신에게 맡긴다",
     "effects": {
-     "people": -10,
+     "people": -12,
      "nobles": -15
     },
     "this_run": "대신들이 나섰지만 일은 더뎠다."
@@ -1401,7 +1410,7 @@
    "left": {
     "label": "모임을 흩는다",
     "effects": {
-     "nobles": 10,
+     "nobles": 12,
      "army": -20
     },
     "this_run": "군사들이 모임 집을 둘러쌌고, 양반들은 흩어졌다."
@@ -1442,7 +1451,7 @@
    "left": {
     "label": "상소를 돌려보낸다",
     "effects": {
-     "nobles": -10,
+     "nobles": -12,
      "people": -15
     },
     "this_run": "상소는 돌아갔지만 대신들은 일을 미뤘다."
@@ -1488,7 +1497,7 @@
    "left": {
     "label": "공사를 멈춘다",
     "effects": {
-     "treasury": 10,
+     "treasury": 12,
      "army": -15
     },
     "this_run": "도성 공사장이 조용해졌다."
@@ -1529,7 +1538,7 @@
    "left": {
     "label": "곳간을 나눠 맡긴다",
     "effects": {
-     "treasury": -10,
+     "treasury": -12,
      "people": -15
     },
     "this_run": "곳간이 여럿으로 나뉘었지만 감시가 느슨해졌다."
@@ -1570,7 +1579,7 @@
    "left": {
     "label": "고을을 비운다",
     "effects": {
-     "army": 10,
+     "army": 12,
      "people": -20
     },
     "this_run": "바닷가 고을 사람들이 모두 성으로 들어왔다."
@@ -1616,7 +1625,7 @@
    "left": {
     "label": "장수들을 갈라놓는다",
     "effects": {
-     "army": -10,
+     "army": -12,
      "treasury": -20
     },
     "this_run": "장수들이 먼 고을로 흩어졌지만 비용이 컸다."

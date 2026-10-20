@@ -57,9 +57,11 @@
     const gaps = Math.max(1, hist.length - 1);
     const slots = Array.from({ length: gaps }, () => []);
     shuffle(required.slice(), rnd).forEach((c, i) => slots[(Math.floor(rnd() * gaps) + i) % gaps].push(c.id));
+    // 무작위 칸은 '*' 자리표만 둔다. 어떤 카드가 올지는 그 자리에 왔을 때 게이지 상태·결 규칙으로 뽑는다(10-9-3)
     const [mn, mx] = stage.randomSlots || [5, 8];
     const n = mn + Math.floor(rnd() * (mx - mn + 1));
-    for (let k = 0; k < n && optional.length; k++) slots[Math.floor(rnd() * gaps)].push(optional.shift().id);
+    for (let k = 0; k < n && k < optional.length; k++) slots[Math.floor(rnd() * gaps)].push('*');
+    G.lastPool = optional.map((c) => c.id);
     for (const s of slots) shuffle(s, rnd);
     const deck = [];
     hist.forEach((c, i) => {
@@ -103,7 +105,13 @@
     run.vals = Object.assign({}, start);
     run.stageSeed = (run.seed + stageIndex(stageId) * 7919 + (run.stats.fallsRun || 0) * 104729) >>> 0;
     run.deck = G.buildDeck(st, run.stageSeed, run.used || [], S.settings.short);
+    run.pool = G.lastPool || [];
     run.pos = 0;
+    // 결(10-9): 지나간 카드의 결, 씨앗 → 열매 예약, 안정이 이어진 장수, 마지막으로 위기를 버틴 자리
+    run.grainHist = [];
+    run.reserve = [];
+    run.calmRun = 0;
+    run.heldAt = -99;
     run.pending = null;
     run.built = run.builtBefore ? run.builtBefore.slice() : [];
     run.builtBefore = run.built.slice();
@@ -184,10 +192,89 @@
     const r = era.data.roles[doll] || { name: name || '', tag: '', bg: '#ddd' };
     return { img: pics[doll], bg: r.bg, name: name || r.name, tag: r.tag };
   }
+  /* ---------- 결 (설계서 10-9) ---------- */
+  const grainCfg = () => era.grain || {};
+  const fruitIds = () => {
+    if (!G._fruits) G._fruits = new Set(era.data.cards.filter((c) => c.seed && c.seed.fruit_id).map((c) => c.seed.fruit_id));
+    return G._fruits;
+  };
+  // 같은 결 연속 / 금지 짝 검사: seq 끝에 붙은 결이 규칙을 어기면 true
+  function grainBreaks(seq) {
+    const g = grainCfg();
+    const n = seq.length;
+    if (!n || !seq[n - 1]) return false;
+    const last = seq[n - 1];
+    let k = 0;
+    for (let i = n - 1; i >= 0 && seq[i] === last; i--) k++;
+    if (k > ((g.maxRun || {})[last] || 99)) return true;
+    for (const [a, b] of g.banAfter || []) if (n >= 2 && seq[n - 2] === a && last === b) return true;
+    return false;
+  }
+  // 지금 게이지 상태(10-9-3 표): 위험 이하 / 위기 수습 직후 / 오래 안정
+  function grainState(run) {
+    const zones = run.zones || {};
+    for (const row of grainCfg().state || []) {
+      if (row.when === 'danger' && Object.values(zones).some((z) => JK.Crisis.RANK[z.level] >= 2)) return row;
+      if (row.when === 'afterHeld' && run.pos - (run.heldAt || -99) <= (row.cards || 3)) return row;
+      if (row.when === 'calm' && (run.calmRun || 0) > (row.cards || 6)) return row;
+    }
+    return null;
+  }
+  G.grainState = () => grainState(G.run);
+  // 무작위 칸 하나 뽑기: 조건(cond.js) → 결 가중치(상태 × 난이도) → 앞뒤 연속 규칙
+  function drawRandom(run) {
+    const ctx = { run, meta: S.meta };
+    const fr = fruitIds();
+    const row = grainState(run);
+    const dm = (grainCfg().diff || {})[G.diffId()] || {};
+    // 바로 뒤 고정 카드의 결(연속 규칙은 앞뒤 모두 본다)
+    let nextGrain = null;
+    for (let i = run.pos + 1; i < run.deck.length; i++) {
+      const nc = cardsById[run.deck[i]];
+      if (run.deck[i] === '*') break;
+      if (nc && nc.grain) {
+        nextGrain = nc.grain;
+        break;
+      }
+    }
+    const cands = [];
+    for (const id of run.pool) {
+      const c = cardsById[id];
+      if (!c || fr.has(id) || (run.used || []).includes(id) || !JK.Cond.test(c.conditions, ctx)) continue;
+      const g = c.grain || 'balance';
+      let w = 1 * ((row && row.mult && row.mult[g]) || 1) * (dm[g] || 1);
+      const seq = run.grainHist.concat(g);
+      const bad = grainBreaks(seq) || (nextGrain && grainBreaks(seq.concat(nextGrain)));
+      cands.push({ id, w, bad });
+    }
+    let list = cands.filter((x) => !x.bad);
+    if (!list.length) list = cands; // 모두 걸리면 규칙보다 카드가 나오는 쪽
+    if (!list.length) return null;
+    const rnd = JK.rng((run.stageSeed + run.pos * 613 + run.grainHist.length * 17) >>> 0);
+    let sum = 0;
+    for (const x of list) sum += x.w;
+    let r = rnd() * sum;
+    for (const x of list) if ((r -= x.w) <= 0) return x.id;
+    return list[list.length - 1].id;
+  }
+  // 도박 결과 미리 정하기는 하지 않는다. 고른 순간 굴린다(성공 확률은 난이도표)
+  function gambleRoll(run, c) {
+    const p = ((grainCfg().gambleWin || {})[G.diffId()]) || 0.6;
+    return JK.rng((run.stageSeed + run.pos * 2027 + (run.stats.fallsRun || 0) * 13 + 5) >>> 0)() < p;
+  }
+
   function showCurrent() {
     const run = G.run;
     if (G.state !== 'play') return;
     if (run.pending) return showRecord();
+    // 무작위 칸: 이 자리에서 뽑는다. 낼 카드가 없으면 칸을 지운다
+    while (run.deck[run.pos] === '*') {
+      const id = drawRandom(run);
+      if (id) {
+        run.deck[run.pos] = id;
+        run.pool = run.pool.filter((x) => x !== id);
+      } else run.deck.splice(run.pos, 1);
+    }
     if (run.pos >= run.deck.length) return stageClear();
     const c = cardsById[run.deck[run.pos]];
     const st = stageOf(run.stage);
@@ -222,7 +309,8 @@
       outside: !!c.out_of_textbook,
       turn: `${run.pos + 1} / ${run.deck.length}`,
       year: c.year || '',
-      fx: c.single ? null : { left: scaled(c.choices.left), right: scaled(c.choices.right) },
+      fx: c.single ? null : { left: previewFx(c, 'left', scaled), right: previewFx(c, 'right', scaled) },
+      grainMark: c.grain && (grainCfg().marks || {})[c.grain] ? grainMarkFor(c) : null,
       preview: run.bigPreview > 0 ? 'arrows' : D.preview,
       hand: st.tutorial && run.pos < st.tutorial && S.meta.cardsPlayed < 12,
     });
@@ -237,6 +325,18 @@
       Cards.gaugeMark(c.gauge, 'quake');
       if (JK.Audio) JK.Audio.gong();
     }
+  }
+  // 도박 쪽 버튼은 수치 대신 '?'(이기면·지면 움직이는 게이지 모두)
+  function previewFx(c, sideKey, scaled) {
+    if (!(c.gamble && c.gamble.side === sideKey)) return scaled(c.choices[sideKey]);
+    const o = {};
+    for (const k of Object.keys(Object.assign({}, c.gamble.win.effects, c.gamble.lose.effects, c.choices[sideKey].effects))) o[k] = '?';
+    return o;
+  }
+  function grainMarkFor(c) {
+    const m = grainCfg().marks[c.grain];
+    if (c.grain === 'seed' && c.seed && c.seed.side) return { [c.seed.side]: m };
+    return { left: m, right: m };
   }
   function showRecord() {
     const p = G.run.pending;
@@ -259,6 +359,16 @@
     const side = c.single ? null : c.choices[sideKey];
     if (!c.single) run.choices[c.id] = sideKey;
     const prevZones = run.zones || {};
+    // 도박형(10-9): 도박 쪽을 고르면 이 자리에서 굴려 이기면 win, 지면 lose 효과
+    let gres = null;
+    let sideEff = side;
+    if (side && c.gamble && c.gamble.side === sideKey) {
+      const won = gambleRoll(run, c);
+      const o = won ? c.gamble.win : c.gamble.lose;
+      gres = { won };
+      sideEff = Object.assign({}, side, { effects: o.effects || {}, this_run: o.this_run || side.this_run });
+      run.gambles = (run.gambles || []).concat({ card: c.id, won });
+    }
     // 위기 사건·후속: 고른 순간(효과 전 게이지로) 수습 또는 실각을 굴린다 (10-8-3)
     let cres = null;
     if (c.kind === 'crisis' && c.level !== 'warn' && side) {
@@ -280,16 +390,24 @@
     let big = 0;
     if (side) {
       const applied = {};
-      for (const k in side.effects || {}) {
+      for (const k in sideEff.effects || {}) {
         if (!(k in run.vals)) continue;
-        const d = G.effect(k, side.effects[k], run.vals);
+        const d = G.effect(k, sideEff.effects[k], run.vals);
         applied[k] = d;
         run.vals[k] = JK.clamp(run.vals[k] + d, 0, 100);
         big = Math.max(big, Math.abs(d));
       }
       for (const k in run.vals) if (run.vals[k] <= 10 || run.vals[k] >= 90) run.stageStats.edge = true;
       W.state.people = run.vals.people;
-      if (against) {
+      if (gres) {
+        // 도박: 동전이 돌고 "운이 따랐다 / 운이 없었다"가 뜬 뒤 게이지가 움직인다
+        Cards.gamble(gres.won);
+        setTimeout(() => {
+          Cards.setGauges(run.vals);
+          Cards.flash(applied, !gres.won);
+          if (!gres.won) Cards.shake();
+        }, 1100);
+      } else if (against) {
         W.historyBeat();
         Cards.beat();
         setTimeout(() => {
@@ -304,7 +422,7 @@
           Cards.shake();
         }
       }
-      if (side.this_run && !c.real_history) Cards.toast(side.this_run, Math.max(2600, side.this_run.length * 70));
+      if (sideEff.this_run && !c.real_history) setTimeout(() => Cards.toast(sideEff.this_run, Math.max(2600, sideEff.this_run.length * 70)), gres ? 1100 : 0);
       // 수습("버텼다!"): 붉은 도장 "버팀", 북 세 번, 아이콘이 원래 색으로. 아직 거리 15 이하면 후속 예약
       if (cres) {
         run.eventScene = null;
@@ -312,6 +430,7 @@
         W.camTo(W.CAM_PLAY, 1.6);
         W.state.alarm = 0;
         Cards.held(c.name, `무너질 확률 ${Math.round(cres.p * 100)}%에서 버텼다!`, 2400);
+        run.heldAt = run.pos;
         Cards.gaugeMark(c.gauge, 'relief');
         if (JK.Audio) [0, 380, 760].forEach((t) => setTimeout(() => JK.Audio.drum(), t));
         if (cres.level === 'end') titleNow(['heldAtEnd']);
@@ -320,11 +439,15 @@
       if ((run.stats.followupsCancelled || 0) >= 3) titleNow(['cancel3']);
     }
     if (run.bigPreview > 0) run.bigPreview--;
+    // 결 기록(연속 규칙) · 씨앗 → 열매 예약 · 안정 구간이 이어진 장수
+    if (c.grain) run.grainHist.push(c.grain);
+    if (c.seed && c.seed.fruit_id && side && (!c.seed.side || c.seed.side === sideKey) && cardsById[c.seed.fruit_id]) run.reserve.push({ card: c.seed.fruit_id, at: run.pos + 1 + (c.seed.after_n || 5), from: c.id });
+    run.calmRun = Object.values(run.zones || {}).every((z) => z.level === 'stable') ? (run.calmRun || 0) + 1 : 0;
     S.meta.cardsPlayed++;
     W.cardPassed();
     if (c.kind === 'daily') run.used.push(c.id);
     // 짓기: 이름 있는 건물은 어느 쪽을 골라도 역사대로 선다. 고른 방식은 건물 상태로 남는다(설계서 7-4).
-    let wait = against ? 1300 : cres ? 2300 : 700;
+    let wait = against ? 1300 : cres ? 2300 : gres ? 2000 : 700;
     const builds = (side ? side.build : c.fx && c.fx.build) || [];
     const state = side && side.build_state;
     if (builds.length) wait = Math.max(wait, doBuilds(builds, against ? 1300 : 350, state));
@@ -341,6 +464,14 @@
     // 게이지가 0·100에 닿아도 바로 실각하지 않는다(v3) — 끝 구간에서는 위기 확률이 매우 높을 뿐이다
     const cid = JK.Crisis.pick(run, JK.rng((run.stageSeed + run.pos * 977 + (run.stats.fallsRun || 0)) >>> 0), prevZones);
     if (cid) run.deck.splice(run.pos, 0, cid);
+    else if (run.reserve.length) {
+      // 씨앗의 열매: 기한이 된 것 하나를 다음 자리에(위기가 끼면 한 장 미룸)
+      const due = run.reserve.find((r) => r.at <= run.pos);
+      if (due) {
+        run.reserve = run.reserve.filter((r) => r !== due);
+        run.deck.splice(run.pos, 0, due.card);
+      }
+    }
     if (c.real_history) run.pending = { text: c.real_history, run: side ? side.this_run : '', against, outside: !!c.out_of_textbook, year: c.year };
     setTOD(false);
     save();
@@ -555,6 +686,12 @@
     G.run.pending = null;
     Cards.hide();
     showCurrent();
+  };
+  // 시험용: 데이터에 없는 카드를 잠시 등록한다(새로 고치면 사라짐)
+  G.debugAddCard = function (c) {
+    era.data.cards.push(c);
+    cardsById[c.id] = c;
+    G._fruits = null;
   };
   // 시험용: 지금 자리에 카드 한 장을 끼워 바로 보여 준다
   G.debugInsert = function (id) {

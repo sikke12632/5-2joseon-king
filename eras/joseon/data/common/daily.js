@@ -44,6 +44,7 @@
     ]
    }
   },
+  "grain": "balance",
   "out_of_textbook": false,
   "sources": [
    {
@@ -102,6 +103,7 @@
     "this_run": "정해진 3년마다의 시험만 열렸다."
    }
   },
+  "grain": "balance",
   "out_of_textbook": false,
   "sources": [
    {
@@ -159,6 +161,7 @@
     ]
    }
   },
+  "grain": "balance",
   "out_of_textbook": false,
   "sources": [
    {
@@ -212,6 +215,7 @@
     "this_run": "마을마다 하던 대로 잔치를 열었다."
    }
   },
+  "grain": "balance",
   "out_of_textbook": false,
   "sources": [
    {
@@ -260,6 +264,7 @@
     "this_run": "농민들은 허리띠를 졸라맸다."
    }
   },
+  "grain": "balance",
   "out_of_textbook": false,
   "sources": [
    {
@@ -309,6 +314,7 @@
     "this_run": "노비는 다시 물동이를 들었다."
    }
   },
+  "grain": "balance",
   "out_of_textbook": false,
   "sources": [
    {
@@ -359,6 +365,7 @@
     "this_run": "모임은 각자 집에서 열렸다."
    }
   },
+  "grain": "balance",
   "out_of_textbook": false,
   "sources": [
    {
@@ -408,6 +415,7 @@
     "this_run": "전하는 소박한 상을 받았다."
    }
   },
+  "grain": "balance",
   "out_of_textbook": false,
   "sources": [],
   "sources_text": "일반 상황(특정 사실을 주장하지 않음)",
@@ -448,6 +456,7 @@
     "this_run": "마을 사람들이 스스로 망을 보았다."
    }
   },
+  "grain": "balance",
   "out_of_textbook": false,
   "sources": [
    {
@@ -494,6 +503,7 @@
     "this_run": "국경 문을 닫았다."
    }
   },
+  "grain": "balance",
   "out_of_textbook": false,
   "sources": [
    {
@@ -541,6 +551,7 @@
     "this_run": "선물을 줄였다."
    }
   },
+  "grain": "balance",
   "out_of_textbook": false,
   "sources": [
    {
@@ -587,6 +598,7 @@
     "this_run": "포구는 닫혀 있었다."
    }
   },
+  "grain": "balance",
   "out_of_textbook": false,
   "sources": [
    {
@@ -637,6 +649,7 @@
     "this_run": "시험은 다음 해로 미뤄졌다."
    }
   },
+  "grain": "balance",
   "out_of_textbook": false,
   "sources": [
    {
@@ -691,6 +704,7 @@
     ]
    }
   },
+  "grain": "balance",
   "out_of_textbook": false,
   "sources": [
    {
@@ -741,6 +755,7 @@
     "this_run": "제사는 예년대로 올렸다."
    }
   },
+  "grain": "balance",
   "out_of_textbook": false,
   "sources": [
    {
@@ -791,6 +806,7 @@
     "this_run": "전하는 집안끼리 정하라 했다."
    }
   },
+  "grain": "balance",
   "out_of_textbook": false,
   "sources": [
    {
@@ -841,6 +857,7 @@
     "this_run": "일손이 급하다며 붙잡았다."
    }
   },
+  "grain": "balance",
   "out_of_textbook": false,
   "sources": [
    {
@@ -888,6 +905,7 @@
     "this_run": "유생들은 배를 문지르며 책을 폈다."
    }
   },
+  "grain": "balance",
   "out_of_textbook": false,
   "sources": [
    {
@@ -937,6 +955,7 @@
     "this_run": "잔치는 조촐하게 지나갔다."
    }
   },
+  "grain": "complex",
   "out_of_textbook": false,
   "sources": [
    {
@@ -986,6 +1005,7 @@
     "this_run": "소문은 소문으로 끝났다."
    }
   },
+  "grain": "balance",
   "out_of_textbook": false,
   "sources": [
    {
@@ -1035,6 +1055,7 @@
     "this_run": "세자는 다시 책상 앞에 앉았다."
    }
   },
+  "grain": "balance",
   "out_of_textbook": false,
   "sources": [],
   "sources_text": "일반 상황(특정 사실을 주장하지 않음)",
@@ -1078,6 +1099,7 @@
     "this_run": "마을 사람들은 문을 걸어 잠갔다."
    }
   },
+  "grain": "balance",
   "out_of_textbook": false,
   "sources": [
    {
@@ -1132,6 +1154,7 @@
     ]
    }
   },
+  "grain": "balance",
   "out_of_textbook": false,
   "sources": [
    {
@@ -1184,6 +1207,7 @@
     "this_run": "농민들끼리 둑을 막았다."
    }
   },
+  "grain": "complex",
   "out_of_textbook": false,
   "sources": [],
   "sources_text": "일반 상황(특정 사실을 주장하지 않음)",
@@ -1225,6 +1249,7 @@
     "this_run": "서얼의 과거 응시는 막혀 있었다."
    }
   },
+  "grain": "balance",
   "out_of_textbook": false,
   "sources": [
    {
@@ -1274,6 +1299,7 @@
     "this_run": "장정들은 창을 들고 성으로 갔다."
    }
   },
+  "grain": "balance",
   "out_of_textbook": false,
   "sources": [
    {
@@ -1322,6 +1348,7 @@
     "this_run": "전하는 예부터 그래 왔다고 했다."
    }
   },
+  "grain": "balance",
   "out_of_textbook": false,
   "sources": [
    {
@@ -1371,6 +1398,7 @@
     "this_run": "화원 몇 명이 바쁘게 붓을 놀렸다."
    }
   },
+  "grain": "balance",
   "out_of_textbook": false,
   "sources": [
    {
@@ -1423,6 +1451,7 @@
     "this_run": "전하는 새벽까지 등불을 켰다."
    }
   },
+  "grain": "balance",
   "out_of_textbook": false,
   "sources": [],
   "sources_text": "일반 상황(특정 사실을 주장하지 않음)",
@@ -1463,6 +1492,7 @@
     "this_run": "훈장님이 ‘이제 겨우 두 글자’라 했다."
    }
   },
+  "grain": "balance",
   "out_of_textbook": false,
   "sources": [
    {
@@ -1516,6 +1546,7 @@
     ]
    }
   },
+  "grain": "balance",
   "out_of_textbook": false,
   "sources": [
    {
@@ -1568,6 +1599,7 @@
     "this_run": "잔치는 조촐하게 치렀다."
    }
   },
+  "grain": "balance",
   "out_of_textbook": false,
   "sources": [
    {
@@ -1617,6 +1649,7 @@
     "this_run": "서당은 글 읽기부터 했다."
    }
   },
+  "grain": "balance",
   "out_of_textbook": false,
   "sources": [
    {
@@ -1664,6 +1697,7 @@
     "this_run": "칭찬의 말만 전했다."
    }
   },
+  "grain": "balance",
   "out_of_textbook": false,
   "sources": [
    {
@@ -1710,6 +1744,7 @@
     "this_run": "유생들은 저희끼리 책을 읽었다."
    }
   },
+  "grain": "balance",
   "out_of_textbook": true,
   "sources": [
    {
@@ -1762,6 +1797,7 @@
     ]
    }
   },
+  "grain": "complex",
   "out_of_textbook": true,
   "sources": [
    {

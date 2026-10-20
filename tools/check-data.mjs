@@ -83,6 +83,18 @@ for (const c of D.cards) {
     if (c.similar && c.similar.out_of_textbook && !hasSource(c.similar.sources)) err(id, '비슷한 실제 일이 [교과서 밖]인데 출처 없음');
   }
   checkCond(id, 'conditions', c.conditions);
+  // 결(10-9): 위기·예고·사관 빼고 모두. 역사 사건 카드에는 도박형을 쓰지 않는다
+  const GRAINS = ['balance', 'complex', 'gift', 'mire', 'seed', 'gamble'];
+  if (c.kind !== 'crisis' && c.kind !== 'sagwan') {
+    if (!c.grain) warn(id, '결(grain) 없음');
+    else if (!GRAINS.includes(c.grain)) err(id, `결 이상: ${c.grain}`);
+  }
+  if (c.kind === 'history' && c.grain === 'gamble') err(id, '역사 사건 카드에 도박형');
+  if (c.grain === 'gamble') {
+    const gm = c.gamble;
+    if (!gm || !['left', 'right'].includes(gm.side) || !gm.win || !gm.lose) err(id, '도박형인데 gamble{side, win, lose} 없음');
+  }
+  if (c.seed && c.seed.fruit_id && !D.cards.some((x) => x.id === c.seed.fruit_id)) warn(id, `씨앗의 열매 카드 없음: ${c.seed.fruit_id}`);
   if (c.kind === 'daily' && (!c.sources || !c.sources.length) && !c.general) warn(id, '일상 카드 근거 없음(일반 상황이면 general: true)');
   if (!c.who || !D.roles[c.who.doll]) err(id, `인형(who.doll) 없음: ${c.who && c.who.doll}`);
   if (!c.line) err(id, '대사(line) 없음');

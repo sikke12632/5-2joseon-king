@@ -318,3 +318,18 @@ body:not(.portrait) #zoneAlert { left: calc((100% - var(--panel-w)) / 2); }
 .cx-crisis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; }
 .cx-crisis li { font-size: 13px; text-align: center; position: relative; }
 .cx-crisis li .gray { position: absolute; right: 2px; top: -4px; font-size: 11px; color: #777; border: 1.5px solid #888; border-radius: 4px; padding: 0 3px; transform: rotate(-10deg); background: #eee; }
+/* 결(10-9): 도박 '?' · 선물/수렁/씨앗 표시 · 동전 */
+.gauge.pv-q .g-dot { width: auto; height: auto; background: none; box-shadow: none; font: 18px/1 'JKTitle', serif; color: #ffe9a8; transform: none !important; animation: qPulse .8s ease-in-out infinite; }
+@keyframes qPulse { 50% { transform: scale(1.25) !important; color: #fff; } }
+#grainMark { position: absolute; right: 18px; top: 128px; z-index: 6; font-size: 26px; opacity: 0; transform: translateY(6px); transition: opacity .2s, transform .2s; pointer-events: none; filter: drop-shadow(0 2px 3px rgba(0,0,0,.3)); }
+#grainMark.show { opacity: 1; transform: none; }
+#luck { position: absolute; left: 0; right: 0; top: 34%; display: grid; place-items: center; gap: 10px; pointer-events: none; z-index: 6; opacity: 0; }
+#luck.show { animation: heldIn 2.2s ease-out forwards; }
+#luck .coin { width: 78px; height: 78px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #fff2b8, #d9a93c 60%, #9c6b17); border: 3px solid #7d5512; display: grid; place-items: center; box-shadow: 0 8px 18px rgba(0,0,0,.35); }
+#luck .coin span { font-family: 'JKTitle', serif; font-size: 30px; color: #6b4410; }
+#luck.show .coin { animation: coinSpin 1s cubic-bezier(.2,.8,.3,1); }
+@keyframes coinSpin { from { transform: rotateY(1440deg) translateY(-40px); } to { transform: rotateY(0) translateY(0); } }
+#luckText { font-family: 'JKTitle', serif; font-size: 24px; padding: 4px 16px; border-radius: 999px; background: rgba(255,248,232,.92); box-shadow: 0 6px 14px rgba(0,0,0,.25); }
+#luck.won #luckText { color: #2f6a3a; }
+#luck.lost #luckText { color: #8d2f2a; }
+#luck.lost .coin { filter: grayscale(.6) brightness(.85); }

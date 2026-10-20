@@ -144,6 +144,15 @@
     void el.offsetWidth;
     el.classList.add(cls);
   };
+  // 도박 결과 드러내기(10-9): 동전이 돌다 멈추며 "운이 따랐다 / 운이 없었다"
+  C.gamble = function (won) {
+    const el = $('#luck');
+    el.className = '';
+    $('#luckText').textContent = won ? '운이 따랐다!' : '운이 없었다…';
+    void el.offsetWidth;
+    el.className = 'show ' + (won ? 'won' : 'lost');
+    setTimeout(() => (el.className = ''), 2200);
+  };
   // 수습("버텼다!"): 사관의 붉은 도장 "버팀" (10-8-3 ④)
   let heldTimer = 0;
   C.held = function (name, line, ms) {
@@ -177,9 +186,22 @@
   function preview(dir) {
     const mode = (view && view.preview) || 'dots';
     const fx = mode !== 'none' && view && view.fx ? (dir > 0 ? view.fx.right : dir < 0 ? view.fx.left : null) : null;
+    // 선물 🌸 · 수렁 ☁ · 씨앗 🌱: 끄는 동안 카드 위에 작은 표시
+    const gm = $('#grainMark');
+    const mk = dir && view && view.grainMark ? view.grainMark[dir > 0 ? 'right' : 'left'] : '';
+    gm.textContent = mode !== 'none' ? mk || '' : '';
+    gm.classList.toggle('show', !!gm.textContent);
     for (const g of gauges) {
       const el = document.querySelector(`.gauge[data-key="${g.key}"]`);
       const raw = fx && fx[g.key] ? fx[g.key] : 0;
+      // 도박 쪽: 크기를 숨기고 '?'만 (10-9)
+      if (raw === '?') {
+        el.classList.add('pv', 'pv-q');
+        el.classList.remove('pv-big', 'pv-mid', 'pv-arrow');
+        el.querySelector('.g-dot').textContent = '?';
+        continue;
+      }
+      el.classList.remove('pv-q');
       const v = Math.abs(raw);
       el.classList.toggle('pv', v > 0);
       el.classList.toggle('pv-big', v >= 15 && mode !== 'flat');

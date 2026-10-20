@@ -121,6 +121,24 @@
         },
       },
     },
+    // 카드의 결 (설계서 10-9): balance 저울 · complex 복합 · gift 선물 · mire 수렁 · seed 씨앗 · gamble 도박
+    //  maxRun 같은 결이 연달아 나올 수 있는 장수 · banAfter [앞, 뒤] 바로 이어 나오면 안 되는 짝
+    //  state 게이지 상태에 따른 가중치(무작위 칸에만, 위에서부터 먼저 맞는 한 줄) · diff 난이도별 가중치
+    //  gambleWin 도박 성공 확률 · marks 끄는 동안 미리보기에 붙는 작은 표시
+    grain: {
+      names: { balance: '저울형', complex: '복합형', gift: '선물형', mire: '수렁형', seed: '씨앗형', gamble: '도박형' },
+      target: { balance: 0.5, complex: 0.15, gift: 0.1, mire: 0.1, seed: 0.08, gamble: 0.07 },
+      maxRun: { balance: 3, complex: 2, gift: 1, mire: 1, seed: 1, gamble: 1 },
+      banAfter: [['mire', 'gamble']],
+      state: [
+        { when: 'danger', mult: { gift: 1.5, mire: 0.6, gamble: 1.2 } },
+        { when: 'afterHeld', cards: 3, mult: { gift: 1.3, mire: 0.5, gamble: 0.8 } },
+        { when: 'calm', cards: 6, mult: { gift: 0.7, mire: 1.5, gamble: 1.0 } },
+      ],
+      diff: { sprout: { gift: 1.2, mire: 0.8 }, normal: { gift: 1, mire: 1 }, sage: { gift: 0.8, mire: 1.2 }, annals: { gift: 0.7, mire: 1.3 } },
+      gambleWin: { sprout: 0.7, normal: 0.6, sage: 0.5, annals: 0.45 },
+      marks: { gift: '🌸', mire: '☁', seed: '🌱' },
+    },
     // 난이도 (설계서 10-7). 역사·카드 순서·「실제 역사」는 난이도와 무관하고, 숫자와 도움말만 바뀐다.
     //  mult 게이지 변화 배율 · safe 안전 구간(이 값 아래/100−값 위에서 실각 쪽 변화에 k를 곱함)
     //  warn 위험 경고(이 값 이하·100−값 이상에서 깜빡임) · preview 미리보기 · carry 다음 왕이 이어받는 몫

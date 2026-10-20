@@ -23,6 +23,27 @@ PREFIX = {'taejo': 'T', 'sejong': 'S', 'seonjo': 'J', 'yeongjo': 'Y', 'gojong': 
 GAUGE = {'백': 'people', '반': 'nobles', '고': 'treasury', '방': 'army'}
 DEVICE = {'발': 'invention', '저': 'scale', '개': 'open'}
 STATE = {'순조롭게': 'smooth', '억지로': 'forced', '늦게': 'late'}
+# 결(10-9). 설계서에 "결:" 줄이 있으면 그것을, 없으면 10-9-2의 셈 방법으로 정한다
+GRAIN = {'저울형': 'balance', '복합형': 'complex', '선물형': 'gift', '수렁형': 'mire', '씨앗형': 'seed', '도박형': 'gamble'}
+CHAIN_OPENERS = {'T07', 'S01', 'S05', 'S06', 'S07', 'SX3', 'J02', 'J04', 'Y03', 'Y09', 'Y10', 'G02', 'G09', 'GX2'}
+
+
+def grain_of(c):
+    if c.get('grain'):
+        return c['grain']
+    if c['id'] in CHAIN_OPENERS:
+        return 'seed'
+    fx = [c[s]['fx'] for s in ('right', 'left') if s in c]
+    if not fx:
+        return None
+    vals = [v for f in fx for v in f.values()]
+    if vals and all(all(v > 0 for v in f.values()) and f for f in fx):
+        return 'gift'
+    if vals and all(all(v < 0 for v in f.values()) and f for f in fx):
+        return 'mire'
+    if any(len(f) >= 3 for f in fx):
+        return 'complex'
+    return 'balance'
 
 # 설계서 7장(연출표)·7-4(건물 상태)를 따라 카드마다 세우는 것과 연출
 STAGE_FX = {
@@ -133,6 +154,10 @@ def block_cards():
                 c['direction'] = s[3:].strip()
             elif s.startswith('주의:'):
                 c['note'] = s[3:].strip()
+            elif s.startswith('결:'):
+                g = s[2:].strip().split()[0] if s[2:].strip() else ''
+                if g in GRAIN:
+                    c['grain'] = GRAIN[g]
             elif s.startswith('(선택 없음'):
                 mm = re.search(r'‘([^’]+)’', s)
                 c['single'] = mm.group(1) if mm else '기록을 넘긴다'
@@ -371,6 +396,9 @@ def to105(c):
         ag = against_side(c)
         if ag:
             o['against'] = ag
+    g = grain_of(c) if not c.get('single') else None
+    if g:
+        o['grain'] = g
     if c.get('record'):
         o['real_history'] = c['record']
     o['out_of_textbook'] = bool(c.get('outside'))
