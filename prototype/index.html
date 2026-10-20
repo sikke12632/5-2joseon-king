@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>조선의 왕 — 태조 (그래픽 시제품)</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div id="app">
+  <canvas id="gl"></canvas>
+  <div id="labels"></div>
+
+  <div id="hud">
+    <div id="stage"><span class="seal">太祖</span><span>태조 · 새 도읍 한양</span></div>
+    <div class="topbtns">
+      <button id="btnSound" class="ibtn" aria-label="소리 끄기" title="소리 켜기/끄기">
+        <svg viewBox="0 0 24 24"><path d="M3 9.5h4l5-4.5v14l-5-4.5H3z"/><path class="wave" d="M15.5 8.5a5 5 0 0 1 0 7M18 6a8.5 8.5 0 0 1 0 12" fill="none" stroke-width="2" stroke-linecap="round"/><path class="cross" d="M15.5 9l6 6M21.5 9l-6 6" fill="none" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+      <button id="btnSet" class="ibtn" aria-label="설정" title="설정">
+        <svg viewBox="0 0 24 24"><path d="M12 8.6a3.4 3.4 0 1 0 0 6.8 3.4 3.4 0 0 0 0-6.8zm8.2 4.6l1.8 1.4-2 3.4-2.2-.8a7.6 7.6 0 0 1-2 1.2l-.4 2.3h-3.9l-.4-2.3a7.6 7.6 0 0 1-2-1.2l-2.2.8-2-3.4 1.8-1.4a7.7 7.7 0 0 1 0-2.4L2 9.4l2-3.4 2.2.8a7.6 7.6 0 0 1 2-1.2L8.6 3.3h3.9l.4 2.3a7.6 7.6 0 0 1 2 1.2l2.2-.8 2 3.4-1.8 1.4a7.7 7.7 0 0 1 0 2.4z"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <section id="panel">
+    <div id="gauges"></div>
+    <div id="deck">
+      <div class="card-back"></div>
+      <div id="card">
+        <div class="choice left" id="chL"></div>
+        <div class="choice right" id="chR"></div>
+        <div class="por-wrap"><img id="portrait" alt="" draggable="false"></div>
+        <div class="who-line"><span id="who"></span><span id="whoTitle"></span></div>
+        <p id="text"></p>
+        <div id="turn"></div>
+      </div>
+    </div>
+    <div id="hint"><span>← 거절한다</span><span>들어준다 →</span></div>
+    <div id="result"></div>
+  </section>
+
+  <div id="title">
+    <div class="t-box">
+      <div class="t-small">레인즈식 조선 경영 게임</div>
+      <h1>조선의 왕</h1>
+      <div class="t-sub">제1대 태조 · 새 나라, 새 도읍</div>
+      <button id="btnStart" class="big">시작하기</button>
+      <div class="t-note">카드를 오른쪽으로 밀면 들어주고, 왼쪽으로 밀면 거절해요. (← → 키도 돼요)<br>소리는 오른쪽 위 버튼으로 끌 수 있어요.</div>
+    </div>
+  </div>
+
+  <div id="end" class="hide">
+    <div class="e-box">
+      <div class="e-small">새 도읍이 완성되었습니다</div>
+      <h2>나의 한양</h2>
+      <div class="e-title">칭호 「새 도읍의 주인」</div>
+      <div id="endSummary"></div>
+      <div class="btns"><button id="btnAgain">다시 하기</button><button id="btnFallPreview" class="ghost">실각 장면 보기</button></div>
+    </div>
+  </div>
+
+  <div id="fall" class="hide">
+    <div class="f-box">
+      <img id="fallPortrait" alt="">
+      <h2>실각</h2>
+      <p id="fallMsg"></p>
+      <div class="btns"><button id="btnAgain2">다시 하기</button></div>
+    </div>
+  </div>
+
+  <div id="settings" class="hide">
+    <h3>설정</h3>
+    <div class="row"><span>화질</span>
+      <label><input type="radio" name="tier" value="auto">자동</label>
+      <label><input type="radio" name="tier" value="high">높음</label>
+      <label><input type="radio" name="tier" value="normal">보통</label>
+      <label><input type="radio" name="tier" value="low">낮음</label>
+    </div>
+    <div class="row small" id="tierNow"></div>
+    <div class="row"><label><input type="checkbox" id="optSound">효과음</label><label><input type="checkbox" id="optMusic">음악</label></div>
+    <div class="row small">주소 끝에 ?q=low 를 붙이면 화질을 낮음으로 고정해요.</div>
+    <button id="btnSetClose">닫기</button>
+  </div>
+
+  <div id="proto">시제품 — 임시 글</div>
+  <div id="debug" class="hide"></div>
+  <div id="lost" class="hide"><p>그래픽을 다시 불러오는 중…</p></div>
+  <div id="loading"><p>섬을 띄우는 중…</p></div>
+</div>
+<script src="lib/three.min.js"></script>
+<script src="js/toy.js"></script>
+<script src="js/models.js"></script>
+<script src="js/world.js"></script>
+<script src="js/audio.js"></script>
+<script src="js/game.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>
