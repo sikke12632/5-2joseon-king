@@ -52,7 +52,7 @@ for (const c of D.cards) {
       for (const k of c.daily.kings) if (!stageIds.includes(k)) err(id, `daily.kings에 없는 왕: ${k}`);
       if (c.daily.required && !c.daily.kings.includes(c.daily.required)) err(id, 'required 왕이 kings에 없음');
     }
-    if (!c.source || !c.source.length) warn(id, '일상 카드 근거 없음(일반 상황이면 note에 적기)');
+    if ((!c.source || !c.source.length) && !c.general) warn(id, '일상 카드 근거 없음(일반 상황이면 general: true)');
   }
   if (!D.roles[c.who]) err(id, `인물(who) 없음: ${c.who}`);
   if (!c.text) err(id, '대사 없음');
@@ -102,7 +102,6 @@ for (const q of D.quizzes) {
     if (new Set(q.wrong).size !== 2) err(id, '오답 두 개가 같음');
   }
   if (!hasSource(q.source)) err(id, '근거 없음');
-  if (q.outside && !/^\[교과서 밖\]/.test(q.q) && !q.outsideTagged) warn(id, '교과서 밖 문항: 화면에는 띠로 표시됨');
   if (q.temp) warn(id, '임시 문항(temp)');
 }
 for (const st of stageIds) {
