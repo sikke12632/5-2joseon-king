@@ -1,42 +1,117 @@
-// crisis-test.mjs — 게이지 위기 시험: 구간별 세계 반응을 찍고, 시험용 위기 카드를 넣어 끼워 넣기·손상을 확인한다
-//   OUT=폴더 node tools/cdp.mjs tools/crisis-test.mjs   (시험 카드는 이 스크립트 안에서만 쓰고 데이터에는 넣지 않는다)
+// crisis-test.mjs — 게이지 위기 시험(설계서 10-8, v3): 구간별 세계 반응, 0·100에서도 바로 실각 안 함,
+// 위기 사건 → 수습(버팀·후속 예약·쿨다운·손상·저장) / 실각(무너진 위기 표시), 위기 장면 예산
+//   OUT=폴더 node tools/cdp.mjs tools/crisis-test.mjs
 const OUT = process.env.OUT || '';
 export default async function (t) {
-  await t.goto('http://127.0.0.1:8643/index.html?idle=0');
-  await t.waitFor('window.__jk && __jk.W.stats.frames > 20');
+  const ok = (name, cond, extra) => console.log(cond ? '  ✔' : '  ✘', name, extra !== undefined ? extra : '');
+  const fresh = async () => {
+    await t.goto('http://127.0.0.1:8643/index.html?idle=0');
+    await t.waitFor('window.__jk && __jk.W.stats.frames > 20');
+  };
+  await fresh();
   await t.eval('localStorage.clear()');
-  await t.goto('http://127.0.0.1:8643/index.html?idle=0');
-  await t.waitFor('window.__jk && __jk.W.stats.frames > 20');
+  await fresh();
   await t.eval("document.querySelector('#btnNew').click()");
-  await t.sleep(2500);
+  await t.waitFor('JK.Cards.isReady()', 15000);
   await t.eval('__jk.G.debugBuildAll()');
-  await t.sleep(6000);
-  const cases = [
-    ['people', 8], ['people', 20], ['nobles', 9], ['treasury', 8], ['army', 9], ['people', 93], ['nobles', 90], ['army', 92],
-  ];
+  await t.sleep(5000);
+  const setVals = (o) => t.eval(`(()=>{const r=__jk.G.run;for(const k in r.vals) r.vals[k]=50;Object.assign(r.vals,${JSON.stringify(o)});r.zones={};JK.Cards.setGauges(r.vals,true);JK.Crisis.apply(r);})()`);
+
+  console.log('1) 구간별 아이콘·세계 반응');
+  const cases = [['people', 20], ['people', 8], ['people', 3], ['people', 0], ['nobles', 9], ['treasury', 8], ['army', 9], ['army', 92], ['nobles', 100]];
   for (const [g, v] of cases) {
-    await t.eval(`(()=>{const r=__jk.G.run;for(const k in r.vals) r.vals[k]=50;r.vals['${g}']=${v};r.zones={};JK.Cards.setGauges(r.vals,true);JK.Crisis.apply(r);})()`);
-    await t.sleep(2200);
-    const st = await t.eval(`JSON.stringify({alert:document.querySelector('#zoneAlert').textContent, cls:document.querySelector('.gauge[data-key="${g}"]').className, lights:JK.U.uLights.value.toFixed(2), tension:(__jk.W.state.tension||0).toFixed(2)})`);
-    console.log(g, v, st);
-    if (OUT) await t.shot(`${OUT}/crisis-${g}-${v}.png`);
+    await setVals({ [g]: v });
+    await t.sleep(1500);
+    const st = JSON.parse(await t.eval(`JSON.stringify({zone:__jk.G.run.zones['${g}'].level, cls:document.querySelector('.gauge[data-key="${g}"]').className.replace('gauge ',''), lights:JK.U.uLights.value.toFixed(2), tension:(__jk.W.state.tension||0).toFixed(2), edge:(__jk.W.state.edge||0).toFixed(2)})`));
+    console.log(`  ${g} ${v}:`, JSON.stringify(st));
+    if (OUT && (v === 0 || v === 8)) await t.shot(`${OUT}/crisis-${g}-${v}.png`);
   }
-  // 시험용 위기 카드(데이터에는 없음): 백성 낮음 위험 → 사건 카드가 다음 자리에 끼는지
-  await t.eval(`(()=>{const D=JK.era.data;const mk=(id,level)=>({id,kind:'crisis',stages:['taejo'],gauge:'people',side:'low',level,who:{name:'시험',doll:'farmer'},line:'시험 카드입니다.',choice_type:'free',choices:{right:{label:'시험 오른쪽',effects:{people:5}},left:{label:'시험 왼쪽',effects:{treasury:-5}}},damage:{target:'random'},out_of_textbook:false,sources:[]});
-    D.cards.push(mk('ZZ1','event'),mk('ZZ2','warn'));__jk.G.card;JK.era.crisis.chance={warn:1,danger:1};})()`);
-  await t.eval(`(()=>{const r=__jk.G.run;for(const k in r.vals) r.vals[k]=50;r.vals.people=10;r.crisisRest=0;JK.Crisis.apply(r);})()`);
-  // cardsById 갱신을 위해 G.card로 못 찾으면 다시 등록
-  await t.eval(`(()=>{const id='ZZ1';if(!__jk.G.card(id)){ /* 엔진 색인에 넣기 */ }})()`);
-  const picked = await t.eval(`JK.Crisis.pick(__jk.G.run, JK.rng(5))`);
-  console.log('위기 카드 고름:', picked);
-  const c = await t.eval(`JSON.stringify(JK.era.data.cards.find(x=>x.id==='${picked}'))`);
-  await t.eval(`JK.Crisis.event(__jk.G.run, ${c})`);
-  await t.sleep(3000);
-  console.log('손상:', await t.eval('JSON.stringify(__jk.G.run.damaged)'), 'alarm', await t.eval('(__jk.W.state.alarm||0).toFixed(2)'));
+
+  console.log('2) 게이지 0이 되어도 바로 실각하지 않는다');
+  await setVals({ people: 2 });
+  await t.eval(`JK.era.crisis.chance = {warn:0,danger:0,cliff:0,end:0,cap:.95}`); // 이번 시험에서는 위기 굴림을 끈다
+  await t.waitFor('JK.Cards.isReady()', 8000);
+  // 아무 카드나 백성을 깎는 쪽: 게이지를 0으로 만들고 넘긴다
+  await t.eval(`(()=>{const r=__jk.G.run;r.vals.people=0;JK.Crisis.apply(r,true);})()`);
+  await t.eval('__jk.G.commit(1)');
+  await t.sleep(2500);
+  ok('0에서 넘겨도 실각 화면이 없다', await t.eval(`__jk.G.state==='play' && document.querySelector('#fall').classList.contains('hide')`), `state=${await t.eval('__jk.G.state')}`);
+
+  console.log('3) 위기 사건 → 수습(버팀)');
+  await t.waitFor('JK.Cards.isReady()', 8000);
+  await setVals({ people: 0 });
+  await t.eval(`__jk.G.debugInsert('KT01')`);
+  await t.waitFor('JK.Cards.isReady()', 8000);
+  await t.sleep(900);
+  const ev = JSON.parse(await t.eval(`JSON.stringify({name:document.querySelector('#crisisName').textContent, tag:document.querySelector('#gameTag').style.display, chance:[...document.querySelectorAll('#chance span')].map(e=>e.textContent), quake:document.querySelector('.gauge[data-key="people"]').classList.contains('quake'), alarm:(__jk.W.state.alarm||0).toFixed(2)})`));
+  ok('위기 카드: 이름·[게임 속 일]·확률 말(보통)', ev.name && ev.tag === '' && ev.chance.every(Boolean), JSON.stringify(ev));
   if (OUT) await t.shot(`${OUT}/crisis-event.png`);
-  // 가장 무거운 위기 장면(모두 짓고 + 위기 + 손상)에서 예산
-  await t.eval(`(()=>{const r=__jk.G.run;r.vals.people=8;r.vals.army=9;r.zones={};JK.Crisis.apply(r,true);})()`);
-  await t.sleep(2000);
+  await t.eval(`(()=>{JK.Crisis._fc=JK.Crisis.fallChance;JK.Crisis.fallChance=function(){const r=JK.Crisis._fc.apply(null,arguments);r.p=0;return r;};})()`);
+  await t.eval('__jk.G.commit(1)');
+  await t.sleep(900);
+  const held = JSON.parse(await t.eval(`JSON.stringify({show:document.querySelector('#held').classList.contains('show'), line:document.querySelector('#heldLine').textContent, people:__jk.G.run.vals.people, followups:__jk.G.run.followups, cooldown:__jk.G.run.cooldown, damaged:__jk.G.run.damaged, held:__jk.G.run.stats.held, log:__jk.G.run.crisisLog.length, title:!!JK.Save.meta.titles['crisis-heldAtEnd'], meta:JK.Save.meta.crisis})`));
+  ok('"버팀" 도장', held.show, held.line);
+  ok('후속 예약(거리 15 이하)', held.followups.length === 1, JSON.stringify(held.followups));
+  ok('쿨다운', held.cooldown['people:low'] > 0, JSON.stringify(held.cooldown));
+  ok('끝 구간 수습 → 벼랑 끝의 임금', held.title);
+  ok('영구 기록(위기 도감)', held.meta.held.KT01 === 1, JSON.stringify(held.meta));
+  await t.sleep(1600);
+  if (OUT) await t.shot(`${OUT}/crisis-held.png`);
+  ok('손상(위험 이하에서 수습)', Object.keys(held.damaged).length === 1, JSON.stringify(held.damaged));
+  ok('먹구름(후속 예약 표시)', await t.eval(`document.querySelector('.gauge[data-key="people"]').classList.contains('fu')`));
+
+  console.log('4) 저장·이어하기에 위기 상태가 남는다');
+  await t.sleep(1500);
+  await fresh();
+  await t.eval("document.querySelector('#btnContinue').click()");
+  await t.waitFor('JK.Cards.isReady()', 15000);
+  const back = JSON.parse(await t.eval(`JSON.stringify({cooldown:__jk.G.run.cooldown, followups:__jk.G.run.followups, damaged:__jk.G.run.damaged, fu:document.querySelector('.gauge[data-key="people"]').classList.contains('fu')})`));
+  ok('이어하기 뒤 쿨다운·후속·손상', back.cooldown['people:low'] > 0 && back.followups.length === 1 && Object.keys(back.damaged).length === 1 && back.fu, JSON.stringify(back));
+
+  console.log('5) 후속 위기는 정해진 장수 안에 반드시 / 쿨다운 중에는 같은 위기 안 터짐');
+  await t.eval(`JK.era.crisis.chance = {warn:1,danger:1,cliff:1,end:1,cap:1}`);
+  let seen = [];
+  for (let i = 0; i < 4; i++) {
+    await t.waitFor('JK.Cards.isReady()', 10000);
+    const id = await t.eval(`(()=>{const r=__jk.G.run; r.vals.people=Math.min(r.vals.people,12); return r.pending?'(기록)':r.deck[r.pos];})()`);
+    seen.push(id);
+    if (id === 'KT01b') break;
+    await t.eval(`__jk.G.run.crisisRest=0`);
+    await t.eval('__jk.G.commit(-1)');
+    await t.sleep(1500);
+  }
+  ok('후속 KT01b가 왔다', seen.includes('KT01b'), seen.join(' → '));
+  ok('쿨다운 중 KT01 다시 안 옴', !seen.slice(0, -1).includes('KT01'));
+
+  console.log('6) 위기 사건 → 실각(무너진 위기 표시)');
+  await t.eval(`(()=>{JK.Crisis._fc=JK.Crisis._fc||JK.Crisis.fallChance;JK.Crisis.fallChance=function(){const r=JK.Crisis._fc.apply(null,arguments);r.p=1;return r;};})()`);
+  await t.waitFor('JK.Cards.isReady()', 10000);
+  console.log('  지금 카드:', await t.eval(`__jk.G.run.deck[__jk.G.run.pos] + ' ready=' + JK.Cards.isReady()`));
+  await t.eval('__jk.G.commit(1)');
+  await t.sleep(1500);
+  console.log('  넘긴 뒤:', await t.eval(`JSON.stringify({state:__jk.G.state, log:__jk.G.run.crisisLog.slice(-1)})`));
+  await t.waitFor(`!document.querySelector('#fall').classList.contains('hide')`, 12000);
+  const fl = await t.eval(`document.querySelector('#fallCrisis').textContent + ' / ' + document.querySelector('#fallName').textContent`);
+  ok('실각 화면에 무너진 위기', /무너질 확률/.test(fl), fl);
+  ok('실각 기록 띠', await t.eval(`JSON.stringify(JK.Save.meta.fallCrisis)`) !== '{}', await t.eval(`JSON.stringify(JK.Save.meta.fallCrisis)`));
+  if (OUT) await t.shot(`${OUT}/crisis-fall.png`);
+  await t.eval("document.querySelector('#btnRetry').click()");
+  await t.waitFor('JK.Cards.isReady()', 15000);
+  ok('다시 도전: 위기 상태·손상 초기화', await t.eval(`(()=>{const r=__jk.G.run;return !r.followups.length && !Object.keys(r.cooldown).length && !Object.keys(r.damaged).length;})()`));
+
+  console.log('7) 점검 상자 실각 보기(미리 보기)');
+  await t.eval('__jk.G.debugFall()');
+  await t.waitFor(`!document.querySelector('#fall').classList.contains('hide')`, 12000);
+  console.log('  ', await t.eval(`document.querySelector('#fallCrisis').textContent + ' / ' + document.querySelector('#fallMsg').textContent`));
+  await t.eval("document.querySelector('#btnRetry').click()");
+  await t.waitFor('JK.Cards.isReady()', 15000);
+
+  console.log('8) 가장 무거운 위기 장면 예산(모두 짓고 + 위기 사건 장면 + 손상)');
+  await t.eval('__jk.G.debugBuildAll()');
+  await t.sleep(5000);
+  await t.eval(`(()=>{const r=__jk.G.run;r.vals.people=0;r.vals.army=4;r.zones={};r.eventScene={gauge:'people',side:'low',until:r.pos+1};r.damaged={gyeongbok:'KT04'};__jk.W.setBuildState('gyeongbok','damaged',0);JK.Crisis.apply(r,true);})()`);
+  await t.sleep(2500);
   const f = await t.fps(3);
-  console.log('위기 장면 예산:', JSON.stringify({ fps: f.avgFps.toFixed(0), calls: f.calls, tris: f.tris }));
+  console.log('  ', JSON.stringify({ fps: f.avgFps.toFixed(0), calls: f.calls, tris: f.tris }));
+  if (OUT) await t.shot(`${OUT}/crisis-heavy.png`);
 }

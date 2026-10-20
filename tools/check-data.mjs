@@ -24,6 +24,20 @@ ctx.JK = ctx.window.JK;
 vm.createContext(ctx);
 const eraDir = join(ROOT, 'eras', ERA);
 for (const f of ['map.js', 'era.js']) vm.runInContext(readFileSync(join(eraDir, f), 'utf8'), ctx, { filename: f });
+// 조건 식 해석기(engine/cond.js) — 카드 conditions·버튼 requires의 문법 검사에 쓴다
+vm.runInContext(readFileSync(join(ROOT, 'engine', 'cond.js'), 'utf8'), ctx, { filename: 'cond.js' });
+const Cond = ctx.window.JK.Cond;
+const checkCond = (id, where, expr) => {
+  if (expr === undefined) return;
+  const list = Array.isArray(expr) ? expr : [expr];
+  for (const e of list) {
+    if (typeof e !== 'string') err(id, `${where} 조건 식은 글이어야 함`);
+    else {
+      const m = Cond.check(e);
+      if (m) err(id, `${where} ${m} (한국어 설명은 conditions_text에)`);
+    }
+  }
+};
 // 데이터: data/common/*.js 먼저, 그다음 왕별 폴더(era.js의 스테이지 순서)
 const dataDir = join(eraDir, 'data');
 const load = (dir) => {
@@ -57,12 +71,18 @@ for (const c of D.cards) {
     if (!hasSource(c.sources)) err(id, '역사 카드 근거(sources) 없음');
   }
   if (c.kind === 'history' && !c.real_history) err(id, '역사 카드에 「실제 역사」(real_history) 없음');
-  // 위기 카드(설계서 10-8): 어느 게이지·어느 쪽·예고(warn)/사건(event)
+  // 위기 카드(설계서 10-8): 어느 게이지·어느 쪽·예고(warn)/사건(event)/후속(followup)
   if (c.kind === 'crisis') {
     if (!gaugeKeys.includes(c.gauge)) err(id, `위기 카드 gauge 이상: ${c.gauge}`);
     if (!['low', 'high'].includes(c.side)) err(id, `위기 카드 side 이상: ${c.side}`);
-    if (!['warn', 'event'].includes(c.level)) err(id, `위기 카드 level 이상: ${c.level}`);
+    if (!['warn', 'event', 'followup'].includes(c.level)) err(id, `위기 카드 level 이상: ${c.level}`);
+    if (c.level !== 'warn' && !c.name) err(id, '위기 이름(name) 없음 — 실각 화면·기록관에 쓴다');
+    if (!c.game_event) warn(id, '위기 카드인데 [게임 속 일](game_event) 표시가 없음');
+    if (c.strong && !['left', 'right'].includes(c.strong)) err(id, `strong 이상: ${c.strong}`);
+    for (const b of (c.damage && c.damage.targets) || []) if (!era.map.buildings[b]) err(id, `damage에 없는 건물: ${b}`);
+    if (c.similar && c.similar.out_of_textbook && !hasSource(c.similar.sources)) err(id, '비슷한 실제 일이 [교과서 밖]인데 출처 없음');
   }
+  checkCond(id, 'conditions', c.conditions);
   if (c.kind === 'daily' && (!c.sources || !c.sources.length) && !c.general) warn(id, '일상 카드 근거 없음(일반 상황이면 general: true)');
   if (!c.who || !D.roles[c.who.doll]) err(id, `인형(who.doll) 없음: ${c.who && c.who.doll}`);
   if (!c.line) err(id, '대사(line) 없음');
@@ -83,9 +103,11 @@ for (const c of D.cards) {
       if (/^(들어준다|거절한다)$/.test((s.label || '').trim())) err(id, `${side} 버튼 글이 "${s.label}" — 무엇을 고르는지 분명한 말로`);
       for (const k in s.effects || {}) {
         if (!gaugeKeys.includes(k)) err(id, `${side} 효과에 없는 게이지: ${k}`);
-        else if (typeof s.effects[k] !== 'number' || Math.abs(s.effects[k]) > 20) err(id, `${side} 효과 값 이상: ${k}=${s.effects[k]}`);
+        // 후속 위기(10-8-5)는 대가가 커서 25까지
+        else if (typeof s.effects[k] !== 'number' || Math.abs(s.effects[k]) > (c.level === 'followup' ? 25 : 20)) err(id, `${side} 효과 값 이상: ${k}=${s.effects[k]}`);
       }
       if (!s.this_run) warn(id, `${side} 「이번 판에서」(this_run) 없음`);
+      checkCond(id, `${side}.requires`, s.requires);
       if (s.build_state && !['smooth', 'forced', 'late'].includes(s.build_state)) err(id, `${side} build_state 이상: ${s.build_state}`);
       for (const b of s.build || []) if (!era.map.buildings[b]) err(id, `build에 없는 건물: ${b}`);
       if (c.kind === 'history' && (s.build || []).some((b) => era.map.buildings[b] && era.map.buildings[b].name && era.map.buildings[b].kind === 'single') && !s.build_state && c.choice_type === 'how') warn(id, `${side} 이름 있는 건물을 세우는데 건물 상태(build_state)가 없음`);
@@ -95,6 +117,13 @@ for (const c of D.cards) {
   }
   if (c.temp) warn(id, '임시 글(temp)');
 }
+// 위기 카드 짝: 위기 사건이 있는 게이지·방향에는 예고와 후속도 있어야 한다
+for (const c of D.cards.filter((x) => x.kind === 'crisis' && x.level === 'event')) {
+  for (const lv of ['warn', 'followup'])
+    if (!D.cards.some((x) => x.kind === 'crisis' && x.level === lv && x.gauge === c.gauge && x.side === c.side && x.stages.some((st) => c.stages.includes(st)))) warn(c.id, `같은 게이지·방향의 ${lv === 'warn' ? '예고' : '후속'} 카드 없음`);
+}
+// 위기 숫자(10-8): 엔진이 읽는 칸
+for (const k of ['zones', 'chance', 'rest', 'fall', 'followup', 'cooldown', 'forewarnMax']) if (!(era.crisis || {})[k]) err('era.crisis', `${k} 없음`);
 // 교과서 밖 역사 카드는 왕마다 절반을 넘지 않게
 for (const st of stageIds) {
   const h = D.cards.filter((c) => (c.stages || []).includes(st) && c.kind === 'history');

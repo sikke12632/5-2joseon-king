@@ -8,6 +8,7 @@
   "id": "people0",
   "gauge": "people",
   "at": 0,
+  "side": "low",
   "name": "민심을 잃은 임금",
   "text": "굶주린 백성들이 들고일어났다."
  },
@@ -15,6 +16,7 @@
   "id": "people100",
   "gauge": "people",
   "at": 100,
+  "side": "high",
   "name": "잔치만 연 임금",
   "text": "백성의 청만 들어주다 보니, 나랏일을 맡을 관리들이 모두 떠났다."
  },
@@ -22,6 +24,7 @@
   "id": "nobles0",
   "gauge": "nobles",
   "at": 0,
+  "side": "low",
   "name": "신하 없는 임금",
   "text": "대신들이 모두 벼슬을 내던지고 고향으로 돌아갔다."
  },
@@ -29,6 +32,7 @@
   "id": "nobles100",
   "gauge": "nobles",
   "at": 100,
+  "side": "high",
   "name": "허수아비 임금",
   "text": "힘이 너무 커진 대신들이 모든 일을 저희끼리 정했다."
  },
@@ -36,6 +40,7 @@
   "id": "treasury0",
   "gauge": "treasury",
   "at": 0,
+  "side": "low",
   "name": "빈 곳간",
   "text": "곳간이 텅 비어 관리에게 줄 녹봉도 없다."
  },
@@ -43,6 +48,7 @@
   "id": "treasury100",
   "gauge": "treasury",
   "at": 100,
+  "side": "high",
   "name": "쌓아만 둔 곳간",
   "text": "곳간을 쌓아만 두자 욕심 많은 관리들이 곳간을 노렸다."
  },
@@ -50,6 +56,7 @@
   "id": "army0",
   "gauge": "army",
   "at": 0,
+  "side": "low",
   "name": "무너진 성문",
   "text": "성을 지킬 군사가 남지 않았다."
  },
@@ -57,8 +64,19 @@
   "id": "army100",
   "gauge": "army",
   "at": 100,
+  "side": "high",
   "name": "장수의 나라",
   "text": "너무 강해진 장수들이 임금의 말을 듣지 않았다."
+ },
+ {
+  "id": "faction",
+  "gauge": "faction",
+  "at": 0,
+  "name": "붕당에 갇힌 임금",
+  "text": "한 붕당이 조정을 차지해, 임금의 말이 통하지 않았다.",
+  "stages": [
+   "yeongjo"
+  ]
  }
 ]);
   D.titles.push(...[
@@ -173,6 +191,27 @@
   "hint": "다섯 번 모두 한 번에",
   "cond": "판 전체에서 실각 0번(보통 이상, 10-7)",
   "rule": "later"
+ },
+ {
+  "id": "crisis-held5",
+  "name": "위기를 넘긴 임금",
+  "hint": "위기를 여러 번 넘겨 보라",
+  "cond": "한 판에서 위기 5번 수습하고 끝까지 가기",
+  "rule": "held5"
+ },
+ {
+  "id": "crisis-heldAtEnd",
+  "name": "벼랑 끝의 임금",
+  "hint": "끝에서 돌아온 임금",
+  "cond": "끝 구간(게이지 0이나 100)에서 터진 위기를 수습",
+  "rule": "heldAtEnd"
+ },
+ {
+  "id": "crisis-cancel3",
+  "name": "같은 위기는 두 번 없다",
+  "hint": "버틴 뒤 바로 고쳐라",
+  "cond": "후속 위기가 예약된 뒤, 정해진 장수 안에 고쳐 후속을 취소하기 3번",
+  "rule": "cancel3"
  }
 ]);
   D.codex.push(...[

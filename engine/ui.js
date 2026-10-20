@@ -183,10 +183,18 @@
     $('#stageName').textContent = `${st.king} · ${st.title}`;
   };
 
+  const esc = (t) => String(t).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
   /* ---------- 실각 ---------- */
   UI.showFall = function (o) {
     $('#fallPortrait').src = o.img || '';
     $('#fallName').textContent = o.rec.name;
+    // 어떤 위기에서 무너졌는지: 위기 이름, 게이지와 그때 값, 고른 대응, 그때의 실각 확률 (4-2, 10-8-3 ④)
+    const fc = $('#fallCrisis');
+    fc.style.display = o.crisis ? '' : 'none';
+    if (o.crisis) {
+      const c = o.crisis;
+      fc.innerHTML = `<b>${esc(c.name)}</b> — ${esc(c.gauge)} ${c.value}, ${esc(c.choice)}, 무너질 확률 ${Math.round(c.p * 100)}%`;
+    }
     $('#fallMsg').textContent = (o.preview ? '(미리 보기) ' : '') + o.rec.text;
     $('#fallReal').textContent = o.real || '';
     $('#fallHint').textContent = o.hint || '';
@@ -252,7 +260,28 @@
       li.innerHTML = `<b>${cat} ${on.length}/${all.length}</b>` + (on.length ? '<br>' + on.map((x) => `${x.name}${x.outside ? ' <span class="tag-out">교과서 밖</span>' : ''}${stateBand(x)}`).join(' · ') : '');
       cx.appendChild(li);
     }
-    list($('#recFalls'), D.falls, (f) => m.falls[f.id], (f) => `${f.name} (${m.falls[f.id]}번)`, () => '？？？');
+    list($('#recFalls'), D.falls, (f) => m.falls[f.id], (f) => `${f.name} (${m.falls[f.id]}번)${(m.fallCrisis || {})[f.id] ? ' — ' + m.fallCrisis[f.id].map((n) => `「${n}」 위기에서 무너짐`).join(', ') : ''}`, () => '？？？');
+    // 위기 도감(10-8-7): 위기 8종 × 왕. 처음 수습하면 칸이 열림, 그 위기로 무너진 적이 있으면 회색 도장
+    const cr = m.crisis || { held: {}, fell: {} };
+    const rc = $('#recCrisis');
+    rc.innerHTML = '';
+    for (const c of D.cards.filter((x) => x.kind === 'crisis' && x.level === 'event')) {
+      const li = document.createElement('li');
+      const on = cr.held[c.id];
+      li.className = on ? 'on' : 'off';
+      li.innerHTML = (on ? esc(c.name) : '？？？') + (cr.fell[c.id] ? '<span class="gray">무너짐</span>' : '');
+      rc.appendChild(li);
+    }
+    // 기록관 "버틴 위기": 수습한 위기 이름과 그때 확률
+    const rh = $('#recHeld');
+    rh.innerHTML = '';
+    for (const h of (m.heldLog || []).slice(0, 12)) {
+      const st = era.stages.find((x) => x.id === h.stage);
+      const li = document.createElement('li');
+      li.innerHTML = `<span>${esc(h.name)} — 무너질 확률 ${h.p}%에서 버팀</span><span>${st ? esc(st.king) : ''}</span>`;
+      rh.appendChild(li);
+    }
+    if (!rh.children.length) rh.innerHTML = '<li class="off">아직 버틴 위기가 없어요.</li>';
     list($('#recTitles'), D.titles, (t) => m.titles[t.id], (t) => `「${t.name}」`, (t) => `？？？ — ${t.hint}`);
     open('#records');
   };

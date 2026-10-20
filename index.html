@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>조선의 왕</title>
 <!-- 배포할 때마다 ?v= 숫자를 올린다(캐시) -->
-<link rel="stylesheet" href="engine/engine.css?v=5">
+<link rel="stylesheet" href="engine/engine.css?v=6">
 </head>
 <body>
 <div id="app">
@@ -37,17 +37,22 @@
         <div class="choice left" id="chL"></div>
         <div class="choice right" id="chR"></div>
         <div id="outside">교과서 밖</div>
+        <div id="gameTag">게임 속 일</div>
         <div class="por-wrap"><img id="portrait" alt="" draggable="false"></div>
         <div class="who-line"><span id="who"></span><span id="whoTitle"></span></div>
         <div id="runBox"><span class="run-label" id="runLabel">이번 판에서</span><span id="runText"></span></div>
         <div id="stamp" aria-hidden="true">그래도<br>역사는<br>흘렀다</div>
         <div id="realLabel">📜 실제 역사</div>
+        <div id="crisisName"></div>
         <p id="text"></p>
+        <p id="similar"></p>
         <div id="turn"></div>
         <div id="hand" aria-hidden="true"><svg viewBox="0 0 48 48"><path d="M19 22V8.5a3 3 0 0 1 6 0V20l.4-.1a3 3 0 0 1 3.6 2.2l.2.1a3 3 0 0 1 4 2.3 3 3 0 0 1 4.6 2.4V33c0 6.6-4.6 11-11 11h-2c-4 0-6.7-1.8-8.8-5.3l-5.6-9.4a2.8 2.8 0 0 1 4.6-3.2L19 30z"/></svg><span>끌어서 넘겨요</span></div>
       </div>
     </div>
     <div id="hint"><span id="hintL"></span><span id="hintR"></span></div>
+    <div id="chance"><span id="chanceL"></span><span id="chanceR"></span></div>
+    <div id="held" aria-live="polite"><div class="h-scroll"><div class="h-stamp">버팀</div><div id="heldName"></div><div id="heldLine"></div></div></div>
     <div id="result"></div>
   </section>
 
@@ -79,6 +84,7 @@
     <div class="m-box f-box">
       <img id="fallPortrait" alt="">
       <h2>실각</h2>
+      <div id="fallCrisis"></div>
       <div id="fallName"></div>
       <p id="fallMsg"></p>
       <p id="fallReal"></p>
@@ -107,6 +113,8 @@
       <h4>도감</h4><ul id="recCodex"></ul>
       <h4>칭호</h4><ul id="recTitles"></ul>
       <h4>실각 기록</h4><ul id="recFalls"></ul>
+      <h4>위기 도감</h4><ul id="recCrisis" class="cx-crisis"></ul>
+      <h4>버틴 위기</h4><ul id="recHeld" class="rec-held"></ul>
       <button data-close="records" class="close">닫기</button>
     </div>
   </div>
@@ -139,27 +147,28 @@
   <div id="lost" class="hide"><p>그래픽을 다시 불러오는 중…</p></div>
   <div id="loading"><p>섬을 띄우는 중…</p></div>
 </div>
-<script src="engine/lib/three.min.js?v=5"></script>
-<script src="engine/toy.js?v=5"></script>
-<script src="engine/props.js?v=5"></script>
-<script src="eras/joseon/map.js?v=5"></script>
-<script src="eras/joseon/models.js?v=5"></script>
-<script src="eras/joseon/models-taejo.js?v=5"></script>
-<script src="eras/joseon/era.js?v=5"></script>
+<script src="engine/lib/three.min.js?v=6"></script>
+<script src="engine/toy.js?v=6"></script>
+<script src="engine/props.js?v=6"></script>
+<script src="eras/joseon/map.js?v=6"></script>
+<script src="eras/joseon/models.js?v=6"></script>
+<script src="eras/joseon/models-taejo.js?v=6"></script>
+<script src="eras/joseon/era.js?v=6"></script>
 <!-- 데이터: 공통 + 왕별 (왕이 늘면 그 왕 폴더의 두 줄을 더한다) -->
-<script src="eras/joseon/data/common/roles.js?v=5"></script>
-<script src="eras/joseon/data/common/records.js?v=5"></script>
-<script src="eras/joseon/data/common/daily.js?v=5"></script>
-<script src="eras/joseon/data/taejo/cards.js?v=5"></script>
-<script src="eras/joseon/data/taejo/quizzes.js?v=5"></script>
-<script src="engine/save.js?v=5"></script>
-<script src="engine/world.js?v=5"></script>
-<script src="engine/audio.js?v=5"></script>
-<script src="engine/cards.js?v=5"></script>
-<script src="engine/quiz.js?v=5"></script>
-<script src="engine/crisis.js?v=5"></script>
-<script src="engine/game.js?v=5"></script>
-<script src="engine/ui.js?v=5"></script>
-<script src="engine/main.js?v=5"></script>
+<script src="eras/joseon/data/common/roles.js?v=6"></script>
+<script src="eras/joseon/data/common/records.js?v=6"></script>
+<script src="eras/joseon/data/common/daily.js?v=6"></script>
+<script src="eras/joseon/data/taejo/cards.js?v=6"></script>
+<script src="eras/joseon/data/taejo/quizzes.js?v=6"></script>
+<script src="engine/save.js?v=6"></script>
+<script src="engine/world.js?v=6"></script>
+<script src="engine/audio.js?v=6"></script>
+<script src="engine/cards.js?v=6"></script>
+<script src="engine/quiz.js?v=6"></script>
+<script src="engine/cond.js?v=6"></script>
+<script src="engine/crisis.js?v=6"></script>
+<script src="engine/game.js?v=6"></script>
+<script src="engine/ui.js?v=6"></script>
+<script src="engine/main.js?v=6"></script>
 </body>
 </html>

@@ -76,9 +76,7 @@
    "gojong"
   ],
   "required_in": "taejo",
-  "conditions": [
-   "G는 G07(갑오개혁) 앞까지만"
-  ],
+  "conditions_text": "G는 G07(갑오개혁) 앞까지만",
   "rarity": "common",
   "who": {
    "name": "양반 부부",
@@ -613,9 +611,7 @@
    "yeongjo",
    "gojong"
   ],
-  "conditions": [
-   "G는 G07 앞까지만"
-  ],
+  "conditions_text": "G는 G07 앞까지만",
   "rarity": "common",
   "who": {
    "name": "병조 판서",
@@ -1252,9 +1248,7 @@
    "yeongjo",
    "gojong"
   ],
-  "conditions": [
-   "G는 G07 앞까지만"
-  ],
+  "conditions_text": "G는 G07 앞까지만",
   "rarity": "common",
   "who": {
    "name": "상민 장정",

@@ -17,7 +17,7 @@
       const el = document.createElement('div');
       el.className = 'gauge';
       el.dataset.key = g.key;
-      el.innerHTML = `<div class="g-icon"><svg class="g-bg" viewBox="0 0 24 24">${g.icon}</svg><div class="g-fillwrap"><svg class="g-fill" viewBox="0 0 24 24">${g.icon}</svg></div></div><div class="g-dot"></div><div class="g-name">${g.name}</div>`;
+      el.innerHTML = `<div class="g-icon"><svg class="g-bg" viewBox="0 0 24 24">${g.icon}</svg><div class="g-fillwrap"><svg class="g-fill" viewBox="0 0 24 24">${g.icon}</svg></div></div><div class="g-dot"></div><div class="g-fu" title="후속 위기 예약"><svg viewBox="0 0 24 16"><path d="M6 15a5 5 0 0 1-.6-10A6 6 0 0 1 17 4.2 4.5 4.5 0 1 1 18.5 15z"/></svg></div><div class="g-name">${g.name}</div>`;
       gw.appendChild(el);
     }
     card = $('#card');
@@ -37,6 +37,8 @@
     $('#whoTitle').textContent = v.tag || '';
     $('#whoTitle').style.display = v.tag ? '' : 'none';
     $('#text').textContent = v.text || '';
+    $('#crisisName').textContent = v.crisisName || '';
+    $('#crisisName').style.display = v.crisisName ? '' : 'none';
     $('#runBox').style.display = v.run ? '' : 'none';
     $('#runBox').classList.toggle('against', !!v.against);
     $('#runLabel').textContent = v.against ? '이번 판에서 — 거스른 대가' : '이번 판에서';
@@ -55,10 +57,19 @@
     $('#hintR').textContent = (v.single || v.right || '') + ' →';
     $('#turn').textContent = [v.year, v.turn].filter(Boolean).join(' · ');
     $('#outside').style.display = v.outside ? '' : 'none';
+    // 위기 카드: [게임 속 일] 표시, 버튼 아래 무너질 확률, 비슷한 실제 일(작게)
+    $('#gameTag').style.display = v.game ? '' : 'none';
+    $('#gameTag').classList.toggle('shift', !!v.outside);
+    $('#chanceL').textContent = (v.chance && v.chance.left) || '';
+    $('#chanceR').textContent = (v.chance && v.chance.right) || '';
+    $('#chance').style.display = v.chance ? '' : 'none';
+    const sim = $('#similar');
+    sim.style.display = v.similar ? '' : 'none';
+    if (v.similar) sim.innerHTML = `<b>비슷한 실제 일</b> ${v.similar.out_of_textbook ? '<span class="tag-out">교과서 밖</span> ' : ''}${esc(v.similar.text)}`;
     card.classList.toggle('scroll', !!v.scroll);
     card.classList.toggle('record', !!v.record);
     card.classList.toggle('crisis', !!v.crisis);
-    card.classList.toggle('crisis-event', v.crisis === 'event');
+    card.classList.toggle('crisis-event', v.crisis === 'event' || v.crisis === 'followup');
     card.style.transition = 'none';
     card.style.transform = 'translate(0, 40px) rotateY(80deg) scale(0.96)';
     card.style.opacity = '0';
@@ -78,6 +89,7 @@
     C.busy = true;
   };
   C.isReady = () => !C.busy;
+  const esc = (t) => String(t).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
 
   // 손 모양 안내(처음 몇 장)
   C.hand = function (on) {
@@ -107,16 +119,42 @@
       if (heavy && fx[k] < 0) el.classList.add('hit');
     }
   };
-  // 게이지 구간: 경고 = 떨림·붉은 빛, 위험 = 빠른 떨림·맥박. 낮음/높음 표시
-  C.setZones = function (zones) {
+  // 게이지 구간(10-8-4): 경고 = 노랑 천천히, 위험 = 빨강, 벼랑 = 빨강 빠르게, 끝 = 아이콘에 금. 낮음/높음 표시
+  // followups: 후속 위기 예약 → 아이콘 옆 작은 먹구름
+  C.setZones = function (zones, followups) {
+    const fu = {};
+    for (const f of followups || []) fu[f.gauge] = 1;
     for (const g of gauges) {
       const el = document.querySelector(`.gauge[data-key="${g.key}"]`);
       const z = zones[g.key] || { level: 'stable' };
       el.classList.toggle('zone-warn', z.level === 'warn');
-      el.classList.toggle('zone-danger', z.level === 'danger');
+      el.classList.toggle('zone-danger', z.level === 'danger' || z.level === 'cliff' || z.level === 'end');
+      el.classList.toggle('zone-cliff', z.level === 'cliff' || z.level === 'end');
+      el.classList.toggle('zone-end', z.level === 'end');
       el.classList.toggle('zone-low', z.side === 'low');
       el.classList.toggle('zone-high', z.side === 'high');
+      el.classList.toggle('fu', !!fu[g.key]);
     }
+  };
+  // 위기 사건 동안 그 게이지 아이콘이 흔들림(quake) / 버텼으면 "후—" 하며 원래 색으로(relief)
+  C.gaugeMark = function (key, cls) {
+    for (const el of document.querySelectorAll('.gauge')) el.classList.remove('quake', 'relief');
+    const el = key && document.querySelector(`.gauge[data-key="${key}"]`);
+    if (!el || !cls) return;
+    void el.offsetWidth;
+    el.classList.add(cls);
+  };
+  // 수습("버텼다!"): 사관의 붉은 도장 "버팀" (10-8-3 ④)
+  let heldTimer = 0;
+  C.held = function (name, line, ms) {
+    const el = $('#held');
+    $('#heldName').textContent = name || '';
+    $('#heldLine').textContent = line || '';
+    el.classList.remove('show');
+    void el.offsetWidth;
+    el.classList.add('show');
+    clearTimeout(heldTimer);
+    heldTimer = setTimeout(() => el.classList.remove('show'), ms || 2400);
   };
   C.setWarn = () => {};
   // 구간에 처음 들어설 때 짧은 알림

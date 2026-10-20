@@ -598,6 +598,1040 @@
    "dusk": true,
    "note": "해 질 녘 붉은 하늘. 경복궁 처마 등불이 하나씩 꺼지고 두루마리가 말리며 다음 왕 화면으로 넘어간다."
   }
+ },
+ {
+  "kind": "crisis",
+  "stages": [
+   "taejo"
+  ],
+  "game_event": true,
+  "out_of_textbook": false,
+  "choice_type": "free",
+  "strong": "right",
+  "id": "NT01",
+  "gauge": "people",
+  "side": "low",
+  "level": "warn",
+  "who": {
+   "name": "장터를 돌아본 내관",
+   "doll": "naegwan"
+  },
+  "line": "장터에 불만이 퍼지고 있사옵니다. 공사에 지친 백성들이 수군거리옵니다.",
+  "conditions_text": "백성 경고(낮음)",
+  "choices": {
+   "right": {
+    "label": "부역을 줄여 준다",
+    "effects": {
+     "people": 15,
+     "treasury": -10,
+     "army": -5
+    },
+    "this_run": "공사장 일꾼 절반이 집으로 돌아갔다."
+   },
+   "left": {
+    "label": "곡식을 조금 푼다",
+    "effects": {
+     "people": 8,
+     "treasury": -5
+    },
+    "this_run": "장터에 죽 솥이 걸렸다."
+   }
+  },
+  "sources": [],
+  "fx": {}
+ },
+ {
+  "kind": "crisis",
+  "stages": [
+   "taejo"
+  ],
+  "game_event": true,
+  "out_of_textbook": false,
+  "choice_type": "free",
+  "strong": "right",
+  "id": "NT02",
+  "gauge": "people",
+  "side": "high",
+  "level": "warn",
+  "who": {
+   "name": "호조 관리",
+   "doll": "official_blue"
+  },
+  "line": "관리들 사이에 ‘백성 눈치만 본다’는 말이 돌고 있사옵니다.",
+  "conditions_text": "백성 경고(높음)",
+  "choices": {
+   "right": {
+    "label": "세금을 바로 세운다",
+    "effects": {
+     "people": -10,
+     "treasury": 10,
+     "nobles": 5
+    },
+    "this_run": "미뤄 둔 세금 장부가 다시 펼쳐졌다."
+   },
+   "left": {
+    "label": "관리를 달랜다",
+    "effects": {
+     "nobles": 8,
+     "people": -5
+    },
+    "this_run": "관리들의 투덜거림이 잦아들었다."
+   }
+  },
+  "sources": [],
+  "fx": {}
+ },
+ {
+  "kind": "crisis",
+  "stages": [
+   "taejo"
+  ],
+  "game_event": true,
+  "out_of_textbook": false,
+  "choice_type": "free",
+  "strong": "right",
+  "id": "NT03",
+  "gauge": "nobles",
+  "side": "low",
+  "level": "warn",
+  "who": {
+   "name": "승지",
+   "doll": "official_red"
+  },
+  "line": "대신들이 모이면 한숨부터 쉰다 하옵니다.",
+  "conditions_text": "양반 경고(낮음)",
+  "choices": {
+   "right": {
+    "label": "공신 잔치를 연다",
+    "effects": {
+     "nobles": 15,
+     "treasury": -10,
+     "people": -5
+    },
+    "this_run": "공신들이 오랜만에 웃었다."
+   },
+   "left": {
+    "label": "대신을 불러 듣는다",
+    "effects": {
+     "nobles": 8,
+     "people": -5
+    },
+    "this_run": "대신들은 하고 싶던 말을 쏟아 냈다."
+   }
+  },
+  "sources": [],
+  "fx": {}
+ },
+ {
+  "kind": "crisis",
+  "stages": [
+   "taejo"
+  ],
+  "game_event": true,
+  "out_of_textbook": false,
+  "choice_type": "free",
+  "strong": "right",
+  "id": "NT04",
+  "gauge": "nobles",
+  "side": "high",
+  "level": "warn",
+  "who": {
+   "name": "내관",
+   "doll": "naegwan"
+  },
+  "line": "대신들이 전하께 아뢰지 않고 일을 정한다는 소문이옵니다.",
+  "conditions_text": "양반 경고(높음)",
+  "choices": {
+   "right": {
+    "label": "직접 회의를 연다",
+    "effects": {
+     "nobles": -15,
+     "people": 5,
+     "army": 5
+    },
+    "this_run": "전하가 회의 자리 한가운데 앉았다."
+   },
+   "left": {
+    "label": "한 사람만 꾸짖는다",
+    "effects": {
+     "nobles": -8,
+     "army": 5
+    },
+    "this_run": "대신 하나가 고개를 숙였다."
+   }
+  },
+  "sources": [],
+  "fx": {}
+ },
+ {
+  "kind": "crisis",
+  "stages": [
+   "taejo"
+  ],
+  "game_event": true,
+  "out_of_textbook": false,
+  "choice_type": "free",
+  "strong": "right",
+  "id": "NT05",
+  "gauge": "treasury",
+  "side": "low",
+  "level": "warn",
+  "who": {
+   "name": "곳간지기",
+   "doll": "farmer"
+  },
+  "line": "쌀가마를 세어 보니 한숨이 나오옵니다. 이대로면 겨울을 못 넘기옵니다.",
+  "conditions_text": "국고 경고(낮음)",
+  "choices": {
+   "right": {
+    "label": "공사를 쉰다",
+    "effects": {
+     "treasury": 15,
+     "army": -5,
+     "nobles": -5
+    },
+    "this_run": "공사장의 망치 소리가 멈췄다."
+   },
+   "left": {
+    "label": "잔치를 줄인다",
+    "effects": {
+     "treasury": 8,
+     "nobles": -5
+    },
+    "this_run": "궁궐 잔칫상이 소박해졌다."
+   }
+  },
+  "sources": [],
+  "fx": {}
+ },
+ {
+  "kind": "crisis",
+  "stages": [
+   "taejo"
+  ],
+  "game_event": true,
+  "out_of_textbook": false,
+  "choice_type": "free",
+  "strong": "right",
+  "id": "NT06",
+  "gauge": "treasury",
+  "side": "high",
+  "level": "warn",
+  "who": {
+   "name": "곳간지기",
+   "doll": "farmer"
+  },
+  "line": "곳간이 넘쳐 아래쪽 쌀이 썩어 간다 하옵니다.",
+  "conditions_text": "국고 경고(높음)",
+  "choices": {
+   "right": {
+    "label": "곡식을 푼다",
+    "effects": {
+     "treasury": -15,
+     "people": 15
+    },
+    "this_run": "굶던 집 굴뚝에 연기가 올랐다."
+   },
+   "left": {
+    "label": "다리를 고친다",
+    "effects": {
+     "treasury": -8,
+     "people": 5
+    },
+    "this_run": "무너진 다리가 다시 놓였다."
+   }
+  },
+  "sources": [],
+  "fx": {}
+ },
+ {
+  "kind": "crisis",
+  "stages": [
+   "taejo"
+  ],
+  "game_event": true,
+  "out_of_textbook": false,
+  "choice_type": "free",
+  "strong": "right",
+  "id": "NT07",
+  "gauge": "army",
+  "side": "low",
+  "level": "warn",
+  "who": {
+   "name": "바닷가 군관",
+   "doll": "official_green"
+  },
+  "line": "바닷가 봉수대를 지키는 군사가 반으로 줄었사옵니다.",
+  "conditions_text": "국방 경고(낮음)",
+  "choices": {
+   "right": {
+    "label": "군사를 보낸다",
+    "effects": {
+     "army": 15,
+     "treasury": -10,
+     "people": -5
+    },
+    "this_run": "봉수대마다 군사가 둘씩 섰다."
+   },
+   "left": {
+    "label": "마을에 망을 맡긴다",
+    "effects": {
+     "army": 8,
+     "people": -5
+    },
+    "this_run": "마을 사람들이 번갈아 언덕에 올랐다."
+   }
+  },
+  "sources": [],
+  "fx": {}
+ },
+ {
+  "kind": "crisis",
+  "stages": [
+   "taejo"
+  ],
+  "game_event": true,
+  "out_of_textbook": false,
+  "choice_type": "free",
+  "strong": "right",
+  "id": "NT08",
+  "gauge": "army",
+  "side": "high",
+  "level": "warn",
+  "who": {
+   "name": "병조 관리",
+   "doll": "official_blue"
+  },
+  "line": "장수들이 거느린 군사가 궁궐 군사보다 많다는 말이 돌고 있사옵니다.",
+  "conditions_text": "국방 경고(높음)",
+  "choices": {
+   "right": {
+    "label": "군사 수를 센다",
+    "effects": {
+     "army": -15,
+     "nobles": 5
+    },
+    "this_run": "장수들이 마지못해 군적을 내놓았다."
+   },
+   "left": {
+    "label": "장수를 불러 타이른다",
+    "effects": {
+     "army": -8,
+     "nobles": -5
+    },
+    "this_run": "장수들은 고개를 숙였지만 눈빛은 그대로였다."
+   }
+  },
+  "sources": [],
+  "fx": {}
+ },
+ {
+  "kind": "crisis",
+  "stages": [
+   "taejo"
+  ],
+  "game_event": true,
+  "out_of_textbook": false,
+  "choice_type": "free",
+  "strong": "right",
+  "id": "KT01",
+  "gauge": "people",
+  "side": "low",
+  "level": "event",
+  "name": "백성들이 들고일어날 기세",
+  "who": {
+   "name": "고을에서 올라온 관리",
+   "doll": "official_green"
+  },
+  "line": "공사에 지친 백성들이 관아를 둘러싸고 물러나지 않사옵니다. 들고일어날 기세이옵니다.",
+  "choices": {
+   "right": {
+    "label": "창고를 열어 달랜다",
+    "effects": {
+     "people": 15,
+     "treasury": -20
+    },
+    "this_run": "곳간 쌀이 수레에 실려 나가자, 사람들이 깃발을 내리고 흩어졌다."
+   },
+   "left": {
+    "label": "군사로 지킨다",
+    "effects": {
+     "people": 10,
+     "army": -10
+    },
+    "this_run": "관아 앞에 군사가 늘어서자 사람들은 물러났지만 원망은 남았다."
+   }
+  },
+  "sources": [],
+  "fx": {}
+ },
+ {
+  "kind": "crisis",
+  "stages": [
+   "taejo"
+  ],
+  "game_event": true,
+  "out_of_textbook": false,
+  "choice_type": "free",
+  "strong": "right",
+  "id": "KT02",
+  "gauge": "people",
+  "side": "high",
+  "level": "event",
+  "name": "관리들이 손을 놓다",
+  "who": {
+   "name": "호조 판서",
+   "doll": "official_red"
+  },
+  "line": "관리들이 ‘백성 눈치에 아무것도 못 한다’며 장부를 덮고 일을 멈췄사옵니다.",
+  "choices": {
+   "right": {
+    "label": "관리에게 힘을 싣는다",
+    "effects": {
+     "people": -15,
+     "treasury": -15
+    },
+    "this_run": "수령들이 다시 관아 문을 열었지만, 새 일꾼을 들이느라 곳간이 줄었다."
+   },
+   "left": {
+    "label": "관리를 타이른다",
+    "effects": {
+     "people": -10,
+     "nobles": -10
+    },
+    "this_run": "관리들이 마지못해 붓을 들었다."
+   }
+  },
+  "sources": [],
+  "fx": {}
+ },
+ {
+  "kind": "crisis",
+  "stages": [
+   "taejo"
+  ],
+  "game_event": true,
+  "out_of_textbook": false,
+  "choice_type": "free",
+  "strong": "right",
+  "id": "KT03",
+  "gauge": "nobles",
+  "side": "low",
+  "level": "event",
+  "name": "양반들의 반란 모의",
+  "who": {
+   "name": "승지",
+   "doll": "official_red"
+  },
+  "line": "벼슬을 잃은 양반들이 밤마다 한 집에 모인다 하옵니다. 반란을 꾀한다는 소문이옵니다.",
+  "choices": {
+   "right": {
+    "label": "공신을 불러 달랜다",
+    "effects": {
+     "nobles": 15,
+     "treasury": -20
+    },
+    "this_run": "벼슬과 땅을 받은 양반들이 모임을 그만두었다."
+   },
+   "left": {
+    "label": "군사로 막는다",
+    "effects": {
+     "nobles": 10,
+     "army": -15
+    },
+    "this_run": "모임 집 앞에 군사가 서자 모의는 흩어졌지만, 양반들의 눈빛은 차가웠다."
+   }
+  },
+  "sources": [],
+  "fx": {}
+ },
+ {
+  "kind": "crisis",
+  "stages": [
+   "taejo"
+  ],
+  "game_event": true,
+  "out_of_textbook": false,
+  "choice_type": "free",
+  "strong": "right",
+  "id": "KT04",
+  "gauge": "nobles",
+  "side": "high",
+  "level": "event",
+  "name": "왕명이 되돌아오다",
+  "who": {
+   "name": "내관",
+   "doll": "naegwan"
+  },
+  "line": "대신들이 의논을 마쳤다며 전하의 명을 되돌려 보냈사옵니다.",
+  "choices": {
+   "right": {
+    "label": "대신을 내려보낸다",
+    "effects": {
+     "nobles": -15,
+     "treasury": -15
+    },
+    "this_run": "힘센 대신 몇이 먼 고을로 떠나고, 새 관리를 들였다."
+   },
+   "left": {
+    "label": "궁궐 호위를 늘린다",
+    "effects": {
+     "nobles": -10,
+     "army": -10
+    },
+    "this_run": "대신들은 물러섰지만 뒤에서 수군거렸다."
+   }
+  },
+  "sources": [],
+  "fx": {},
+  "damage": {
+   "targets": [
+    "gyeongbok"
+   ]
+  }
+ },
+ {
+  "kind": "crisis",
+  "stages": [
+   "taejo"
+  ],
+  "game_event": true,
+  "out_of_textbook": false,
+  "choice_type": "free",
+  "strong": "right",
+  "id": "KT05",
+  "gauge": "treasury",
+  "side": "low",
+  "level": "event",
+  "name": "녹봉이 밀리다",
+  "who": {
+   "name": "호조 관리",
+   "doll": "official_blue"
+  },
+  "line": "곳간이 비어 녹봉을 못 받은 관리들이 백성에게서 몰래 거두고 있사옵니다.",
+  "choices": {
+   "right": {
+    "label": "궁궐 살림을 줄인다",
+    "effects": {
+     "treasury": 15,
+     "nobles": -20
+    },
+    "this_run": "전하의 수라상이 줄고 그 쌀이 녹봉이 되었다. 대신들은 체면이 깎였다며 투덜댔다."
+   },
+   "left": {
+    "label": "세금을 더 걷는다",
+    "effects": {
+     "treasury": 10,
+     "people": -15
+    },
+    "this_run": "곳간은 조금 찼지만 마을마다 한숨이 늘었다."
+   }
+  },
+  "sources": [],
+  "fx": {}
+ },
+ {
+  "kind": "crisis",
+  "stages": [
+   "taejo"
+  ],
+  "game_event": true,
+  "out_of_textbook": false,
+  "choice_type": "free",
+  "strong": "right",
+  "id": "KT06",
+  "gauge": "treasury",
+  "side": "high",
+  "level": "event",
+  "name": "곳간을 노리는 손",
+  "who": {
+   "name": "곳간지기",
+   "doll": "farmer"
+  },
+  "line": "넘치는 곳간을 두고 관리 몇이 쌀을 빼돌렸다는 소문이옵니다.",
+  "choices": {
+   "right": {
+    "label": "조사해 벌한다",
+    "effects": {
+     "treasury": -15,
+     "nobles": -15
+    },
+    "this_run": "빼돌린 쌀이 돌아왔고, 관리 몇이 벼슬을 잃었다."
+   },
+   "left": {
+    "label": "곡식을 풀어 버린다",
+    "effects": {
+     "treasury": -10,
+     "army": -5
+    },
+    "this_run": "곳간이 줄자 다툼도 잦아들었지만, 군량 몫까지 나갔다."
+   }
+  },
+  "sources": [],
+  "fx": {}
+ },
+ {
+  "kind": "crisis",
+  "stages": [
+   "taejo"
+  ],
+  "game_event": true,
+  "out_of_textbook": false,
+  "choice_type": "free",
+  "strong": "right",
+  "id": "KT07",
+  "gauge": "army",
+  "side": "low",
+  "level": "event",
+  "name": "국경이 뚫리다",
+  "who": {
+   "name": "바닷가 군관",
+   "doll": "official_green"
+  },
+  "line": "남쪽 바닷가 봉수대에 불이 올랐사옵니다! 낯선 배들이 고을 가까이 왔사옵니다.",
+  "choices": {
+   "right": {
+    "label": "군사를 모아 보낸다",
+    "effects": {
+     "army": 15,
+     "treasury": -20
+    },
+    "this_run": "군사들이 밤새 달려 바닷가를 지켰고 낯선 배들은 물러갔다."
+   },
+   "left": {
+    "label": "백성을 성으로 모은다",
+    "effects": {
+     "army": 10,
+     "people": -15
+    },
+    "this_run": "바닷가 사람들이 짐을 지고 성으로 피했다. 빈 마을은 쓸쓸했다."
+   }
+  },
+  "sources": [],
+  "fx": {},
+  "similar": {
+   "text": "고려 말부터 조선 초까지 왜구가 바닷가를 자주 침입했다.",
+   "sources_text": "지도서 232(교과서 74), 234(교과서 76)",
+   "sources": [
+    {
+     "type": "guide",
+     "page": "232",
+     "tb": "74"
+    }
+   ],
+   "out_of_textbook": false
+  },
+  "damage": {
+   "targets": [
+    "wall"
+   ]
+  }
+ },
+ {
+  "kind": "crisis",
+  "stages": [
+   "taejo"
+  ],
+  "game_event": true,
+  "out_of_textbook": false,
+  "choice_type": "free",
+  "strong": "right",
+  "id": "KT08",
+  "gauge": "army",
+  "side": "high",
+  "level": "event",
+  "name": "장수들이 명을 거부하다",
+  "who": {
+   "name": "병조 판서",
+   "doll": "official_red"
+  },
+  "line": "장수 몇이 군사를 이끌고 도성 밖에 모여 명을 따르지 않사옵니다.",
+  "choices": {
+   "right": {
+    "label": "군권을 거둔다",
+    "effects": {
+     "army": -15,
+     "nobles": -15
+    },
+    "this_run": "장수들이 거느린 군사 일부가 나라 군대로 들어왔다. 공신들은 불안해했다."
+   },
+   "left": {
+    "label": "장수에게 상을 준다",
+    "effects": {
+     "army": -10,
+     "treasury": -15
+    },
+    "this_run": "장수들은 상을 받고 물러갔지만 군사는 그대로였다."
+   }
+  },
+  "sources": [],
+  "fx": {},
+  "similar": {
+   "text": "조선 건국 초 왕위를 둘러싼 갈등 끝에, 1398년 이방원이 군사를 일으킨 제1차 왕자의 난이 일어났다.",
+   "sources_text": "[교과서 밖] 백과 '정종' https://encykorea.aks.ac.kr/Article/E0050884",
+   "sources": [
+    {
+     "type": "web",
+     "title": "백과 '정종'",
+     "url": "https://encykorea.aks.ac.kr/Article/E0050884"
+    }
+   ],
+   "out_of_textbook": true
+  },
+  "damage": {
+   "targets": [
+    "sungnye",
+    "heungin",
+    "donui",
+    "sukjeong"
+   ]
+  }
+ },
+ {
+  "kind": "crisis",
+  "stages": [
+   "taejo"
+  ],
+  "game_event": true,
+  "out_of_textbook": false,
+  "choice_type": "free",
+  "strong": "right",
+  "id": "KT01b",
+  "gauge": "people",
+  "side": "low",
+  "level": "followup",
+  "step": 2,
+  "name": "백성들이 들고일어날 기세",
+  "who": {
+   "name": "고을에서 올라온 관리",
+   "doll": "official_green"
+  },
+  "line": "관아를 둘러싼 사람들이 더 늘었사옵니다. 이번에 잘못하면 나라 곳곳으로 번지옵니다.",
+  "choices": {
+   "right": {
+    "label": "수령을 바꾸고 푼다",
+    "effects": {
+     "people": 20,
+     "treasury": -25
+    },
+    "this_run": "새 수령이 곳간을 열자 사람들이 하나둘 집으로 돌아갔다."
+   },
+   "left": {
+    "label": "성문을 닫는다",
+    "effects": {
+     "people": 10,
+     "army": -15
+    },
+    "this_run": "성문은 닫혔고, 성 밖 원망은 그대로였다."
+   }
+  },
+  "sources": [],
+  "fx": {}
+ },
+ {
+  "kind": "crisis",
+  "stages": [
+   "taejo"
+  ],
+  "game_event": true,
+  "out_of_textbook": false,
+  "choice_type": "free",
+  "strong": "right",
+  "id": "KT02b",
+  "gauge": "people",
+  "side": "high",
+  "level": "followup",
+  "step": 2,
+  "name": "관리들이 손을 놓다",
+  "who": {
+   "name": "호조 판서",
+   "doll": "official_red"
+  },
+  "line": "고을마다 관아 문이 닫히고 있사옵니다. 이대로면 나라 살림이 멈추옵니다.",
+  "choices": {
+   "right": {
+    "label": "수령을 새로 뽑는다",
+    "effects": {
+     "people": -20,
+     "treasury": -20
+    },
+    "this_run": "새 수령들이 다시 장부를 펼쳤다."
+   },
+   "left": {
+    "label": "대신에게 맡긴다",
+    "effects": {
+     "people": -10,
+     "nobles": -15
+    },
+    "this_run": "대신들이 나섰지만 일은 더뎠다."
+   }
+  },
+  "sources": [],
+  "fx": {}
+ },
+ {
+  "kind": "crisis",
+  "stages": [
+   "taejo"
+  ],
+  "game_event": true,
+  "out_of_textbook": false,
+  "choice_type": "free",
+  "strong": "right",
+  "id": "KT03b",
+  "gauge": "nobles",
+  "side": "low",
+  "level": "followup",
+  "step": 2,
+  "name": "양반들의 반란 모의",
+  "who": {
+   "name": "승지",
+   "doll": "official_red"
+  },
+  "line": "모의한 양반들이 군사를 모은다는 말까지 들리옵니다.",
+  "choices": {
+   "right": {
+    "label": "벼슬을 돌려준다",
+    "effects": {
+     "nobles": 20,
+     "treasury": -25
+    },
+    "this_run": "벼슬을 되찾은 양반들이 모의를 그만두었다."
+   },
+   "left": {
+    "label": "모임을 흩는다",
+    "effects": {
+     "nobles": 10,
+     "army": -20
+    },
+    "this_run": "군사들이 모임 집을 둘러쌌고, 양반들은 흩어졌다."
+   }
+  },
+  "sources": [],
+  "fx": {}
+ },
+ {
+  "kind": "crisis",
+  "stages": [
+   "taejo"
+  ],
+  "game_event": true,
+  "out_of_textbook": false,
+  "choice_type": "free",
+  "strong": "right",
+  "id": "KT04b",
+  "gauge": "nobles",
+  "side": "high",
+  "level": "followup",
+  "step": 2,
+  "name": "왕명이 되돌아오다",
+  "who": {
+   "name": "내관",
+   "doll": "naegwan"
+  },
+  "line": "대신들이 상소를 모아 전하의 결정을 모두 미루자 하옵니다.",
+  "choices": {
+   "right": {
+    "label": "공신 권한을 줄인다",
+    "effects": {
+     "nobles": -20,
+     "treasury": -20
+    },
+    "this_run": "공신들이 맡던 일 몇 가지가 임금 곁으로 돌아왔다."
+   },
+   "left": {
+    "label": "상소를 돌려보낸다",
+    "effects": {
+     "nobles": -10,
+     "people": -15
+    },
+    "this_run": "상소는 돌아갔지만 대신들은 일을 미뤘다."
+   }
+  },
+  "sources": [],
+  "fx": {},
+  "damage": {
+   "targets": [
+    "gyeongbok"
+   ]
+  }
+ },
+ {
+  "kind": "crisis",
+  "stages": [
+   "taejo"
+  ],
+  "game_event": true,
+  "out_of_textbook": false,
+  "choice_type": "free",
+  "strong": "right",
+  "id": "KT05b",
+  "gauge": "treasury",
+  "side": "low",
+  "level": "followup",
+  "step": 2,
+  "name": "녹봉이 밀리다",
+  "who": {
+   "name": "호조 관리",
+   "doll": "official_blue"
+  },
+  "line": "녹봉을 못 받은 관리들이 일을 놓기 시작했사옵니다.",
+  "choices": {
+   "right": {
+    "label": "궁궐 창고를 연다",
+    "effects": {
+     "treasury": 20,
+     "nobles": -25
+    },
+    "this_run": "궁궐 창고의 비단과 그릇이 녹봉이 되었다."
+   },
+   "left": {
+    "label": "공사를 멈춘다",
+    "effects": {
+     "treasury": 10,
+     "army": -15
+    },
+    "this_run": "도성 공사장이 조용해졌다."
+   }
+  },
+  "sources": [],
+  "fx": {}
+ },
+ {
+  "kind": "crisis",
+  "stages": [
+   "taejo"
+  ],
+  "game_event": true,
+  "out_of_textbook": false,
+  "choice_type": "free",
+  "strong": "right",
+  "id": "KT06b",
+  "gauge": "treasury",
+  "side": "high",
+  "level": "followup",
+  "step": 2,
+  "name": "곳간을 노리는 손",
+  "who": {
+   "name": "곳간지기",
+   "doll": "farmer"
+  },
+  "line": "곳간 다툼이 관리들 패싸움 소문으로 번졌사옵니다.",
+  "choices": {
+   "right": {
+    "label": "곳간지기를 바꾼다",
+    "effects": {
+     "treasury": -20,
+     "nobles": -20
+    },
+    "this_run": "새 곳간지기가 장부를 처음부터 다시 셌다."
+   },
+   "left": {
+    "label": "곳간을 나눠 맡긴다",
+    "effects": {
+     "treasury": -10,
+     "people": -15
+    },
+    "this_run": "곳간이 여럿으로 나뉘었지만 감시가 느슨해졌다."
+   }
+  },
+  "sources": [],
+  "fx": {}
+ },
+ {
+  "kind": "crisis",
+  "stages": [
+   "taejo"
+  ],
+  "game_event": true,
+  "out_of_textbook": false,
+  "choice_type": "free",
+  "strong": "right",
+  "id": "KT07b",
+  "gauge": "army",
+  "side": "low",
+  "level": "followup",
+  "step": 2,
+  "name": "국경이 뚫리다",
+  "who": {
+   "name": "바닷가 군관",
+   "doll": "official_green"
+  },
+  "line": "낯선 배들이 다시 와 더 깊이 들어왔사옵니다. 바닷가 성이 위태롭사옵니다.",
+  "choices": {
+   "right": {
+    "label": "성과 군사를 챙긴다",
+    "effects": {
+     "army": 20,
+     "treasury": -25
+    },
+    "this_run": "바닷가 성벽에 돌이 더해지고 군사가 모였다."
+   },
+   "left": {
+    "label": "고을을 비운다",
+    "effects": {
+     "army": 10,
+     "people": -20
+    },
+    "this_run": "바닷가 고을 사람들이 모두 성으로 들어왔다."
+   }
+  },
+  "sources": [],
+  "fx": {},
+  "damage": {
+   "targets": [
+    "wall"
+   ]
+  }
+ },
+ {
+  "kind": "crisis",
+  "stages": [
+   "taejo"
+  ],
+  "game_event": true,
+  "out_of_textbook": false,
+  "choice_type": "free",
+  "strong": "right",
+  "id": "KT08b",
+  "gauge": "army",
+  "side": "high",
+  "level": "followup",
+  "step": 2,
+  "name": "장수들이 명을 거부하다",
+  "who": {
+   "name": "병조 판서",
+   "doll": "official_red"
+  },
+  "line": "장수들이 서로 군사를 겨루며 도성 문을 막아섰사옵니다.",
+  "choices": {
+   "right": {
+    "label": "군권을 한곳에 모은다",
+    "effects": {
+     "army": -20,
+     "nobles": -20
+    },
+    "this_run": "군사를 움직이는 권한이 한곳으로 모였다."
+   },
+   "left": {
+    "label": "장수들을 갈라놓는다",
+    "effects": {
+     "army": -10,
+     "treasury": -20
+    },
+    "this_run": "장수들이 먼 고을로 흩어졌지만 비용이 컸다."
+   }
+  },
+  "sources": [],
+  "fx": {},
+  "damage": {
+   "targets": [
+    "sungnye",
+    "heungin",
+    "donui",
+    "sukjeong"
+   ]
+  }
  }
 ]);
 })();

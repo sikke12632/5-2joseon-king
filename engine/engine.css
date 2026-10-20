@@ -281,3 +281,40 @@ body:not(.portrait) #zoneAlert { left: calc((100% - var(--panel-w)) / 2); }
 #card.crisis-event { box-shadow: 0 14px 30px rgba(80,10,10,.35), inset 0 0 0 3px #b23b30, inset 0 0 0 8px #f1d5cc; }
 #card.crisis #whoTitle { background: #b5632a; }
 #card.crisis-event #whoTitle { background: #b23b30; }
+/* 10-8-4: 벼랑(빠르게)·끝(금이 감)·후속 예약(먹구름)·위기 중 흔들림·버텼다(후—) */
+.gauge { position: relative; }
+.gauge .g-icon { position: relative; }
+.gauge.zone-cliff .g-icon { animation-duration: .32s; }
+.gauge.zone-end .g-icon::after { content: ''; position: absolute; inset: 8% 18%; pointer-events: none; background: linear-gradient(118deg, transparent 46%, #2a1612 47%, #2a1612 50%, transparent 51%), linear-gradient(64deg, transparent 58%, #2a1612 59%, #2a1612 61%, transparent 62%); opacity: .8; }
+.g-fu { position: absolute; top: -4px; right: -10px; width: 22px; height: 15px; display: none; pointer-events: none; }
+.g-fu svg { width: 100%; height: 100%; fill: #3b3540; filter: drop-shadow(0 1px 2px rgba(0,0,0,.35)); }
+.gauge.fu .g-fu { display: block; animation: fuDrift 2.4s ease-in-out infinite; }
+@keyframes fuDrift { 50% { transform: translate(3px, -2px); } }
+.gauge.quake .g-icon { animation: gQuake .14s linear infinite !important; }
+@keyframes gQuake { 0% { transform: translate(-2px, 0) rotate(-6deg); } 50% { transform: translate(2px, -1px) rotate(6deg); } 100% { transform: translate(-2px, 0) rotate(-6deg); } }
+.gauge.relief .g-icon { animation: gRelief 1.4s ease-out !important; }
+@keyframes gRelief { 0% { transform: scale(1.3); filter: drop-shadow(0 0 14px #fff1c0); } 100% { transform: scale(1); filter: none; } }
+#gameTag { position: absolute; top: 14px; left: 18px; z-index: 1; font-size: 12px; color: #fff; background: #2f6f6a; padding: 1px 8px; border-radius: 999px; }
+#gameTag.shift { left: 96px; }
+#similar { margin: 4px 4px 0; font-size: 12px; line-height: 1.45; color: #6a5440; text-align: left; word-break: keep-all; }
+#similar b { color: #6b3a2a; font-weight: normal; font-family: 'JKTitle', serif; margin-right: 2px; }
+#similar .tag-out { font-size: 11px; }
+#chance { display: flex; justify-content: space-between; gap: 8px; margin-top: -4px; font-size: 13px; color: #ffd9c9; transition: opacity .3s; }
+#chance span { max-width: 48%; text-shadow: 0 1px 2px rgba(0,0,0,.5); }
+#chance span:empty { visibility: hidden; }
+#deck:not(.show) ~ #chance { opacity: 0; }
+#held { position: absolute; left: 0; right: 0; top: 30%; display: grid; place-items: center; pointer-events: none; z-index: 6; opacity: 0; }
+#held.show { animation: heldIn 2.4s ease-out forwards; }
+@keyframes heldIn { 0% { opacity: 0; transform: translateY(14px); } 12%, 82% { opacity: 1; transform: none; } 100% { opacity: 0; } }
+#held .h-scroll { position: relative; min-width: 62%; max-width: 86%; padding: 16px 22px 14px; border-radius: 10px; background: #efe3c4; box-shadow: 0 12px 26px rgba(40,25,10,.35), inset 0 10px 0 #c9a96c, inset 0 -10px 0 #c9a96c; text-align: center; }
+#heldName { font-family: 'JKTitle', serif; font-size: 19px; color: #3a2a1e; word-break: keep-all; }
+#heldLine { font-size: 14px; color: #6a5440; margin-top: 4px; word-break: keep-all; }
+#held .h-stamp { position: absolute; right: -14px; top: -22px; width: 74px; height: 74px; border-radius: 10px; border: 4px solid rgba(178,59,48,.92); color: rgba(178,59,48,.96); background: rgba(255,248,236,.6); font-family: 'JKTitle', serif; font-size: 25px; display: grid; place-items: center; transform: rotate(-12deg) scale(0); }
+#held.show .h-stamp { animation: stampIn .5s .35s cubic-bezier(.2,1.6,.4,1) forwards; }
+#crisisName { font-family: 'JKTitle', serif; font-size: clamp(17px, 1.5vw, 20px); color: #8d2f2a; text-align: center; margin: 2px 0 -2px; word-break: keep-all; }
+#fallCrisis { font-size: 15px; color: #7d2820; background: #f6e6e1; border-radius: 10px; padding: 6px 10px; margin: 6px 0 2px; word-break: keep-all; }
+#fallCrisis b { font-family: 'JKTitle', serif; font-weight: normal; font-size: 17px; }
+.rec-held li { display: flex; justify-content: space-between; gap: 8px; }
+.cx-crisis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; }
+.cx-crisis li { font-size: 13px; text-align: center; position: relative; }
+.cx-crisis li .gray { position: absolute; right: 2px; top: -4px; font-size: 11px; color: #777; border: 1.5px solid #888; border-radius: 4px; padding: 0 3px; transform: rotate(-10deg); background: #eee; }

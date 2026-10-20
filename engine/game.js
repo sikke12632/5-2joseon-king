@@ -114,9 +114,20 @@
     run.grown = run.grownBefore || 0;
     run.stageStats = { edge: false, falls: run.stageStats && run.stageStats.stage === stageId ? run.stageStats.falls : 0, stage: stageId };
     run.waiting = null;
+    // 게이지 위기 상태(10-8): 왕을 새로 시작하면 모두 처음부터. 손상된 건물도 이때 고쳐진다
     run.zones = {};
     run.crisisRest = 0;
     run.damaged = {};
+    run.followups = [];
+    run.followStep = {};
+    run.cooldown = {};
+    run.forewarned = {};
+    run.forewarnCount = 0;
+    run.eventScene = null;
+    // 조건 식(engine/cond.js)이 읽는 이번 왕의 기록
+    run.choices = {};
+    run.seenRun = [];
+    run.flagsRun = Object.assign({}, run.flagsRunBefore || {});
     G.state = 'play';
     setupWorld(st, false);
     save();
@@ -187,7 +198,20 @@
       for (const k in side.effects || {}) o[k] = G.effect(k, side.effects[k], run.vals);
       return o;
     };
-    if (c.kind === 'crisis') v.tag = c.level === 'event' ? '위기' : '예고';
+    const crisisEvent = c.kind === 'crisis' && c.level !== 'warn';
+    if (c.kind === 'crisis') {
+      v.tag = c.level === 'warn' ? '예고' : c.level === 'followup' ? '후속 위기' : '위기';
+      v.game = !!c.game_event;
+      if (crisisEvent) {
+        v.crisisName = c.name;
+        v.similar = c.similar || null;
+        // 버튼 아래 무너질 확률(새싹 숫자 / 보통 말 / 성군·실록 없음)
+        const L = JK.Crisis.chanceLabel(JK.Crisis.fallChance(c, 'left', run.vals).p);
+        const R = JK.Crisis.chanceLabel(JK.Crisis.fallChance(c, 'right', run.vals).p);
+        if (L || R) v.chance = { left: L, right: R };
+      }
+    }
+    if (!run.seenRun.includes(c.id)) run.seenRun.push(c.id);
     Object.assign(v, {
       crisis: c.kind === 'crisis' ? c.level : '',
       text: c.line,
@@ -204,6 +228,15 @@
     });
     S.markSeen(c.id);
     Cards.show(v);
+    // 위기 사건(10-8-4): 위기 장면(3단계), 아이콘 흔들림, 카메라 살짝 당김, 징 한 번
+    if (crisisEvent) {
+      run.eventScene = { gauge: c.gauge, side: c.side, until: run.pos + 1 };
+      refreshWarn(true);
+      W.crisisBeat();
+      W.camTo({ dist: W.CAM_PLAY.dist - 3 }, 1.4);
+      Cards.gaugeMark(c.gauge, 'quake');
+      if (JK.Audio) JK.Audio.gong();
+    }
   }
   function showRecord() {
     const p = G.run.pending;
@@ -224,6 +257,24 @@
     const c = cardsById[run.deck[run.pos]];
     const sideKey = dir > 0 ? 'right' : 'left';
     const side = c.single ? null : c.choices[sideKey];
+    if (!c.single) run.choices[c.id] = sideKey;
+    const prevZones = run.zones || {};
+    // 위기 사건·후속: 고른 순간(효과 전 게이지로) 수습 또는 실각을 굴린다 (10-8-3)
+    let cres = null;
+    if (c.kind === 'crisis' && c.level !== 'warn' && side) {
+      cres = JK.Crisis.resolve(run, c, sideKey, Object.assign({}, run.vals), JK.rng((run.stageSeed + run.pos * 131 + (run.stats.fallsRun || 0) * 7 + 99) >>> 0));
+      const at = c.side === 'low' ? 0 : 100;
+      const frec = era.data.falls.find((f) => f.gauge === c.gauge && f.at === at);
+      S.addCrisis(cres, frec ? frec.id : c.gauge + at);
+      Cards.gaugeMark(null);
+      if (cres.fell) {
+        W.crisisBeat();
+        run.eventScene = null;
+        save();
+        S.saveMeta();
+        return setTimeout(() => fall(c.gauge, at, false, cres), 900);
+      }
+    }
     // 역사를 거스르는 쪽을 골랐는데 결국 일이 일어나는 카드: "그래도 역사는 흘렀다" 한 박자
     const against = !!(side && c.against === sideKey);
     let big = 0;
@@ -254,16 +305,26 @@
         }
       }
       if (side.this_run && !c.real_history) Cards.toast(side.this_run, Math.max(2600, side.this_run.length * 70));
+      // 수습("버텼다!"): 붉은 도장 "버팀", 북 세 번, 아이콘이 원래 색으로. 아직 거리 15 이하면 후속 예약
+      if (cres) {
+        run.eventScene = null;
+        JK.Crisis.afterHeld(run, c);
+        W.camTo(W.CAM_PLAY, 1.6);
+        W.state.alarm = 0;
+        Cards.held(c.name, `무너질 확률 ${Math.round(cres.p * 100)}%에서 버텼다!`, 2400);
+        Cards.gaugeMark(c.gauge, 'relief');
+        if (JK.Audio) [0, 380, 760].forEach((t) => setTimeout(() => JK.Audio.drum(), t));
+        if (cres.level === 'end') titleNow(['heldAtEnd']);
+      }
       refreshWarn();
+      if ((run.stats.followupsCancelled || 0) >= 3) titleNow(['cancel3']);
     }
     if (run.bigPreview > 0) run.bigPreview--;
     S.meta.cardsPlayed++;
     W.cardPassed();
     if (c.kind === 'daily') run.used.push(c.id);
-    // 위기 사건 카드: 큰 연출과 건물 손상(이번 판에서)
-    if (c.kind === 'crisis' && c.level === 'event') JK.Crisis.event(run, c);
     // 짓기: 이름 있는 건물은 어느 쪽을 골라도 역사대로 선다. 고른 방식은 건물 상태로 남는다(설계서 7-4).
-    let wait = against ? 1300 : 700;
+    let wait = against ? 1300 : cres ? 2300 : 700;
     const builds = (side ? side.build : c.fx && c.fx.build) || [];
     const state = side && side.build_state;
     if (builds.length) wait = Math.max(wait, doBuilds(builds, against ? 1300 : 350, state));
@@ -276,17 +337,15 @@
     run.grown = (run.grown || 0) + 1;
     run.pos++;
     // 위기 카드 끼워 넣기: 지금 구간에 따라 확률로 다음 자리에(역사 카드 순서는 그대로 밀린다)
-    const cid = JK.Crisis.pick(run, JK.rng((run.stageSeed + run.pos * 977 + (run.stats.fallsRun || 0)) >>> 0));
+    // 위기 카드 끼워 넣기(10-8): 후속(기한) → 예고(안정→경고) → 위기 사건(구간 확률). 역사 카드 순서는 그대로 밀린다.
+    // 게이지가 0·100에 닿아도 바로 실각하지 않는다(v3) — 끝 구간에서는 위기 확률이 매우 높을 뿐이다
+    const cid = JK.Crisis.pick(run, JK.rng((run.stageSeed + run.pos * 977 + (run.stats.fallsRun || 0)) >>> 0), prevZones);
     if (cid) run.deck.splice(run.pos, 0, cid);
     if (c.real_history) run.pending = { text: c.real_history, run: side ? side.this_run : '', against, outside: !!c.out_of_textbook, year: c.year };
     setTOD(false);
-    const bad = era.gauges.find((g) => run.vals[g.key] <= 0 || run.vals[g.key] >= 100);
     save();
     S.saveMeta();
-    setTimeout(() => {
-      if (bad) return fall(bad.key, run.vals[bad.key] >= 100 ? 100 : 0);
-      showCurrent();
-    }, Math.max(wait, c.single ? 500 : 900));
+    setTimeout(showCurrent, Math.max(wait, c.single ? 500 : 900));
   }
   // 건물을 차례로 세우고, 다 설 때까지 걸리는 시간(ms)을 돌려준다
   function doBuilds(keys, delay, stateIn) {
@@ -332,7 +391,8 @@
   }
 
   /* ---------- 실각 ---------- */
-  function fall(key, at, preview) {
+  // cr: 무너진 위기 { name, gauge, value, choice, p } (10-8-3 ④)
+  function fall(key, at, preview, cr) {
     const run = G.run;
     G.state = 'fall';
     Cards.hide();
@@ -365,10 +425,21 @@
       if (el < 2200 || (W.state.ink < 0.8 && el < 6000)) return;
       clearInterval(iv);
       if (G.state !== 'fall') return;
-      JK.UI.showFall({ rec, real: `${st.realEnd} ${again}`, hint, img: pics[st.kingRole || st.id], preview });
+      const crisis = cr ? { name: cr.name, gauge: g.name, value: cr.value, choice: cr.choice, p: cr.p } : null;
+      JK.UI.showFall({ rec, real: `${st.realEnd} ${again}`, hint, img: pics[st.kingRole || st.id], preview, crisis });
     }, 100);
   }
-  G.debugFall = () => fall('treasury', 0, true);
+  // 점검 상자 '실각 보기': 녹봉이 밀리다(국고 낮음) 위기에서 무너진 모습을 미리 본다(기록에 남지 않음)
+  G.debugFall = function () {
+    const c = cardsById['KT05'];
+    const v = Object.assign({}, G.run.vals, { treasury: 4 });
+    fall('treasury', 0, true, { name: c ? c.name : '국고 위기', value: 4, choice: c ? c.choices.left.label : '', p: c ? JK.Crisis.fallChance(c, 'left', v).p : 0.3 });
+  };
+  // 위기 칭호는 이룬 그 자리에서 준다(10-8-7)
+  function titleNow(rules) {
+    const got = awardTitles(rules);
+    if (got.length) setTimeout(() => Cards.toast(`새 칭호 「${got[0].name}」`, 2800), 2600);
+  }
   // 실각 뒤 (10-7): 새싹 = 시작 게이지 50 + 처음 3장 큰 미리보기 / 보통·성군 = 시작 게이지 그대로 / 실록 도전 = 판 전체 처음부터
   G.retryStage = function () {
     document.body.classList.remove('over');
@@ -377,6 +448,7 @@
     const run = G.run;
     const D = G.diff();
     if (D.afterFall === 'run') {
+      run.flagsRunBefore = {};
       run.builtBefore = [];
       run.statesBefore = {};
       run.flagsBefore = {};
@@ -404,6 +476,8 @@
     const got = [];
     if (run.stageStats.edge) got.push('edgeClear');
     if (!run.stageStats.falls) got.push('noFallStage');
+    const lastStage = !era.stages[stageIndex(st.id) + 1];
+    if (lastStage && (run.stats.held || 0) >= 5) got.push('held5');
     W.setTOD(Math.min(1, st.tod[1] + 0.06));
     const qs = pickQuiz(st.id, run.stageSeed);
     JK.Quiz.run(qs, { options: D.quizOptions, retry: D.quizRetry }, (res) => {
@@ -431,6 +505,7 @@
       run.builtBefore = run.built.slice();
       run.statesBefore = {};
       run.flagsBefore = Object.assign({}, run.flags || {});
+      run.flagsRunBefore = Object.assign({}, run.flagsRun || {});
       run.grownBefore = run.grown || 0;
       if (nst && nst.ready) {
         G.startStage(nst.id, next);
@@ -480,6 +555,14 @@
     G.run.pending = null;
     Cards.hide();
     showCurrent();
+  };
+  // 시험용: 지금 자리에 카드 한 장을 끼워 바로 보여 준다
+  G.debugInsert = function (id) {
+    if (G.state !== 'play' || !cardsById[id]) return;
+    G.run.pending = null;
+    G.run.deck.splice(G.run.pos, 0, id);
+    Cards.hide();
+    setTimeout(showCurrent, 300);
   };
   G.commit = (dir) => Cards.commit(dir);
 })();

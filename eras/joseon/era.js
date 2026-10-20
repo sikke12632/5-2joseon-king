@@ -50,48 +50,73 @@
       { id: 'gojong', king: '고종', seal: '高宗', title: '개항 압력', years: '1863~1899', ready: false },
     ],
     data: D,
-    // 게이지 위기 (설계서 10-8 — 지금 숫자는 임시. 10-8이 나오면 그 표로 바꾼다)
-    //  zones: 낮음 ≤warn 경고, ≤danger 위험 (높음은 100에서 같은 거리)
-    //  chance: 그 구간에 있을 때 카드마다 위기 카드가 끼어들 확률(난이도 crisisMult를 곱함)
-    //  rest: 위기 카드 뒤 쉬는 장수 · alerts: 구간에 처음 들어설 때 뜨는 짧은 알림
-    //  scenes: 세계 반응(사람 무리·깃발·연기·봉수 불·불빛). 자리는 map.js crisis. 폭력 장면 없음
+    // 게이지 위기 (설계서 10-8, v3 규칙). 단계별 값은 { sprout, normal, sage, annals }
     crisis: {
-      zones: { warn: 25, danger: 12 },
-      chance: { warn: 0.15, danger: 0.35 },
-      rest: 3,
-      alerts: {
-        people: { low: { warn: '백성들의 불만이 커지고 있사옵니다.', danger: '백성들이 궁궐 앞에 모였사옵니다!' }, high: { warn: '백성의 청만 쌓이고 있사옵니다.', danger: '잔치 소리에 나랏일이 멈추었사옵니다!' } },
-        nobles: { low: { warn: '대신들이 하나둘 등을 돌리옵니다.', danger: '대신들이 벼슬을 내던지고 떠나옵니다!' }, high: { warn: '대신들의 목소리가 너무 커지옵니다.', danger: '대신들이 궁궐 마당을 메웠사옵니다!' } },
-        treasury: { low: { warn: '곳간이 비어 가옵니다.', danger: '곳간이 바닥나 마을 불빛이 꺼져 가옵니다!' }, high: { warn: '곳간만 차고 쓰이지 않사옵니다.', danger: '곳간을 노리는 관리들이 모였사옵니다!' } },
-        army: { low: { warn: '성을 지킬 군사가 줄고 있사옵니다.', danger: '산마다 봉수 불이 올랐사옵니다!' }, high: { warn: '장수들의 힘이 커지고 있사옵니다.', danger: '군사들이 도성 문 앞에 늘어섰사옵니다!' } },
+      // 10-8-1 구간: 거리(0·100까지 남은 값) < warn → 위험, < stable → 경고, < cliff(6) → 벼랑, 0 → 끝
+      zones: { sprout: { stable: 31, warn: 16 }, normal: { stable: 26, warn: 16 }, sage: { stable: 21, warn: 13 }, annals: { stable: 21, warn: 11 } },
+      cliff: 6,
+      // 10-8-2 예고: 왕당 최대 장수
+      forewarnMax: { sprout: 5, normal: 4, sage: 4, annals: 4 },
+      // 10-8-3 ① 카드마다 위기가 터질 확률(보통). 난이도 crisisMult를 곱하고 95%가 상한
+      chance: { warn: 0.06, danger: 0.18, cliff: 0.4, end: 0.75, cap: 0.95 },
+      // 쉬는 장수(위기 뒤 이 동안 새 위기 없음). 끝 구간에서는 모든 단계 1
+      rest: { sprout: 5, normal: 3, sage: 2, annals: 2, end: 1 },
+      // 10-8-3 ②③ 실각 확률 = 구간 기본값 × 대응 배율 × 난이도 배율 (+ 후속 가산), 상한 95%
+      fall: {
+        base: { warn: 0.05, danger: 0.15, cliff: 0.35, end: 0.6 },
+        response: { strong: 0.5, light: 0.75, weakStrong: 0.75, weakLight: 1.0 },
+        diff: { sprout: 0.5, normal: 1.0, sage: 1.2, annals: 1.4 },
+        followAdd: { sprout: 0.05, normal: 0.1, sage: 0.1, annals: 0.15 },
+        cap: 0.95,
       },
+      // 위기 카드 버튼 아래: 새싹 숫자 / 보통 말 / 성군·실록 없음
+      showChance: { sprout: 'number', normal: 'words', sage: 'none', annals: 'none' },
+      // 10-8-3 ⑤ 후속: 수습 뒤 거리 15 이하면 정해진 장수 안에 반드시. 그 안에 거리 16 이상이면 취소
+      followup: { within: { sprout: 4, normal: 3, sage: 2, annals: 2 } },
+      followupIfAtMost: 15,
+      followupCancelAt: 16,
+      followupMaxStep: 3,
+      // 담임 추가 규칙: 수습한 위기 종류는 이 장수 동안 다시 터지지 않는다 (숫자는 10-8 표가 나오면 바꾼다 — 임시)
+      cooldown: { sprout: 8, normal: 6, sage: 5, annals: 4 },
+      // 구간에 처음 들어설 때 뜨는 짧은 알림
+      alerts: {
+        people: { low: { warn: '백성들의 불만이 커지고 있사옵니다.', danger: '백성들이 궁궐 앞에 모이고 있사옵니다!', end: '백성의 마음이 바닥났사옵니다!' }, high: { warn: '백성 눈치만 본다는 말이 도옵니다.', danger: '관아 일이 멈추어 가옵니다!', end: '관리들이 손을 놓았사옵니다!' } },
+        nobles: { low: { warn: '대신들이 하나둘 등을 돌리옵니다.', danger: '빈 방석이 늘어 가옵니다!', end: '밤마다 한 집에 불이 켜지옵니다!' }, high: { warn: '대신들끼리 수군거리옵니다.', danger: '대신들 방에만 불이 켜지옵니다!', end: '왕명이 되돌아오옵니다!' } },
+        treasury: { low: { warn: '곳간 쌀가마가 줄고 있사옵니다.', danger: '곳간 문이 열린 채 텅 비었사옵니다!', end: '녹봉을 못 받은 관리들이 줄을 섰사옵니다!' }, high: { warn: '곳간이 넘쳐 가옵니다.', danger: '곳간에 쥐가 드나드옵니다!', end: '곳간을 두고 다툼이 났사옵니다!' } },
+        army: { low: { warn: '성벽 위 군사가 줄고 있사옵니다.', danger: '봉수대에 연기가 오르옵니다!', end: '산마다 봉수 불이 올랐사옵니다!' }, high: { warn: '성 밖 군막이 늘어 가옵니다.', danger: '장수 깃발이 궁궐 깃발보다 많사옵니다!', end: '군사들이 도성 문 앞을 막아섰사옵니다!' } },
+      },
+      // 10-8-4 세계 반응: warn(1단계) · danger(2단계, 위험·벼랑·끝) · event(3단계, 위기 사건). 폭력 장면 없음
       scenes: {
         people: {
           low: {
-            warn: { crowds: [{ at: 'gate', n: 6, face: 'gyeongbok', flags: 2, flag: '#f4f0e4', clothes: ['#ece4d2', '#e3dccb'] }] },
-            danger: { crowds: [{ at: 'gate', n: 14, face: 'gyeongbok', flags: 5, flag: '#f4f0e4', clothes: ['#ece4d2', '#e3dccb', '#ddd2bb'] }], smoke: ['fields'] },
+            warn: {},
+            danger: { crowds: [{ at: 'gate', n: 8, face: 'gyeongbok', flags: 0, clothes: ['#ece4d2', '#e3dccb'] }] },
+            event: { crowds: [{ at: 'gate', n: 16, face: 'gyeongbok', flags: 5, flag: '#f4f0e4', clothes: ['#ece4d2', '#e3dccb', '#ddd2bb'] }], smoke: ['fields'] },
           },
           high: {
-            warn: { crowds: [{ at: 'street', n: 6, mode: 'hop', flags: 2, flag: '#e98f8f', clothes: ['#f2c86b', '#e98f8f', '#9cc9a8'] }] },
-            danger: { crowds: [{ at: 'street', n: 12, mode: 'hop', flags: 4, flag: '#f2c86b', clothes: ['#f2c86b', '#e98f8f', '#9cc9a8'] }] },
+            warn: {},
+            danger: { lights: 0.6 },
+            event: { lights: 0.3, crowds: [{ at: 'yard', n: 6, face: 'gyeongbok', flags: 0, clothes: ['#3d5e8c', '#9a3d3a'] }] },
           },
         },
         nobles: {
-          low: { warn: { processions: [{ path: 'leave', n: 4, clothes: ['#d7e8e0', '#e9eef0'] }] }, danger: { processions: [{ path: 'leave', n: 9, clothes: ['#d7e8e0', '#e9eef0', '#c9dcea'] }] } },
+          low: { warn: {}, danger: { processions: [{ path: 'leave', n: 4, clothes: ['#d7e8e0', '#e9eef0'] }] }, event: { processions: [{ path: 'leave', n: 9, clothes: ['#d7e8e0', '#e9eef0', '#c9dcea'] }], lights: 0.4 } },
           high: {
-            warn: { crowds: [{ at: 'yard', n: 6, face: 'gyeongbok', flags: 2, flag: '#3d5e8c', clothes: ['#3d5e8c', '#9a3d3a'] }] },
-            danger: { crowds: [{ at: 'yard', n: 12, face: 'gyeongbok', flags: 4, flag: '#3d5e8c', clothes: ['#3d5e8c', '#9a3d3a', '#3f7a62'] }] },
+            warn: { crowds: [{ at: 'yard', n: 4, face: 'yard', flags: 0, clothes: ['#3d5e8c', '#9a3d3a'] }] },
+            danger: { crowds: [{ at: 'yard', n: 8, face: 'yard', flags: 2, flag: '#3d5e8c', clothes: ['#3d5e8c', '#9a3d3a'] }] },
+            event: { crowds: [{ at: 'yard', n: 12, face: 'gyeongbok', flags: 4, flag: '#3d5e8c', clothes: ['#3d5e8c', '#9a3d3a', '#3f7a62'] }] },
           },
         },
         treasury: {
-          low: { warn: { lights: 0.45 }, danger: { lights: 0.1 } },
-          high: { warn: { crowds: [{ at: 'street', n: 5, face: 'gyeongbok', flags: 1, flag: '#d8b64e', clothes: ['#3d5e8c', '#9a3d3a'] }] }, danger: { crowds: [{ at: 'street', n: 10, face: 'gyeongbok', flags: 3, flag: '#d8b64e', clothes: ['#3d5e8c', '#9a3d3a'] }] } },
+          low: { warn: { lights: 0.7 }, danger: { lights: 0.35 }, event: { lights: 0.1, crowds: [{ at: 'yard', n: 8, face: 'gyeongbok', flags: 0, clothes: ['#3d5e8c', '#3f7a62'] }] } },
+          high: { warn: {}, danger: { crowds: [{ at: 'street', n: 5, face: 'gyeongbok', flags: 1, flag: '#d8b64e', clothes: ['#3d5e8c', '#9a3d3a'] }] }, event: { crowds: [{ at: 'street', n: 10, face: 'gyeongbok', flags: 3, flag: '#d8b64e', clothes: ['#3d5e8c', '#9a3d3a'] }] } },
         },
         army: {
-          low: { warn: { beacons: 1 }, danger: { beacons: 3 } },
+          low: { warn: {}, danger: { beacons: 1 }, event: { beacons: 3 } },
           high: {
-            warn: { crowds: [{ at: 'southGate', n: 6, face: 'gyeongbok', flags: 2, flag: '#b23b30', clothes: ['#4a4a55'] }] },
-            danger: { crowds: [{ at: 'southGate', n: 12, face: 'gyeongbok', flags: 4, flag: '#b23b30', clothes: ['#4a4a55', '#3a3a44'] }] },
+            warn: {},
+            danger: { crowds: [{ at: 'southGate', n: 6, face: 'gyeongbok', flags: 2, flag: '#b23b30', clothes: ['#4a4a55'] }] },
+            event: { crowds: [{ at: 'southGate', n: 12, face: 'gyeongbok', flags: 4, flag: '#b23b30', clothes: ['#4a4a55', '#3a3a44'] }] },
           },
         },
       },

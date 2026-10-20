@@ -1951,7 +1951,7 @@
     for (const g in zones) {
       const z = zones[g];
       if (z.level === 'stable') continue;
-      if (z.level === 'danger') tension = Math.max(tension, 1);
+      if (z.level === 'danger' || z.level === 'event') tension = Math.max(tension, 1);
       const sc = ((CS[g] || {})[z.side] || {})[z.level];
       if (!sc) continue;
       for (const c of sc.crowds || []) placeCrowd(c.at, c.n, c.clothes || ['#ece4d2'], c.hat, c.face, c.flags || 0, c.flag || '#c0392b', c.mode || 'stand');
@@ -2415,7 +2415,7 @@
     u.uBloom.value = cfg.bloom ? 1 : 0.5;
     u.uInk.value = W.state.ink;
     u.uFxaa.value = cfg.msaa ? 0 : 1;
-    u.uGloom.value = Math.max(W.state.gloom || 0, (W.state.tension || 0) * 0.35);
+    u.uGloom.value = Math.max(W.state.gloom || 0, (W.state.tension || 0) * 0.35, (W.state.edge || 0) * 0.42);
     u.uAlarm.value = W.state.alarm || 0;
     u.uFocusY.value = view.focusY || 0.5;
     post.quad.material = post.compMat;
@@ -2557,8 +2557,13 @@
     if (Math.abs(S.ink - S.inkTarget) > 0.0005) S.ink += clamp(S.inkTarget - S.ink, -dt * 0.4, dt * 0.32);
     // 실각: 섬이 기울고 가라앉는다
     const tilt = S.inkTarget > 0 ? smooth(0, 1, S.ink) : smooth(0, 1, S.ink);
-    W.island.rotation.z = tilt * 0.09;
-    W.island.rotation.x = tilt * -0.05;
+    // 끝 구간(게이지 0·100): 섬 가장자리가 살짝 기울고 색이 엷어짐 — 실각 연출의 예고 (10-8-4)
+    if (Math.abs((S.edgeTarget || 0) - (S.edge || 0)) > 0.002) {
+      S.edge = (S.edge || 0) + ((S.edgeTarget || 0) - (S.edge || 0)) * Math.min(1, dt * 0.9);
+      if (frameNo % 6 === 0) shadowFrames = Math.max(shadowFrames, 1);
+    }
+    W.island.rotation.z = tilt * 0.09 + S.edge * 0.018;
+    W.island.rotation.x = tilt * -0.05 - S.edge * 0.01;
     W.island.position.y = -tilt * 0.9;
     // 연출
     for (let i = anims.length - 1; i >= 0; i--) {

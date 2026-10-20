@@ -224,16 +224,26 @@ def table_after(title):
 def records():
     falls = []
     gmap = {'백성': 'people', '양반': 'nobles', '국고': 'treasury', '국방': 'army'}
+    # v3(10-8): 실각은 위기 사건에서 무너졌을 때. id는 예전 저장과 맞도록 people0(낮음)·people100(높음)
     for r in table_after('**실각 기록 (도감'):
-        m = re.match(r'(백성|양반|국고|국방) (0|100)', r[0])
+        m = re.match(r'(백성|양반|국고|국방) (낮음|높음|0|100)', r[0])
         if m:
-            falls.append({'id': gmap[m.group(1)] + m.group(2), 'gauge': gmap[m.group(1)], 'at': int(m.group(2)), 'name': r[1], 'text': r[2]})
-    rules = {'아슬아슬 줄타기': 'edgeClear'}
+            at = 0 if m.group(2) in ('낮음', '0') else 100
+            falls.append({'id': gmap[m.group(1)] + str(at), 'gauge': gmap[m.group(1)], 'at': at, 'side': 'low' if at == 0 else 'high', 'name': r[1], 'text': r[2]})
+        elif r[0].startswith('붕당'):
+            falls.append({'id': 'faction', 'gauge': 'faction', 'at': 0, 'name': r[1], 'text': r[2], 'stages': ['yeongjo']})
+    rules = {'아슬아슬 줄타기': 'edgeClear', '위기를 넘긴 임금': 'held5', '벼랑 끝의 임금': 'heldAtEnd', '같은 위기는 두 번 없다': 'cancel3'}
     titles = []
     for r in table_after('### 4-2. 엔딩 칭호'):
         if not r[0].isdigit():
             continue
         titles.append({'id': 'title' + r[0].zfill(2), 'name': r[1], 'hint': r[3] if r[3] != '—' else '', 'cond': r[2], 'rule': rules.get(r[1], 'later')})
+    # 위기 칭호 3개 (10-8-7). 힌트는 설계서에 없어 조건을 짧게 가린 말로 둔다
+    hint = {'held5': '위기를 여러 번 넘겨 보라', 'heldAtEnd': '끝에서 돌아온 임금', 'cancel3': '버틴 뒤 바로 고쳐라'}
+    for r in table_after('#### 10-8-7.'):
+        if r[0] == '칭호':
+            rule = rules.get(r[1], 'later')
+            titles.append({'id': 'crisis-' + rule, 'name': r[1], 'hint': hint.get(rule, ''), 'cond': r[2], 'rule': rule})
     codex = []
     for r in table_after('**인물 도감'):
         if len(r) < 4:
@@ -334,7 +344,7 @@ def to105(c):
     if c.get('daily', {}).get('required'):
         o['required_in'] = c['daily']['required']
     if c.get('daily', {}).get('cond'):
-        o['conditions'] = [c['daily']['cond']]
+        o['conditions_text'] = c['daily']['cond']
     if c['type'] == 'daily':
         o['rarity'] = 'common'
     if c.get('year'):
@@ -382,6 +392,77 @@ def to105(c):
     return o
 
 
+# ---------- 위기 카드 (10-8-5): 예고 NT·위기 KT·후속 KTb, 모두 [게임 속 일] ----------
+# 번호 순서: 01 백성 낮음, 02 백성 높음, 03 양반 낮음 … 08 국방 높음. 오른쪽 = 강한 대응
+CRISIS_ORDER = [('people', 'low'), ('people', 'high'), ('nobles', 'low'), ('nobles', 'high'), ('treasury', 'low'), ('treasury', 'high'), ('army', 'low'), ('army', 'high')]
+# 수습하면 손상되는 건물(10-8-5 아래 줄). 지도에 없는 곳(관아·곳간·공신 집)은 비워 두면 엔진이 지어진 건물 하나를 고른다
+CRISIS_DAMAGE = {'04': ['gyeongbok'], '07': ['wall'], '08': ['sungnye', 'heungin', 'donui', 'sukjeong']}
+CRISIS_DOLL = {'고을에서 올라온 관리': 'official_green', '호조 판서': 'official_red', '호조 관리': 'official_blue', '승지': 'official_red', '내관': 'naegwan', '장터를 돌아본 내관': 'naegwan', '곳간지기': 'farmer', '바닷가 군관': 'official_green', '병조 관리': 'official_blue', '병조 판서': 'official_red'}
+
+
+def crisis_side(cell):
+    lm = re.match(r'\*\*\[([^\]]+)\]\*\*\s*(.*?)\s+—\s+(?:이번 판에서:\s*)?(.*)$', cell)
+    if not lm:
+        raise SystemExit('위기 카드 칸을 못 읽음: ' + cell)
+    fx, _ = effects(lm.group(2))
+    return {'label': lm.group(1).strip(), 'effects': fx, 'this_run': lm.group(3).strip().strip('"“”')}
+
+
+def crisis_cards():
+    out = []
+    for hm in re.finditer(r'^#### 10-8-\d+\. (\S+) 위기 카드', src, re.M):
+        stage = KING.get(hm.group(1))
+        if stage not in STAGES:
+            continue
+        p = PREFIX[stage]
+        sec = src[hm.start():]
+        sec = sec[: sec.index('\n#### ', 5)]
+
+        def rows(title):
+            i = sec.index(title)
+            rs = []
+            for ln in sec[i:].split('\n')[1:]:
+                if ln.startswith('|') and not ln.startswith('|---'):
+                    rs.append([x.strip() for x in ln.strip().strip('|').split('|')])
+                elif rs and not ln.strip():
+                    break
+            return rs[1:]
+        base = {'kind': 'crisis', 'stages': [stage], 'game_event': True, 'out_of_textbook': False, 'choice_type': 'free', 'strong': 'right'}
+        who_of = {}
+        for r in rows('**예고 카드'):
+            n = r[0][-2:]
+            g, side = CRISIS_ORDER[int(n) - 1]
+            who = r[2]
+            out.append(dict(base, id=r[0], gauge=g, side=side, level='warn', who={'name': who, 'doll': CRISIS_DOLL.get(who) or role_of(who, r[0])}, line=r[3], conditions_text=r[1],
+                            choices={'right': crisis_side(r[4]), 'left': crisis_side(r[5])}, sources=[], fx={}))
+        for r in rows('**위기 8장'):
+            n = r[0][-2:]
+            g, side = CRISIS_ORDER[int(n) - 1]
+            name = re.sub(r'\s*\(.*?\)\s*$', '', r[1]).strip()
+            wm = re.match(r'(.+?):\s*["“](.*)["”]$', r[2])
+            who, line = wm.group(1).strip(), wm.group(2).strip()
+            who_of[n] = who
+            c = dict(base, id=r[0], gauge=g, side=side, level='event', name=name, who={'name': who, 'doll': CRISIS_DOLL.get(who) or role_of(who, r[0])}, line=line,
+                     choices={'right': crisis_side(r[3]), 'left': crisis_side(r[4])}, sources=[], fx={})
+            sim = r[5]
+            if not sim.startswith('(비움'):
+                sm = re.match(r'["“](.*?)["”]\s*\((.*)\)$', sim)
+                c['similar'] = {'text': sm.group(1), 'sources_text': sm.group(2), 'sources': src105(sources(sm.group(2))), 'out_of_textbook': '[교과서 밖]' in sm.group(2)}
+            if n in CRISIS_DAMAGE:
+                c['damage'] = {'targets': CRISIS_DAMAGE[n]}
+            out.append(c)
+        for r in rows('**후속 위기'):
+            n = r[0][-3:-1]
+            g, side = CRISIS_ORDER[int(n) - 1]
+            ev = next(x for x in out if x['id'] == 'K' + p + n)
+            c = dict(base, id=r[0], gauge=g, side=side, level='followup', step=2, name=ev['name'], who=dict(ev['who']), line=r[1].strip('"“”'),
+                     choices={'right': crisis_side(r[2]), 'left': crisis_side(r[3])}, sources=[], fx={})
+            if n in CRISIS_DAMAGE:
+                c['damage'] = {'targets': CRISIS_DAMAGE[n]}
+            out.append(c)
+    return out
+
+
 cards = block_cards() + daily_cards()
 CARDS_BY_ID = {c['id']: c for c in cards}
 for c in cards:
@@ -389,6 +470,7 @@ for c in cards:
     if c['who'] in ('sagwan', 'jeong') and c.get('whoName') in ('사관', '정도전'):
         c.pop('whoName')
 qs = quizzes()
+crisis = crisis_cards()
 falls, titles, codex = records()
 
 # 왕별 파일: data/<왕>/cards.js(그 왕의 역사·사관·전용 일상), data/<왕>/quizzes.js
@@ -398,6 +480,7 @@ for st in STAGES:
     os.makedirs(d, exist_ok=True)
     mine = [to105(c) for c in cards if c['type'] != 'daily' and c['stage'] == st]
     mine += [to105(c) for c in cards if c['type'] == 'daily' and re.match(r'D[A-Z]\d{3}$', c['id']) and st in c['daily']['kings']]
+    mine += [c for c in crisis if c['stages'] == [st]]
     open(os.path.join(d, 'cards.js'), 'w', encoding='utf-8', newline='\n').write(js(f"D.cards.push(...{json.dumps(mine, ensure_ascii=False, indent=1)});"))
     qq = []
     for q in qs:
@@ -426,5 +509,6 @@ open(os.path.join(common, 'records.js'), 'w', encoding='utf-8', newline='\n').wr
     f"D.falls.push(...{json.dumps(falls, ensure_ascii=False, indent=1)});\n  D.titles.push(...{json.dumps(titles, ensure_ascii=False, indent=1)});\n  D.codex.push(...{json.dumps(codex, ensure_ascii=False, indent=1)});"))
 roles = sorted(set(c['who'] for c in cards))
 print(f'카드 {len(cards)}장 (역사·사관 {sum(1 for c in cards if c["type"] != "daily")}, 일상 {sum(1 for c in cards if c["type"] == "daily")}) · 퀴즈 {len(qs)} · 실각 {len(falls)} · 칭호 {len(titles)} · 도감 {len(codex)}')
+print(f'위기 카드 {len(crisis)}장 (예고 {sum(c["level"] == "warn" for c in crisis)} · 위기 {sum(c["level"] == "event" for c in crisis)} · 후속 {sum(c["level"] == "followup" for c in crisis)})')
 print('쓰인 인형:', ', '.join(roles))
 print('거스른 쪽(against):', ', '.join(f"{c['id']}={against_side(c)}" for c in cards if against_side(c)))

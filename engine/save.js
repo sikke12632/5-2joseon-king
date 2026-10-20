@@ -40,6 +40,11 @@
     plays: 0, // 새로 시작한 판 수
     cardsPlayed: 0,
     quiz: { asked: 0, right: 0 },
+    // 게이지 위기(10-8-7): 위기 카드 id(KT01 — 후속 KT01b도 KT01 칸) → 버틴/무너진 횟수
+    crisis: { held: {}, fell: {} },
+    heldLog: [], // 기록관 "버틴 위기": { name, p, stage, day } 최근 40줄
+    fallCrisis: {}, // 실각 기록 id → 그 실각을 부른 위기 이름들("○○ 위기에서 무너짐" 띠)
+    archive: [], // 기록관: 왕마다 "나의 역사 vs 실제 역사" 비교(10-10)
   });
   const defaultSettings = () => ({ sound: false, music: false, tier: 'auto', short: false, difficulty: 'normal' });
 
@@ -69,6 +74,7 @@
   };
   // 나중에 저장 형식이 바뀌면 여기서 옛 형식을 고친다
   function migrate(m) {
+    if (m && !m.crisis) m.crisis = { held: {}, fell: {} };
     return m;
   }
   S.saveMeta = () => writeJSON(key('meta'), S.meta);
@@ -98,6 +104,20 @@
     if (!S.meta.seen[id]) S.meta.seen[id] = today();
   };
   S.addFall = (id) => (S.meta.falls[id] = (S.meta.falls[id] || 0) + 1);
+  // 위기 결과를 영구 기록에 남긴다 (r: crisis.js resolve 결과)
+  S.addCrisis = function (r, fallId) {
+    const m = S.meta;
+    const slot = r.card.replace(/b$/, '');
+    const box = r.fell ? m.crisis.fell : m.crisis.held;
+    box[slot] = (box[slot] || 0) + 1;
+    if (r.fell) {
+      const l = (m.fallCrisis[fallId] = m.fallCrisis[fallId] || []);
+      if (!l.includes(r.name)) l.push(r.name);
+    } else {
+      m.heldLog.unshift({ name: r.name, p: Math.round(r.p * 100), stage: r.stage, day: today() });
+      if (m.heldLog.length > 40) m.heldLog.length = 40;
+    }
+  };
   S.addTitle = function (id) {
     if (S.meta.titles[id]) return false;
     S.meta.titles[id] = today();
@@ -107,7 +127,7 @@
   // 코드를 짧게: 날짜는 버리고 id만 쉼표로 잇는다
   function packMeta(m) {
     const ids = (o) => Object.keys(o).join(',');
-    return { s: ids(m.seen), t: ids(m.titles), f: m.falls, c: m.clears, p: m.plays, n: m.cardsPlayed, q: [m.quiz.asked, m.quiz.right] };
+    return { s: ids(m.seen), t: ids(m.titles), f: m.falls, c: m.clears, p: m.plays, n: m.cardsPlayed, q: [m.quiz.asked, m.quiz.right], x: { cr: m.crisis, hl: m.heldLog, fc: m.fallCrisis, bs: m.buildStates || {}, ar: m.archive } };
   }
   function unpackMeta(k) {
     if (!k || k.seen) return k; // 옛 형식
@@ -117,7 +137,8 @@
       for (const id of (str || '').split(',')) if (id) o[id] = day;
       return o;
     };
-    return { seen: obj(k.s), titles: obj(k.t), falls: k.f || {}, clears: k.c || {}, plays: k.p || 0, cardsPlayed: k.n || 0, quiz: { asked: (k.q || [])[0] || 0, right: (k.q || [])[1] || 0 } };
+    const x = k.x || {};
+    return { seen: obj(k.s), titles: obj(k.t), falls: k.f || {}, clears: k.c || {}, plays: k.p || 0, cardsPlayed: k.n || 0, quiz: { asked: (k.q || [])[0] || 0, right: (k.q || [])[1] || 0 }, crisis: x.cr || { held: {}, fell: {} }, heldLog: x.hl || [], fallCrisis: x.fc || {}, buildStates: x.bs || {}, archive: x.ar || [] };
   }
 
   /* ---------- 기록 코드 (기기를 바꿔도 이어가기) ----------
