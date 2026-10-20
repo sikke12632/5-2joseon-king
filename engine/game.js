@@ -17,6 +17,7 @@
     pics = opts.portraits;
     for (const c of era.data.cards) cardsById[c.id] = c;
     Cards.init({ gauges: era.gauges, onCommit: commit });
+    JK.Crisis.init();
   };
   G.card = (id) => cardsById[id];
   const stageOf = (id) => era.stages.find((s) => s.id === id);
@@ -113,6 +114,9 @@
     run.grown = run.grownBefore || 0;
     run.stageStats = { edge: false, falls: run.stageStats && run.stageStats.stage === stageId ? run.stageStats.falls : 0, stage: stageId };
     run.waiting = null;
+    run.zones = {};
+    run.crisisRest = 0;
+    run.damaged = {};
     G.state = 'play';
     setupWorld(st, false);
     save();
@@ -146,7 +150,8 @@
     W.camTo(W.CAM_PLAY, restoring ? 1.2 : 2.4);
     W.setOrbit(false);
     Cards.setGauges(G.run.vals, true);
-    refreshWarn();
+    refreshWarn(true);
+    for (const k in G.run.damaged || {}) W.setBuildState(k, 'damaged', 0);
     JK.UI.setStage(st);
   }
   function setTOD(instant) {
@@ -158,12 +163,9 @@
   function save() {
     S.saveRun(G.run);
   }
-  // 위험 경고: 게이지가 난이도별 경계를 넘으면 깜빡인다
-  function refreshWarn() {
-    const D = G.diff();
-    const on = [];
-    if (D.warn) for (const k in G.run.vals) if (G.run.vals[k] <= D.warn || G.run.vals[k] >= 100 - D.warn) on.push(k);
-    Cards.setWarn(on);
+  // 게이지 구간(안정/경고/위험): 아이콘·알림·세계 반응 (engine/crisis.js)
+  function refreshWarn(quiet) {
+    JK.Crisis.apply(G.run, quiet);
   }
 
   /* ---------- 카드 보여 주기 ---------- */
@@ -185,7 +187,9 @@
       for (const k in side.effects || {}) o[k] = G.effect(k, side.effects[k], run.vals);
       return o;
     };
+    if (c.kind === 'crisis') v.tag = c.level === 'event' ? '위기' : '예고';
     Object.assign(v, {
+      crisis: c.kind === 'crisis' ? c.level : '',
       text: c.line,
       left: c.choices && c.choices.left.label,
       right: c.choices && c.choices.right.label,
@@ -256,6 +260,8 @@
     S.meta.cardsPlayed++;
     W.cardPassed();
     if (c.kind === 'daily') run.used.push(c.id);
+    // 위기 사건 카드: 큰 연출과 건물 손상(이번 판에서)
+    if (c.kind === 'crisis' && c.level === 'event') JK.Crisis.event(run, c);
     // 짓기: 이름 있는 건물은 어느 쪽을 골라도 역사대로 선다. 고른 방식은 건물 상태로 남는다(설계서 7-4).
     let wait = against ? 1300 : 700;
     const builds = (side ? side.build : c.fx && c.fx.build) || [];
@@ -269,6 +275,9 @@
     }
     run.grown = (run.grown || 0) + 1;
     run.pos++;
+    // 위기 카드 끼워 넣기: 지금 구간에 따라 확률로 다음 자리에(역사 카드 순서는 그대로 밀린다)
+    const cid = JK.Crisis.pick(run, JK.rng((run.stageSeed + run.pos * 977 + (run.stats.fallsRun || 0)) >>> 0));
+    if (cid) run.deck.splice(run.pos, 0, cid);
     if (c.real_history) run.pending = { text: c.real_history, run: side ? side.this_run : '', against, outside: !!c.out_of_textbook, year: c.year };
     setTOD(false);
     const bad = era.gauges.find((g) => run.vals[g.key] <= 0 || run.vals[g.key] >= 100);

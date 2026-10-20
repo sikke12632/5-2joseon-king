@@ -16,6 +16,7 @@
   const U = (JK.U = {
     uTime: { value: 0 },
     uNight: { value: 0 }, // 0 낮 ~ 1 밤: 창 불빛
+    uLights: { value: 1 }, // 창 불빛 세기(게이지 위기 때 줄어듦)
     uWater: { value: new T.Color('#5fb7c9') },
   });
 
@@ -23,6 +24,7 @@
   function patchToy(shader) {
     shader.uniforms.uTime = U.uTime;
     shader.uniforms.uNight = U.uNight;
+    shader.uniforms.uLights = U.uLights;
     shader.vertexShader = shader.vertexShader
       .replace(
         '#include <common>',
@@ -50,7 +52,7 @@
     shader.fragmentShader = shader.fragmentShader
       .replace(
         '#include <common>',
-        '#include <common>\nvarying vec3 vFx;\nuniform float uTime;\nuniform float uNight;'
+        '#include <common>\nvarying vec3 vFx;\nuniform float uTime;\nuniform float uNight;\nuniform float uLights;'
       )
       .replace(
         '#include <color_fragment>',
@@ -82,7 +84,7 @@
         [
           '#include <emissivemap_fragment>',
           'if ( kind > 1.5 && kind < 2.5 ) {',
-          '  totalEmissiveRadiance += vec3( 1.0, 0.62, 0.26 ) * uNight * 1.6;',
+          '  totalEmissiveRadiance += vec3( 1.0, 0.62, 0.26 ) * uNight * uLights * 1.6;',
           '}',
           'if ( kind > 4.5 && kind < 5.5 ) { totalEmissiveRadiance += diffuseColor.rgb * 0.25; }',
         ].join('\n')

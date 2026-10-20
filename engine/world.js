@@ -470,7 +470,7 @@
       gl_FragColor = vec4( c, 1.0 );
     }`;
   const compFrag = `
-    uniform sampler2D tScene, tBlur; uniform vec2 uTexel; uniform float uTilt, uFocusY, uInk, uBloom, uTime, uFlash, uAspect, uGloom;
+    uniform sampler2D tScene, tBlur; uniform vec2 uTexel; uniform float uTilt, uFocusY, uInk, uBloom, uTime, uFlash, uAspect, uGloom, uAlarm;
     varying vec2 vUv;
     float h21( vec2 p ){ return fract( sin( dot( p, vec2( 127.1, 311.7 ) ) ) * 43758.5453 ); }
     float vn( vec2 p ){ vec2 i = floor( p ), f = fract( p ); f = f*f*(3.0-2.0*f);
@@ -514,6 +514,11 @@
       float v = smoothstep( 1.05, 0.35, length( ( vUv - 0.5 ) * vec2( 1.0, 0.9 ) ) );
       s *= mix( 0.86, 1.0, v );
       s += uFlash * 0.25;
+      // 위기 경보: 붉은 가장자리가 맥박처럼
+      if ( uAlarm > 0.001 ) {
+        float va = smoothstep( 0.35, 0.95, length( ( vUv - 0.5 ) * vec2( uAspect * 0.75, 1.0 ) ) );
+        s = mix( s, s * vec3( 1.15, 0.62, 0.55 ), uAlarm * ( 0.25 + 0.75 * va ) );
+      }
       // "그래도 역사는 흘렀다": 하늘이 어두워지고 색이 빠지는 한 박자
       if ( uGloom > 0.001 ) {
         float vg = smoothstep( 0.2, 0.85, length( ( vUv - 0.5 ) * vec2( uAspect * 0.8, 1.0 ) ) );
@@ -1695,6 +1700,11 @@
   // cards: 먹구름·일꾼이 남는 카드 수 (늦게는 이 왕이 끝날 때까지)
   W.setBuildState = function (key, state, cards) {
     if (state === 'smooth' || !state) return;
+    if (state === 'damaged') {
+      ensureCrisisMeshes();
+      if (!stateFx.some((f) => f.key === key && f.kind === 'damaged')) addDamage(key);
+      return;
+    }
     if (state === 'cheer') {
       ensureStateMeshes();
       const fp = footprint(key);
@@ -1768,6 +1778,7 @@
     }
   };
   W.clearStates = function () {
+    damageSmoke.length = 0;
     for (const f of stateFx) if (f.mesh) {
       W.island.remove(f.mesh);
       f.mesh.geometry.dispose();
@@ -1848,6 +1859,238 @@
     setTimeout(() => W.shake(0.6), 520);
     if (JK.Audio) JK.Audio.drum();
   };
+
+  /* ================= 게이지 위기: 세계가 게이지를 따라 바뀐다 =================
+   * 시대팩 map.crisis 의 자리(궁궐 앞, 큰길, 들판, 떠나는 길)와 era.crisis.scenes 의 장면 표를 읽는다.
+   * 폭력 장면은 없다: 모인 사람·깃발·연기·봉수 불·꺼지는 불빛만. */
+  let crowdMesh = null,
+    flagMeshC = null,
+    smokeMesh = null,
+    fireMesh = null;
+  const CROWD_MAX = 48,
+    FLAG_MAX = 18,
+    SMOKE_MAX = 40,
+    FIRE_MAX = 8;
+  let crowdList = [],
+    flagList = [],
+    smokeList = [],
+    fireList = [];
+  function ensureCrisisMeshes() {
+    if (crowdMesh) return;
+    crowdMesh = new T.InstancedMesh(JK.walkerDoll(), JK.MAT, CROWD_MAX);
+    crowdMesh.count = 0;
+    crowdMesh.frustumCulled = false;
+    W.island.add(crowdMesh);
+    const fb = new JK.Builder();
+    fb.cyl(0, 0, 0, 0.012, 0.012, 0.75, 4, JK.col('#6b4a30'), { noTop: true });
+    fb.kind(3);
+    fb.quad([0.012, 0.48, 0], [0.3, 0.5, 0], [0.3, 0.72, 0], [0.012, 0.74, 0], JK.col('#ffffff'));
+    fb.quad([0.3, 0.5, 0], [0.012, 0.48, 0], [0.012, 0.74, 0], [0.3, 0.72, 0], JK.col('#ffffff'));
+    fb.kind(0);
+    flagMeshC = new T.InstancedMesh(fb.build(), JK.MAT, FLAG_MAX);
+    flagMeshC.count = 0;
+    flagMeshC.frustumCulled = false;
+    W.island.add(flagMeshC);
+    // 연기 퍼프는 가벼운 공(20면)
+    smokeMesh = new T.InstancedMesh(new T.IcosahedronGeometry(1, 0), new T.MeshLambertMaterial({ color: 0x55565c, emissive: 0x2c2c30, emissiveIntensity: 0.6, flatShading: true }), SMOKE_MAX);
+    smokeMesh.count = 0;
+    smokeMesh.frustumCulled = false;
+    W.island.add(smokeMesh);
+    fireMesh = new T.InstancedMesh(new T.ConeGeometry(0.09, 0.32, 6), new T.MeshBasicMaterial({ color: 0xff8a2a }), FIRE_MAX);
+    fireMesh.count = 0;
+    fireMesh.frustumCulled = false;
+    W.island.add(fireMesh);
+  }
+  // 자리 이름: map.crisis(궁궐 앞·들판 …) → 성문 → 터 순서로 찾는다. 목록이면 모든 점
+  const anchorsOf = (a) => {
+    if (typeof a !== 'string') return [a];
+    const c = (MAP.crisis || {})[a];
+    if (c) return Array.isArray(c[0]) ? c : [c];
+    if (gatePos[a]) return [gatePos[a]];
+    if (SITES[a]) return [[SITES[a].x, SITES[a].z]];
+    return [];
+  };
+  const anchorOf = (a) => anchorsOf(a)[0] || [0, 0];
+  // 무리: 자리 둘레에 줄지어 서서 한곳(face)을 바라본다
+  function placeCrowd(at, n, clothes, hat, face, flags, flagColor, mode) {
+    const [cx, cz] = anchorOf(at);
+    const fp = face ? anchorOf(face) : null;
+    const rnd = JK.rng(Math.round(cx * 100 + cz * 7 + n));
+    for (let i = 0; i < n; i++) {
+      const row = Math.floor(i / 6),
+        col = (i % 6) - 2.5;
+      const x = cx + col * 0.22 + (rnd() - 0.5) * 0.1,
+        z = cz + row * 0.26 + (rnd() - 0.5) * 0.1;
+      const yaw = fp ? Math.atan2(fp[0] - x, fp[1] - z) : rnd() * 6.28;
+      crowdList.push({ x, z, y: height(x, z), yaw, ph: rnd() * 6, color: JK.col(clothes[i % clothes.length]), mode, hat });
+    }
+    for (let i = 0; i < flags; i++) {
+      const x = cx + (i - (flags - 1) / 2) * 0.42,
+        z = cz + 0.05 + (i % 2) * 0.15;
+      flagList.push({ x, z, y: height(x, z), ph: i * 1.3, color: JK.col(flagColor) });
+    }
+  }
+  // 떠나는 행렬: 길을 따라 걷는다
+  function placeProcession(path, n, clothes) {
+    const pts = path.map(anchorOf);
+    for (let i = 0; i < n; i++) crowdList.push({ path: pts, s: i / n, ph: i, color: JK.col(clothes[i % clothes.length]), mode: 'walk' });
+  }
+  let sceneKey = '';
+  W.crisisScene = function (zones) {
+    const CS = (JK.era && JK.era.crisis && JK.era.crisis.scenes) || {};
+    const key = JSON.stringify(zones);
+    if (key === sceneKey) return;
+    sceneKey = key;
+    ensureCrisisMeshes();
+    crowdList = [];
+    flagList = [];
+    smokeList = [];
+    fireList = [];
+    let lights = 1,
+      tension = 0;
+    for (const g in zones) {
+      const z = zones[g];
+      if (z.level === 'stable') continue;
+      if (z.level === 'danger') tension = Math.max(tension, 1);
+      const sc = ((CS[g] || {})[z.side] || {})[z.level];
+      if (!sc) continue;
+      for (const c of sc.crowds || []) placeCrowd(c.at, c.n, c.clothes || ['#ece4d2'], c.hat, c.face, c.flags || 0, c.flag || '#c0392b', c.mode || 'stand');
+      for (const p of sc.processions || []) placeProcession((MAP.crisis || {})[p.path] || p.path, p.n, p.clothes || ['#d7e8e0']);
+      for (const a of sc.smoke || [])
+        for (const [x, zz] of anchorsOf(a)) smokeList.push({ x, z: zz, y: height(x, zz) });
+      if (sc.beacons) {
+        // 봉수 불: 높은 산꼭대기부터
+        const peaks = MOUNTS.filter((m) => m[2] >= 1.0).sort((a, b) => b[2] - a[2]).slice(0, sc.beacons);
+        for (const m of peaks) {
+          fireList.push({ x: m[0], z: m[1], y: height(m[0], m[1]) });
+          smokeList.push({ x: m[0], z: m[1], y: height(m[0], m[1]) + 0.2, thin: true });
+        }
+      }
+      if (sc.lights !== undefined) lights = Math.min(lights, sc.lights);
+    }
+    W.state.lightsTarget = lights;
+    W.state.tensionTarget = tension;
+  };
+  function updateCrisis(dt, t) {
+    const S = W.state;
+    if (S.lightsTarget !== undefined) JK.U.uLights.value += (S.lightsTarget - JK.U.uLights.value) * Math.min(1, dt * 1.5);
+    S.tension = (S.tension || 0) + ((S.tensionTarget || 0) - (S.tension || 0)) * Math.min(1, dt * 0.8);
+    if (S.alarm) S.alarm = Math.max(0, S.alarm - dt * 0.35);
+    if (!crowdMesh) return;
+    let ci = 0;
+    for (const c of crowdList) {
+      if (ci >= CROWD_MAX) break;
+      let x = c.x,
+        z = c.z,
+        y = c.y,
+        yaw = c.yaw,
+        roll = 0;
+      if (c.mode === 'walk') {
+        c.s = (c.s + dt * 0.035) % 1;
+        const pts = c.path;
+        const f = c.s * (pts.length - 1),
+          k = Math.floor(f),
+          u = f - k;
+        const a = pts[k],
+          b = pts[Math.min(k + 1, pts.length - 1)];
+        x = a[0] + (b[0] - a[0]) * u;
+        z = a[1] + (b[1] - a[1]) * u;
+        y = height(x, z) + Math.abs(Math.sin(t * 6 + c.ph)) * 0.03;
+        yaw = Math.atan2(b[0] - a[0], b[1] - a[1]);
+        roll = Math.sin(t * 6 + c.ph) * 0.1;
+      } else if (c.mode === 'hop') {
+        y += Math.abs(Math.sin(t * 6 + c.ph)) * 0.1;
+      } else {
+        // 모여 서서 들썩인다
+        y += Math.abs(Math.sin(t * 2.4 + c.ph)) * 0.03;
+        roll = Math.sin(t * 2.4 + c.ph) * 0.06;
+      }
+      _sp.set(x, y, z);
+      _se.set(0, yaw, roll, 'YXZ');
+      _sq.setFromEuler(_se);
+      _ss.set(0.42, 0.42, 0.42);
+      _sm.compose(_sp, _sq, _ss);
+      crowdMesh.setMatrixAt(ci, _sm);
+      crowdMesh.setColorAt(ci, c.color);
+      ci++;
+    }
+    crowdMesh.count = ci;
+    crowdMesh.instanceMatrix.needsUpdate = true;
+    if (crowdMesh.instanceColor) crowdMesh.instanceColor.needsUpdate = true;
+    let fi = 0;
+    for (const f of flagList) {
+      if (fi >= FLAG_MAX) break;
+      _sp.set(f.x, f.y, f.z);
+      _se.set(0, 0.6 + Math.sin(t * 2 + f.ph) * 0.25, Math.sin(t * 3 + f.ph) * 0.05);
+      _sq.setFromEuler(_se);
+      _ss.set(1.7, 1.7, 1.7);
+      _sm.compose(_sp, _sq, _ss);
+      flagMeshC.setMatrixAt(fi, _sm);
+      flagMeshC.setColorAt(fi, f.color);
+      fi++;
+    }
+    flagMeshC.count = fi;
+    flagMeshC.instanceMatrix.needsUpdate = true;
+    if (flagMeshC.instanceColor) flagMeshC.instanceColor.needsUpdate = true;
+    // 연기 기둥: 퍼프가 위로 올라가며 커지다 작아진다
+    let si = 0;
+    const emitters = smokeList.concat(damageSmoke);
+    for (const e of emitters) {
+      const n = e.thin ? 3 : 5;
+      for (let i = 0; i < n && si < SMOKE_MAX; i++) {
+        const ph = (t * 0.22 + i / n + (e.x * 0.13) % 1) % 1;
+        const sc = (e.thin ? 0.22 : 0.42) * Math.sin(ph * Math.PI) + 0.04;
+        _sp.set(e.x + Math.sin(t * 0.5 + i) * 0.15 + ph * 0.5, e.y + 0.25 + ph * (e.thin ? 1.8 : 2.6), e.z + ph * 0.25);
+        _se.set(0, i, 0);
+        _sq.setFromEuler(_se);
+        _ss.set(sc, sc * 0.8, sc);
+        _sm.compose(_sp, _sq, _ss);
+        smokeMesh.setMatrixAt(si++, _sm);
+      }
+    }
+    smokeMesh.count = si;
+    smokeMesh.instanceMatrix.needsUpdate = true;
+    let ri = 0;
+    for (const f of fireList) {
+      if (ri >= FIRE_MAX) break;
+      const fl = 0.8 + Math.sin(t * 13 + f.x) * 0.15 + Math.sin(t * 7.3) * 0.1;
+      _sp.set(f.x, f.y + 0.15, f.z);
+      _se.set(0, t, 0);
+      _sq.setFromEuler(_se);
+      _ss.set(fl * 2.4, fl * 3.0, fl * 2.4);
+      _sm.compose(_sp, _sq, _ss);
+      fireMesh.setMatrixAt(ri++, _sm);
+    }
+    fireMesh.count = ri;
+    fireMesh.instanceMatrix.needsUpdate = true;
+  }
+  // 위기 사건: 붉은 경보 + 어두워짐 + 북 + 큰 흔들림
+  W.crisisBeat = function () {
+    W.historyBeat();
+    W.state.alarm = 1;
+  };
+  // 손상된 건물: 연기 기둥과 무너진 돌무더기 (이번 판에서만, 모양은 그대로)
+  const damageSmoke = [];
+  function addDamage(key) {
+    const fp = footprint(key);
+    if (!fp) return;
+    const p = fp.m.position;
+    damageSmoke.push({ key, x: p.x, z: p.z, y: p.y + fp.bb.max.y * 0.6 });
+    const b = new JK.Builder();
+    const rnd = JK.rng(key.length * 31);
+    const rock = JK.col('#8a8378'),
+      wood = JK.col('#4a3a2e');
+    for (let i = 0; i < 9; i++) {
+      const a = rnd() * 6.28,
+        r = 0.2 + rnd() * 0.25;
+      b.box(Math.cos(a) * r + (fp.bb.max.x + fp.bb.min.x) / 2, 0.03, Math.sin(a) * r + fp.bb.max.z, 0.08 + rnd() * 0.06, 0.06, 0.07, i % 3 ? rock : wood);
+    }
+    const m = new T.Mesh(b.build(), JK.MAT);
+    m.position.copy(p);
+    m.rotation.y = fp.m.rotation.y;
+    W.island.add(m);
+    stateFx.push({ key, kind: 'damaged', mesh: m, left: Infinity });
+  }
 
   /* ================= 카드 연출 (설계서 3장 연출 칸) ================= */
   // 짐배: 한강을 오가는 이름 없는 돛배
@@ -2119,6 +2362,7 @@
         uAspect: { value: 1 },
         uFxaa: { value: 0 },
         uGloom: { value: 0 },
+        uAlarm: { value: 0 },
       },
     });
     const quad = new T.Mesh(quadGeo, blurMat);
@@ -2171,7 +2415,8 @@
     u.uBloom.value = cfg.bloom ? 1 : 0.5;
     u.uInk.value = W.state.ink;
     u.uFxaa.value = cfg.msaa ? 0 : 1;
-    u.uGloom.value = W.state.gloom || 0;
+    u.uGloom.value = Math.max(W.state.gloom || 0, (W.state.tension || 0) * 0.35);
+    u.uAlarm.value = W.state.alarm || 0;
     u.uFocusY.value = view.focusY || 0.5;
     post.quad.material = post.compMat;
     renderer.setRenderTarget(null);
@@ -2338,6 +2583,7 @@
     }
     updatePeople(dt, clock.t);
     updateStates(clock.t);
+    updateCrisis(dt, clock.t);
     updateBoats(dt);
     stats.walkers = dollMesh.count;
     W.clouds.rotation.y += dt * 0.004;
@@ -2391,6 +2637,11 @@
     shadowRects.length = 0;
     repaintGround();
     W.clearStates();
+    sceneKey = '';
+    W.crisisScene({});
+    JK.U.uLights.value = 1;
+    W.state.tension = W.state.tensionTarget = 0;
+    W.state.alarm = 0;
     W.fxBoats(false);
     W.fxFlag(false);
     W.state.ink = 0;

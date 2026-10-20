@@ -43,7 +43,7 @@ const hasSource = (src) => Array.isArray(src) && src.some((s) => (s.type === 'gu
 
 /* ---------- 카드 (설계서 10-5 형식) ---------- */
 const ids = new Set();
-const KINDS = ['sagwan', 'history', 'device', 'daily', 'chain', 'rare', 'legend'];
+const KINDS = ['sagwan', 'history', 'device', 'daily', 'chain', 'rare', 'legend', 'crisis'];
 for (const c of D.cards) {
   const id = c.id || '(id 없음)';
   if (ids.has(id)) err(id, '카드 id 중복');
@@ -57,6 +57,12 @@ for (const c of D.cards) {
     if (!hasSource(c.sources)) err(id, '역사 카드 근거(sources) 없음');
   }
   if (c.kind === 'history' && !c.real_history) err(id, '역사 카드에 「실제 역사」(real_history) 없음');
+  // 위기 카드(설계서 10-8): 어느 게이지·어느 쪽·예고(warn)/사건(event)
+  if (c.kind === 'crisis') {
+    if (!gaugeKeys.includes(c.gauge)) err(id, `위기 카드 gauge 이상: ${c.gauge}`);
+    if (!['low', 'high'].includes(c.side)) err(id, `위기 카드 side 이상: ${c.side}`);
+    if (!['warn', 'event'].includes(c.level)) err(id, `위기 카드 level 이상: ${c.level}`);
+  }
   if (c.kind === 'daily' && (!c.sources || !c.sources.length) && !c.general) warn(id, '일상 카드 근거 없음(일반 상황이면 general: true)');
   if (!c.who || !D.roles[c.who.doll]) err(id, `인형(who.doll) 없음: ${c.who && c.who.doll}`);
   if (!c.line) err(id, '대사(line) 없음');

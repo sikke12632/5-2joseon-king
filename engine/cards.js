@@ -57,6 +57,8 @@
     $('#outside').style.display = v.outside ? '' : 'none';
     card.classList.toggle('scroll', !!v.scroll);
     card.classList.toggle('record', !!v.record);
+    card.classList.toggle('crisis', !!v.crisis);
+    card.classList.toggle('crisis-event', v.crisis === 'event');
     card.style.transition = 'none';
     card.style.transform = 'translate(0, 40px) rotateY(80deg) scale(0.96)';
     card.style.opacity = '0';
@@ -105,9 +107,26 @@
       if (heavy && fx[k] < 0) el.classList.add('hit');
     }
   };
-  // 위험 경고: 경계를 넘은 게이지가 깜빡인다(난이도별 경계)
-  C.setWarn = function (keys) {
-    for (const g of gauges) document.querySelector(`.gauge[data-key="${g.key}"]`).classList.toggle('warn', keys.includes(g.key));
+  // 게이지 구간: 경고 = 떨림·붉은 빛, 위험 = 빠른 떨림·맥박. 낮음/높음 표시
+  C.setZones = function (zones) {
+    for (const g of gauges) {
+      const el = document.querySelector(`.gauge[data-key="${g.key}"]`);
+      const z = zones[g.key] || { level: 'stable' };
+      el.classList.toggle('zone-warn', z.level === 'warn');
+      el.classList.toggle('zone-danger', z.level === 'danger');
+      el.classList.toggle('zone-low', z.side === 'low');
+      el.classList.toggle('zone-high', z.side === 'high');
+    }
+  };
+  C.setWarn = () => {};
+  // 구간에 처음 들어설 때 짧은 알림
+  let alertTimer = 0;
+  C.alert = function (g, text, level) {
+    const el = $('#zoneAlert');
+    el.innerHTML = `<svg viewBox="0 0 24 24">${g.icon}</svg><span>${text}</span>`;
+    el.className = 'show ' + level;
+    clearTimeout(alertTimer);
+    alertTimer = setTimeout(() => (el.className = ''), level === 'danger' ? 3600 : 2800);
   };
   // "그래도 역사는 흘렀다" 한 박자: 게이지 띠가 크게 흔들린다
   C.beat = function () {

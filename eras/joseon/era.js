@@ -50,6 +50,52 @@
       { id: 'gojong', king: '고종', seal: '高宗', title: '개항 압력', years: '1863~1899', ready: false },
     ],
     data: D,
+    // 게이지 위기 (설계서 10-8 — 지금 숫자는 임시. 10-8이 나오면 그 표로 바꾼다)
+    //  zones: 낮음 ≤warn 경고, ≤danger 위험 (높음은 100에서 같은 거리)
+    //  chance: 그 구간에 있을 때 카드마다 위기 카드가 끼어들 확률(난이도 crisisMult를 곱함)
+    //  rest: 위기 카드 뒤 쉬는 장수 · alerts: 구간에 처음 들어설 때 뜨는 짧은 알림
+    //  scenes: 세계 반응(사람 무리·깃발·연기·봉수 불·불빛). 자리는 map.js crisis. 폭력 장면 없음
+    crisis: {
+      zones: { warn: 25, danger: 12 },
+      chance: { warn: 0.15, danger: 0.35 },
+      rest: 3,
+      alerts: {
+        people: { low: { warn: '백성들의 불만이 커지고 있사옵니다.', danger: '백성들이 궁궐 앞에 모였사옵니다!' }, high: { warn: '백성의 청만 쌓이고 있사옵니다.', danger: '잔치 소리에 나랏일이 멈추었사옵니다!' } },
+        nobles: { low: { warn: '대신들이 하나둘 등을 돌리옵니다.', danger: '대신들이 벼슬을 내던지고 떠나옵니다!' }, high: { warn: '대신들의 목소리가 너무 커지옵니다.', danger: '대신들이 궁궐 마당을 메웠사옵니다!' } },
+        treasury: { low: { warn: '곳간이 비어 가옵니다.', danger: '곳간이 바닥나 마을 불빛이 꺼져 가옵니다!' }, high: { warn: '곳간만 차고 쓰이지 않사옵니다.', danger: '곳간을 노리는 관리들이 모였사옵니다!' } },
+        army: { low: { warn: '성을 지킬 군사가 줄고 있사옵니다.', danger: '산마다 봉수 불이 올랐사옵니다!' }, high: { warn: '장수들의 힘이 커지고 있사옵니다.', danger: '군사들이 도성 문 앞에 늘어섰사옵니다!' } },
+      },
+      scenes: {
+        people: {
+          low: {
+            warn: { crowds: [{ at: 'gate', n: 6, face: 'gyeongbok', flags: 2, flag: '#f4f0e4', clothes: ['#ece4d2', '#e3dccb'] }] },
+            danger: { crowds: [{ at: 'gate', n: 14, face: 'gyeongbok', flags: 5, flag: '#f4f0e4', clothes: ['#ece4d2', '#e3dccb', '#ddd2bb'] }], smoke: ['fields'] },
+          },
+          high: {
+            warn: { crowds: [{ at: 'street', n: 6, mode: 'hop', flags: 2, flag: '#e98f8f', clothes: ['#f2c86b', '#e98f8f', '#9cc9a8'] }] },
+            danger: { crowds: [{ at: 'street', n: 12, mode: 'hop', flags: 4, flag: '#f2c86b', clothes: ['#f2c86b', '#e98f8f', '#9cc9a8'] }] },
+          },
+        },
+        nobles: {
+          low: { warn: { processions: [{ path: 'leave', n: 4, clothes: ['#d7e8e0', '#e9eef0'] }] }, danger: { processions: [{ path: 'leave', n: 9, clothes: ['#d7e8e0', '#e9eef0', '#c9dcea'] }] } },
+          high: {
+            warn: { crowds: [{ at: 'yard', n: 6, face: 'gyeongbok', flags: 2, flag: '#3d5e8c', clothes: ['#3d5e8c', '#9a3d3a'] }] },
+            danger: { crowds: [{ at: 'yard', n: 12, face: 'gyeongbok', flags: 4, flag: '#3d5e8c', clothes: ['#3d5e8c', '#9a3d3a', '#3f7a62'] }] },
+          },
+        },
+        treasury: {
+          low: { warn: { lights: 0.45 }, danger: { lights: 0.1 } },
+          high: { warn: { crowds: [{ at: 'street', n: 5, face: 'gyeongbok', flags: 1, flag: '#d8b64e', clothes: ['#3d5e8c', '#9a3d3a'] }] }, danger: { crowds: [{ at: 'street', n: 10, face: 'gyeongbok', flags: 3, flag: '#d8b64e', clothes: ['#3d5e8c', '#9a3d3a'] }] } },
+        },
+        army: {
+          low: { warn: { beacons: 1 }, danger: { beacons: 3 } },
+          high: {
+            warn: { crowds: [{ at: 'southGate', n: 6, face: 'gyeongbok', flags: 2, flag: '#b23b30', clothes: ['#4a4a55'] }] },
+            danger: { crowds: [{ at: 'southGate', n: 12, face: 'gyeongbok', flags: 4, flag: '#b23b30', clothes: ['#4a4a55', '#3a3a44'] }] },
+          },
+        },
+      },
+    },
     // 난이도 (설계서 10-7). 역사·카드 순서·「실제 역사」는 난이도와 무관하고, 숫자와 도움말만 바뀐다.
     //  mult 게이지 변화 배율 · safe 안전 구간(이 값 아래/100−값 위에서 실각 쪽 변화에 k를 곱함)
     //  warn 위험 경고(이 값 이하·100−값 이상에서 깜빡임) · preview 미리보기 · carry 다음 왕이 이어받는 몫
@@ -60,23 +106,23 @@
     difficulty: {
       sprout: {
         name: '새싹', icon: '🌱', mult: 0.6, safe: { below: 20, k: 0.5 }, warn: 25, preview: 'arrows', carry: 0.25,
-        quizOptions: 3, quizRetry: true, quizBonus: 8, afterFall: 'reset50', hint: 'full', rareMult: 1.0, scoreMult: 0.7,
+        quizOptions: 3, quizRetry: true, quizBonus: 8, afterFall: 'reset50', hint: 'full', rareMult: 1.0, scoreMult: 0.7, crisisMult: 0.5,
         stage: { warCost: 0, food: 8, starvePeople: -3, scaleFall: 6, shipThreat: -10, sejongTriggers: [1, 2, 4] },
       },
       normal: {
         name: '보통', icon: '🙂', mult: 1.0, safe: { below: 10, k: 0.75 }, warn: 15, preview: 'dots', carry: 0.5,
-        quizOptions: 3, quizRetry: false, quizBonus: 5, afterFall: 'same', hint: 'gauge', rareMult: 1.0, scoreMult: 1.0,
+        quizOptions: 3, quizRetry: false, quizBonus: 5, afterFall: 'same', hint: 'gauge', rareMult: 1.0, scoreMult: 1.0, crisisMult: 1.0,
         stage: { warCost: -1, food: 6, starvePeople: -5, scaleFall: 5, shipThreat: -15, sejongTriggers: [2, 3, 5] },
       },
       sage: {
         name: '성군', icon: '👑', mult: 1.3, safe: null, warn: 10, preview: 'flat', carry: 0.75,
-        quizOptions: 4, quizRetry: false, quizBonus: 5, afterFall: 'same', hint: 'none', rareMult: 1.2, scoreMult: 1.3,
+        quizOptions: 4, quizRetry: false, quizBonus: 5, afterFall: 'same', hint: 'none', rareMult: 1.2, scoreMult: 1.3, crisisMult: 1.3,
         stage: { warCost: -2, food: 5, starvePeople: -8, scaleFall: 4, shipThreat: -20, sejongTriggers: [2, 4, 6] },
         unlock: { rule: 'fullRunNormal', text: '보통으로 한 판 끝내면 열려요' },
       },
       annals: {
         name: '실록 도전', icon: '📜', mult: 1.5, safe: null, warn: 0, preview: 'none', carry: 0.75,
-        quizOptions: 4, quizRetry: false, quizBonus: 3, afterFall: 'run', hint: 'none', rareMult: 1.5, scoreMult: 1.6,
+        quizOptions: 4, quizRetry: false, quizBonus: 3, afterFall: 'run', hint: 'none', rareMult: 1.5, scoreMult: 1.6, crisisMult: 1.5,
         stage: { warCost: -2, food: 5, starvePeople: -8, scaleFall: 4, shipThreat: -20, sejongTriggers: [2, 4, 6] },
         unlock: { rule: 'archive30', text: '기록관 30권이 쌓이면 열려요' },
       },
