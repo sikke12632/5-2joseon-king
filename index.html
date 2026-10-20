@@ -2,10 +2,151 @@
 <html lang="ko">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>조선의 왕</title>
-<script>location.replace('prototype/' + location.search);</script>
-<meta http-equiv="refresh" content="0; url=prototype/">
+<!-- 배포할 때마다 ?v= 숫자를 올린다(캐시) -->
+<link rel="stylesheet" href="engine/engine.css?v=2">
 </head>
-<body><a href="prototype/">조선의 왕 시제품 열기</a></body>
+<body>
+<div id="app">
+  <canvas id="gl"></canvas>
+  <div id="labels"></div>
+
+  <div id="hud">
+    <div id="stage"><span class="seal" id="stageSeal"></span><span id="stageName"></span></div>
+    <div class="topbtns">
+      <button id="btnHome" class="ibtn" aria-label="첫 화면" title="첫 화면으로">
+        <svg viewBox="0 0 24 24"><path d="M12 3.5L2.5 11.5h2.8V20h5v-5.2h3.4V20h5v-8.5h2.8z"/></svg>
+      </button>
+      <button id="btnSound" class="ibtn off" aria-label="소리 켜기" title="소리 켜기/끄기">
+        <svg viewBox="0 0 24 24"><path d="M3 9.5h4l5-4.5v14l-5-4.5H3z"/><path class="wave" d="M15.5 8.5a5 5 0 0 1 0 7M18 6a8.5 8.5 0 0 1 0 12" fill="none" stroke-width="2" stroke-linecap="round"/><path class="cross" d="M15.5 9l6 6M21.5 9l-6 6" fill="none" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+      <button id="btnSet" class="ibtn" aria-label="설정" title="설정">
+        <svg viewBox="0 0 24 24"><path d="M12 8.6a3.4 3.4 0 1 0 0 6.8 3.4 3.4 0 0 0 0-6.8zm8.2 4.6l1.8 1.4-2 3.4-2.2-.8a7.6 7.6 0 0 1-2 1.2l-.4 2.3h-3.9l-.4-2.3a7.6 7.6 0 0 1-2-1.2l-2.2.8-2-3.4 1.8-1.4a7.7 7.7 0 0 1 0-2.4L2 9.4l2-3.4 2.2.8a7.6 7.6 0 0 1 2-1.2L8.6 3.3h3.9l.4 2.3a7.6 7.6 0 0 1 2 1.2l2.2-.8 2 3.4-1.8 1.4a7.7 7.7 0 0 1 0 2.4z"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <section id="panel">
+    <div id="gauges"></div>
+    <div id="deck">
+      <div class="card-back"></div>
+      <div id="card">
+        <div class="choice left" id="chL"></div>
+        <div class="choice right" id="chR"></div>
+        <div id="outside">교과서 밖</div>
+        <div class="por-wrap"><img id="portrait" alt="" draggable="false"></div>
+        <div class="who-line"><span id="who"></span><span id="whoTitle"></span></div>
+        <p id="text"></p>
+        <div id="turn"></div>
+        <div id="hand" aria-hidden="true"><svg viewBox="0 0 48 48"><path d="M19 22V8.5a3 3 0 0 1 6 0V20l.4-.1a3 3 0 0 1 3.6 2.2l.2.1a3 3 0 0 1 4 2.3 3 3 0 0 1 4.6 2.4V33c0 6.6-4.6 11-11 11h-2c-4 0-6.7-1.8-8.8-5.3l-5.6-9.4a2.8 2.8 0 0 1 4.6-3.2L19 30z"/></svg><span>끌어서 넘겨요</span></div>
+      </div>
+    </div>
+    <div id="hint"><span id="hintL"></span><span id="hintR"></span></div>
+    <div id="result"></div>
+  </section>
+
+  <div id="title">
+    <div class="t-box">
+      <div class="t-small" id="tSmall"></div>
+      <h1 id="tTitle">조선의 왕</h1>
+      <div class="t-sub">태조에서 고종까지, 내가 짓는 한양</div>
+      <div class="t-btns">
+        <button id="btnContinue" class="big hide">이어 하기</button>
+        <button id="btnNew" class="big">시작하기</button>
+        <button id="btnRecords" class="big ghost">나의 기록</button>
+      </div>
+      <div class="t-note">카드를 오른쪽이나 왼쪽으로 끌어 넘겨요. (← → 키도 돼요)<br>소리는 꺼져 있어요. 오른쪽 위 스피커로 켤 수 있어요.</div>
+    </div>
+  </div>
+
+  <div id="quiz" class="modal hide">
+    <div class="m-box q-box">
+      <div class="q-head"><span id="qNum"></span><span id="qOutside" class="tag-out">교과서 밖</span></div>
+      <p id="qText"></p>
+      <div id="qOpts"></div>
+      <div id="qFeedback"></div>
+      <button id="qNext" class="big hide">다음 질문</button>
+    </div>
+  </div>
+
+  <div id="fall" class="modal bottom hide">
+    <div class="m-box f-box">
+      <img id="fallPortrait" alt="">
+      <h2>실각</h2>
+      <div id="fallName"></div>
+      <p id="fallMsg"></p>
+      <p id="fallReal"></p>
+      <div class="btns"><button id="btnRetry">다시 도전</button><button id="btnFallHome" class="ghost">첫 화면</button></div>
+    </div>
+  </div>
+
+  <div id="soon" class="modal bottom hide">
+    <div class="m-box e-box">
+      <div class="e-small" id="soonHead"></div>
+      <h2>사관 기록</h2>
+      <div id="soonQuiz"></div>
+      <div id="soonTitles" class="e-title"></div>
+      <div id="soonVals"></div>
+      <p id="soonNext"></p>
+      <div class="btns"><button id="btnSoonRecords" class="ghost">나의 기록</button><button id="btnSoonHome">첫 화면</button></div>
+    </div>
+  </div>
+
+  <div id="records" class="modal hide">
+    <div class="m-box r-box">
+      <h3>나의 기록</h3>
+      <div id="recSummary"></div>
+      <h4>도감</h4><ul id="recCodex"></ul>
+      <h4>칭호</h4><ul id="recTitles"></ul>
+      <h4>실각 기록</h4><ul id="recFalls"></ul>
+      <button data-close="records" class="close">닫기</button>
+    </div>
+  </div>
+
+  <div id="settings" class="modal side hide">
+    <div class="m-box s-box">
+      <h3>설정</h3>
+      <div class="row"><span>화질</span>
+        <label><input type="radio" name="tier" value="auto">자동</label>
+        <label><input type="radio" name="tier" value="high">높음</label>
+        <label><input type="radio" name="tier" value="normal">보통</label>
+        <label><input type="radio" name="tier" value="low">낮음</label>
+      </div>
+      <div class="row small" id="tierNow"></div>
+      <div class="row"><label><input type="checkbox" id="optSound">효과음</label><label><input type="checkbox" id="optMusic">음악</label></div>
+      <div class="row"><label><input type="checkbox" id="optShort">짧은 판 (꼭 나올 카드만)</label></div>
+      <h4>기록 코드</h4>
+      <div class="row small">다른 기기에서 이어 하려면 코드를 복사해 두었다가 그 기기에서 붙여 넣으세요.</div>
+      <textarea id="codeBox" rows="3" spellcheck="false" placeholder="여기에 기록 코드가 나와요 / 붙여 넣어요"></textarea>
+      <div class="row"><button id="btnExport">코드 만들기</button><button id="btnCopy">복사</button><button id="btnImport">불러오기</button></div>
+      <div class="row small" id="codeMsg"></div>
+      <div class="row small warn" id="saveWarn" style="display:none">이 기기에서는 저장이 되지 않아요. 기록 코드를 써 주세요.</div>
+      <div class="row"><button id="btnWipe" class="danger">이 기기의 기록 지우기</button><button data-close="settings">닫기</button></div>
+    </div>
+  </div>
+
+  <div id="debug" class="hide"></div>
+  <div id="lost" class="hide"><p>그래픽을 다시 불러오는 중…</p></div>
+  <div id="loading"><p>섬을 띄우는 중…</p></div>
+</div>
+<script src="engine/lib/three.min.js?v=2"></script>
+<script src="engine/toy.js?v=2"></script>
+<script src="engine/props.js?v=2"></script>
+<script src="eras/joseon/map.js?v=2"></script>
+<script src="eras/joseon/models.js?v=2"></script>
+<script src="eras/joseon/era.js?v=2"></script>
+<script src="eras/joseon/data/roles.js?v=2"></script>
+<script src="eras/joseon/data/cards.js?v=2"></script>
+<script src="eras/joseon/data/quizzes.js?v=2"></script>
+<script src="eras/joseon/data/records.js?v=2"></script>
+<script src="engine/save.js?v=2"></script>
+<script src="engine/world.js?v=2"></script>
+<script src="engine/audio.js?v=2"></script>
+<script src="engine/cards.js?v=2"></script>
+<script src="engine/quiz.js?v=2"></script>
+<script src="engine/game.js?v=2"></script>
+<script src="engine/ui.js?v=2"></script>
+<script src="engine/main.js?v=2"></script>
+</body>
 </html>
