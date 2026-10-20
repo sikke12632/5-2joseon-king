@@ -470,7 +470,7 @@
       gl_FragColor = vec4( c, 1.0 );
     }`;
   const compFrag = `
-    uniform sampler2D tScene, tBlur; uniform vec2 uTexel; uniform float uTilt, uFocusY, uInk, uBloom, uTime, uFlash, uAspect;
+    uniform sampler2D tScene, tBlur; uniform vec2 uTexel; uniform float uTilt, uFocusY, uInk, uBloom, uTime, uFlash, uAspect, uGloom;
     varying vec2 vUv;
     float h21( vec2 p ){ return fract( sin( dot( p, vec2( 127.1, 311.7 ) ) ) * 43758.5453 ); }
     float vn( vec2 p ){ vec2 i = floor( p ), f = fract( p ); f = f*f*(3.0-2.0*f);
@@ -514,6 +514,12 @@
       float v = smoothstep( 1.05, 0.35, length( ( vUv - 0.5 ) * vec2( 1.0, 0.9 ) ) );
       s *= mix( 0.86, 1.0, v );
       s += uFlash * 0.25;
+      // "그래도 역사는 흘렀다": 하늘이 어두워지고 색이 빠지는 한 박자
+      if ( uGloom > 0.001 ) {
+        float vg = smoothstep( 0.2, 0.85, length( ( vUv - 0.5 ) * vec2( uAspect * 0.8, 1.0 ) ) );
+        s = mix( s, vec3( lum( s ) ) * vec3( 0.86, 0.88, 0.98 ), uGloom * 0.55 );
+        s *= 1.0 - uGloom * ( 0.32 + 0.38 * vg );
+      }
       // 수묵화로 바뀌기
       if ( uInk > 0.001 ) {
         float L = lum( toS( sharp ) );
@@ -572,7 +578,7 @@
     camTo = {};
   let camT = 1,
     camDur = 1;
-  W.state = { ink: 0, inkTarget: 0, tod: 0.1, todTarget: 0.1, people: 50, idle: false, title: true };
+  W.state = { ink: 0, inkTarget: 0, tod: 0.1, todTarget: 0.1, people: 50, idle: false, title: true, gloom: 0 };
 
   /* ================= 초기화 ================= */
   W.init = function (cv, opts) {
@@ -1253,6 +1259,26 @@
     }
     P.needsUpdate = V.needsUpdate = T0.needsUpdate = true;
   }
+  // 순조롭게 지은 건물 위로 금빛 불꽃: 먼지 입자를 금색으로 잠깐 쓴다
+  function sparkle(x, y, z, r) {
+    const g = dust.geometry;
+    const P = g.attributes.position,
+      V = g.attributes.aVel,
+      T0 = g.attributes.aT0;
+    for (let i = 0; i < 40; i++) {
+      const k = dustHead;
+      dustHead = (dustHead + 1) % DUST_N;
+      const a = Math.random() * Math.PI * 2,
+        rr = Math.random() * r;
+      P.setXYZ(k, x + Math.cos(a) * rr, y + 0.4 + Math.random() * 0.6, z + Math.sin(a) * rr);
+      V.setXYZ(k, Math.cos(a) * 0.6, 1.2 + Math.random() * 1.2, Math.sin(a) * 0.6);
+      T0.setX(k, clock.t + 0.15 + Math.random() * 0.5);
+    }
+    P.needsUpdate = V.needsUpdate = T0.needsUpdate = true;
+    dust.material.uniforms.uColor.value.set('#ffe39a');
+    clearTimeout(sparkle.tm);
+    sparkle.tm = setTimeout(() => dust.material.uniforms.uColor.value.set('#f3e6c8'), 1700);
+  }
   let ringAnim = null;
   function shock(x, y, z, size) {
     ring.position.set(x, y + 0.04, z);
@@ -1273,7 +1299,10 @@
     built[key] = true;
     const sfx = JK.Audio;
     const kind = MAP.buildings[key] && MAP.buildings[key].kind;
-    if (kind === 'wall') return buildWallAnim(sfx, MAP.buildings[key]);
+    if (kind === 'wall') {
+      if (opts.state === 'forced' || opts.state === 'late') setTimeout(() => W.setBuildState(key, opts.state, 4), 800);
+      return buildWallAnim(sfx, MAP.buildings[key]);
+    }
     if (kind === 'village') return buildVillageAnim(key, sfx);
     if (kind === 'spots') {
       const subs = Object.keys(BUILD_DEFS).filter((k) => k.startsWith(key + ':'));
@@ -1285,6 +1314,40 @@
     const d = BUILD_DEFS[key];
     m.visible = true;
     m.scale.set(0.001, 0.001, 0.001);
+    // 억지로·늦게 지은 건물은 먹구름·비계 속에서 천천히 무겁게 올라간다
+    const heavy = opts.state === 'forced' || opts.state === 'late';
+    if (heavy) {
+      W.setBuildState(key, opts.state, 4);
+      const hd = 2.2;
+      anims.push({
+        t: -0.05,
+        dur: hd,
+        step(t) {
+          const k = clamp(t / hd, 0, 1);
+          const e = 1 - Math.pow(1 - k, 3);
+          // 계단처럼 조금씩 올라간다(공사가 더디게 이어지는 느낌)
+          const stepped = Math.min(1, Math.floor(e * 6) / 6 + (e * 6 - Math.floor(e * 6)) * 0.35);
+          m.scale.set(1, Math.max(0.001, stepped), 1);
+        },
+        end() {
+          m.scale.set(1, 1, 1);
+        },
+      });
+      const y0 = m.position.y;
+      setTimeout(() => {
+        burst(d.x, y0, d.z, 30, Math.max(d.shadowR[0], d.shadowR[1]) * 0.9, 0.7);
+        W.shake(0.45);
+        if (sfx) {
+          sfx.thud(0.9);
+          if (opts.state === 'late') sfx.hammer();
+        }
+      }, 90);
+      if (d.name) W.label(d.name, new T.Vector3(d.x, y0 + d.label, d.z), 3600);
+      W.focusOn(d.x, d.z, 0.4);
+      groundShadow(d.x, d.z, d.shadowR[0], d.shadowR[1], d.rot, 0.28);
+      shadowFrames = 150;
+      return hd;
+    }
     const dur = 0.95;
     anims.push({
       t: -0.05,
@@ -1303,15 +1366,16 @@
     setTimeout(() => {
       burst(d.x, y, d.z, 46, Math.max(d.shadowR[0], d.shadowR[1]) * 0.8, 1.4);
       shock(d.x, y, d.z, Math.max(d.shadowR[0], d.shadowR[1]) * 1.6);
-      W.shake(opts.state === 'forced' ? 0.6 : 0.35);
-      if (sfx) {
-        if (opts.state === 'forced') sfx.thud(0.9);
-        else sfx.pop(1);
-        if (opts.state === 'late') sfx.hammer();
+      W.shake(0.35);
+      if (sfx) sfx.pop(1);
+      // 순조롭게 지음: 금빛 불꽃과 둘레에서 환호하는 사람들
+      if (opts.state === 'smooth' && d.name) {
+        sparkle(d.x, y, d.z, Math.max(d.shadowR[0], d.shadowR[1]));
+        W.setBuildState(key, 'cheer', 0);
+        if (sfx && sfx.chime) setTimeout(() => sfx.chime(), 300);
       }
     }, 90);
     if (d.name) W.label(d.name, new T.Vector3(d.x, y + d.label, d.z), 3200);
-    if (opts.state) setTimeout(() => W.setBuildState(key, opts.state, 4), 700);
     W.focusOn(d.x, d.z, 0.4);
     groundShadow(d.x, d.z, d.shadowR[0], d.shadowR[1], d.rot, 0.28);
     shadowFrames = 70;
@@ -1558,6 +1622,8 @@
    * 늦게: 나무 비계와 천막 (이 왕이 끝날 때까지)
    * 상태는 장식이다. 건물 모양·크기·자리는 바꾸지 않는다. */
   const stateFx = [];
+  const TIRED_COLOR = JK.col('#a89a82');
+  const CHEER_COLORS = ['#f2c86b', '#e98f8f', '#9cc9a8', '#f3e9d8', '#c9dcea'].map((c) => JK.col(c));
   let stormMesh = null,
     workerMesh = null;
   const STORM_MAX = 12,
@@ -1629,6 +1695,24 @@
   // cards: 먹구름·일꾼이 남는 카드 수 (늦게는 이 왕이 끝날 때까지)
   W.setBuildState = function (key, state, cards) {
     if (state === 'smooth' || !state) return;
+    if (state === 'cheer') {
+      ensureStateMeshes();
+      const fp = footprint(key);
+      if (!fp) return;
+      const cx = fp.m.position.x,
+        cz = fp.m.position.z;
+      const rad = Math.max(fp.bb.max.x - fp.bb.min.x, fp.bb.max.z - fp.bb.min.z) / 2;
+      const pts = [];
+      for (let i = 0; i < 7; i++) {
+        const a = (i / 7) * Math.PI * 2 + 0.2;
+        const r = rad * 0.8 + 0.25;
+        const x = cx + Math.cos(a) * r,
+          z = cz + Math.sin(a) * r;
+        pts.push({ x, z, y: height(x, z), a });
+      }
+      stateFx.push({ key, kind: 'cheer', pts, until: clock.t + 4, t0: clock.t });
+      return;
+    }
     const def = MAP.buildings[key];
     if (state === 'late') {
       if (stateFx.some((f) => f.key === key && f.kind === 'scaffold')) return;
@@ -1678,7 +1762,7 @@
   W.cardPassed = function () {
     for (let i = stateFx.length - 1; i >= 0; i--) {
       const f = stateFx[i];
-      if (f.left === Infinity) continue;
+      if (f.left === Infinity || f.kind === 'cheer') continue;
       f.left--;
       if (f.left <= 0) stateFx.splice(i, 1);
     }
@@ -1700,7 +1784,24 @@
     if (!stormMesh) return;
     let si = 0,
       wi = 0;
+    for (let i = stateFx.length - 1; i >= 0; i--) if (stateFx[i].kind === 'cheer' && t > stateFx[i].until) stateFx.splice(i, 1);
     for (const f of stateFx) {
+      if (f.kind === 'cheer') {
+        for (const p of f.pts) {
+          if (wi >= WORKER_MAX) break;
+          // 깡충깡충 뛰며 환호
+          const hop = Math.abs(Math.sin((t - f.t0) * 7 + p.a * 3)) * 0.12;
+          _sp.set(p.x, p.y + hop, p.z);
+          _se.set(0, p.a + Math.PI / 2 + Math.PI, Math.sin((t - f.t0) * 7 + p.a) * 0.2, 'YXZ');
+          _sq.setFromEuler(_se);
+          _ss.set(0.33, 0.33, 0.33);
+          _sm.compose(_sp, _sq, _ss);
+          workerMesh.setMatrixAt(wi, _sm);
+          workerMesh.setColorAt(wi, CHEER_COLORS[wi % CHEER_COLORS.length]);
+          wi++;
+        }
+        continue;
+      }
       if (f.kind !== 'forced') continue;
       const fade = Math.min(1, (t - f.t0) * 1.5);
       for (let k = 0; k < 2 && si < STORM_MAX; k++) {
@@ -1720,14 +1821,33 @@
         _sq.setFromEuler(_se);
         _ss.set(0.3, 0.22, 0.3);
         _sm.compose(_sp, _sq, _ss);
+        workerMesh.setColorAt(wi, TIRED_COLOR);
         workerMesh.setMatrixAt(wi++, _sm);
       }
     }
     stormMesh.count = si;
     workerMesh.count = wi;
+    if (workerMesh.instanceColor) workerMesh.instanceColor.needsUpdate = true;
     stormMesh.instanceMatrix.needsUpdate = true;
     workerMesh.instanceMatrix.needsUpdate = true;
   }
+
+  // 역사를 거스르는 쪽을 골랐는데 일이 결국 일어날 때: 하늘이 어두워지고 북이 울리고 크게 흔들린다
+  W.historyBeat = function () {
+    anims.push({
+      t: 0,
+      dur: 2.6,
+      step(t) {
+        W.state.gloom = t < 0.3 ? t / 0.3 : t < 1.4 ? 1 : Math.max(0, 1 - (t - 1.4) / 1.2);
+      },
+      end() {
+        W.state.gloom = 0;
+      },
+    });
+    W.shake(0.9);
+    setTimeout(() => W.shake(0.6), 520);
+    if (JK.Audio) JK.Audio.drum();
+  };
 
   /* ================= 카드 연출 (설계서 3장 연출 칸) ================= */
   // 짐배: 한강을 오가는 이름 없는 돛배
@@ -1998,6 +2118,7 @@
         uFlash: { value: 0 },
         uAspect: { value: 1 },
         uFxaa: { value: 0 },
+        uGloom: { value: 0 },
       },
     });
     const quad = new T.Mesh(quadGeo, blurMat);
@@ -2050,6 +2171,7 @@
     u.uBloom.value = cfg.bloom ? 1 : 0.5;
     u.uInk.value = W.state.ink;
     u.uFxaa.value = cfg.msaa ? 0 : 1;
+    u.uGloom.value = W.state.gloom || 0;
     u.uFocusY.value = view.focusY || 0.5;
     post.quad.material = post.compMat;
     renderer.setRenderTarget(null);

@@ -127,6 +127,32 @@
     o.start(t);
     o.stop(t + 0.25);
   };
+  // "그래도 역사는 흘렀다": 큰 북 세 번
+  A.drum = function () {
+    if (!ok()) return;
+    const c = A.ctx;
+    [0, 0.42, 0.84].forEach((d, i) => {
+      const t = c.currentTime + d;
+      const o = c.createOscillator(),
+        g = c.createGain();
+      o.type = 'sine';
+      o.frequency.setValueAtTime(i === 2 ? 70 : 95, t);
+      o.frequency.exponentialRampToValueAtTime(42, t + 0.35);
+      env(g, t, 0.005, i === 2 ? 0.8 : 0.6, 0.45);
+      o.connect(g).connect(A.master);
+      o.start(t);
+      o.stop(t + 0.5);
+      const n = noiseSrc(),
+        f = c.createBiquadFilter(),
+        ng = c.createGain();
+      f.type = 'lowpass';
+      f.frequency.value = 300;
+      env(ng, t, 0.003, 0.25, 0.12);
+      n.connect(f).connect(ng).connect(A.master);
+      n.start(t);
+      n.stop(t + 0.2);
+    });
+  };
   // 늦게 지음: 망치 소리 몇 번
   A.hammer = function () {
     if (!ok()) return;

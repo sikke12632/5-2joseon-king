@@ -29,7 +29,7 @@ export default async function (t) {
     const dir = await t.eval(`(()=>{const r=__jk.G.run;if(r.pending) return 'R';const c=__jk.G.card(r.deck[r.pos]);if(c.single) return 'R';
       const f=${JSON.stringify(FORCE)};if(f[c.id]) return f[c.id];
       const cost=(fx)=>{let m=0;for(const k in r.vals){const v=r.vals[k]+(fx[k]||0);m=Math.max(m,Math.abs(v-50));}return m;};
-      return cost(c.right.fx)<=cost(c.left.fx)?'R':'L';})()`);
+      return cost(c.choices.right.effects)<=cost(c.choices.left.effects)?'R':'L';})()`);
     if (SHOTS.includes(cur + '-card') && OUT) await t.shot(`${OUT}/${cur}-card.png`);
     await key(dir);
     console.log(n, cur, dir, await t.eval('JSON.stringify(__jk.G.run.vals)'));
@@ -42,7 +42,7 @@ export default async function (t) {
   if (process.env.QUIZ !== '0') {
     for (let q = 0; q < 3; q++) {
       try { await t.waitFor("!document.querySelector('#quiz').classList.contains('hide')", 9000); } catch { break; }
-      await t.eval(`(()=>{const q=JK.era.data.quizzes.find(x=>x.q===document.querySelector('#qText').textContent);[...document.querySelectorAll('.q-opt')].find(b=>b.textContent===q.answer).click();})()`);
+      await t.eval(`(()=>{const q=JK.era.data.quizzes.find(x=>x.question===document.querySelector('#qText').textContent);[...document.querySelectorAll('.q-opt')].find(b=>b.textContent===q.answer).click();})()`);
       await t.sleep(400);
       await t.eval("document.querySelector('#qNext').click()");
     }

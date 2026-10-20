@@ -45,6 +45,22 @@
     };
     $('#optMusic').onchange = (e) => JK.Audio.setMusic(e.target.checked);
     $('#optShort').onchange = (e) => S.setSetting('short', e.target.checked);
+    // 난이도: 열리지 않은 단계는 잠김(점검 상자에서는 모두 열림)
+    const dsel = $('#optDiff');
+    dsel.innerHTML = '';
+    for (const id in era.difficulty) {
+      const d = era.difficulty[id];
+      const o = document.createElement('option');
+      o.value = id;
+      const locked = !UI.diffOpen(id);
+      o.textContent = `${d.icon} ${d.name}${locked ? ' 🔒 ' + d.unlock.text : ''}`;
+      o.disabled = locked;
+      dsel.appendChild(o);
+    }
+    dsel.onchange = (e) => {
+      JK.Game.setDifficulty(e.target.value);
+      paintSettings();
+    };
     document.querySelectorAll('input[name="tier"]').forEach((r) =>
       r.addEventListener('change', (e) => {
         const v = e.target.value;
@@ -112,6 +128,9 @@
     document.querySelectorAll('input[name="tier"]').forEach((r) => (r.checked = r.value === v));
     $('#tierNow').textContent = `지금: ${W.TIERS[W.getTier()].name}`;
     $('#optShort').checked = !!S.settings.short;
+    $('#optDiff').value = JK.Game.diffId();
+    const dd = era.difficulty[JK.Game.diffId()];
+    $('#diffNote').textContent = `게이지 변화 ×${dd.mult} · 다음 왕 시작 게이지 ${dd.carry === 0.5 ? '절반' : dd.carry === 0.25 ? '1/4' : '3/4'} 이어받기 · 퀴즈 보기 ${dd.quizOptions}개${dd.quizRetry ? '(틀리면 한 번 더)' : ''}. 역사는 어느 단계든 같아요.`;
     $('#saveWarn').style.display = S.ok ? 'none' : '';
     paintSound();
   }
@@ -126,6 +145,18 @@
     }
     $('#btnNew').textContent = has ? '처음부터' : '시작하기';
   }
+
+  // 난이도 단계가 열렸는지(설계서 10-7)
+  UI.diffOpen = function (id) {
+    const d = era.difficulty[id];
+    if (!d.unlock) return true;
+    if (new URLSearchParams(location.search).get('debug') === '1') return true;
+    if (d.unlock.rule === 'fullRunNormal') return !!(S.meta.fullRuns && S.meta.fullRuns.normal);
+    if (d.unlock.rule === 'archive30') return (S.meta.archive || 0) >= 30;
+    return false;
+  };
+  const STATE_NAME = { smooth: '순조롭게', forced: '억지로', late: '늦게' };
+  const bname = (k) => (era.map.buildings[k] && era.map.buildings[k].name) || '';
 
   /* ---------- 첫 화면 오가기 ---------- */
   UI.leaveTitle = function () {
@@ -157,7 +188,9 @@
     $('#fallPortrait').src = o.img || '';
     $('#fallName').textContent = o.rec.name;
     $('#fallMsg').textContent = (o.preview ? '(미리 보기) ' : '') + o.rec.text;
-    $('#fallReal').textContent = `${o.real || ''} 이 왕의 처음부터 다시!`;
+    $('#fallReal').textContent = o.real || '';
+    $('#fallHint').textContent = o.hint || '';
+    $('#fallHint').style.display = o.hint ? '' : 'none';
     open('#fall');
   };
 
@@ -170,6 +203,11 @@
     $('#soonTitles').textContent = w.titles && w.titles.length ? `새 칭호: ${w.titles.map((t) => `「${t.name}」`).join(' ')}` : '';
     $('#soonNext').textContent = next ? `다음 왕 「${next.king}」은 아직 준비 중이에요. 곧 이어집니다!` : '마지막 왕까지 마쳤습니다.';
     $('#soonVals').textContent = era.gauges.map((g) => `${g.name} ${w.vals[g.key]}`).join(' · ');
+    // 이 왕에서 세운 것과 그 모습(순조롭게·억지로·늦게)
+    $('#soonBuilt').innerHTML = (w.built || [])
+      .filter(([k]) => bname(k))
+      .map(([k, st]) => `<span class="bst ${st}">${st === 'smooth' ? '' : STATE_NAME[st] + ' 지은 '}${bname(k)}</span>`)
+      .join(' ');
     document.body.classList.add('over');
     open('#soon');
   };
@@ -196,12 +234,22 @@
     const cx = $('#recCodex');
     cx.innerHTML = '';
     const cats = [...new Set(D.codex.map((x) => x.cat))];
+    // 건물이 선 모습(설계서 7-4 도감 띠: "억지로 지은 ○○"). 세 모습을 다 보면 별
+    const bs = m.buildStates || {};
+    const stateBand = (x) => {
+      const keys = Object.keys(era.map.buildings).filter((k) => bname(k) && x.name.includes(bname(k)));
+      const seen = new Set();
+      for (const k of keys) for (const st in bs[k] || {}) seen.add(st);
+      if (!seen.size) return '';
+      const bands = [...seen].filter((st) => st !== 'smooth').map((st) => `<span class="bst ${st}">${STATE_NAME[st]} 지은 ${x.name}</span>`);
+      return (seen.size >= 3 ? ' ★' : '') + (bands.length ? ' ' + bands.join(' ') : '');
+    };
     for (const cat of cats) {
       const all = D.codex.filter((x) => x.cat === cat);
       const on = all.filter(codexOpen);
       const li = document.createElement('li');
       li.className = on.length ? 'on' : 'off';
-      li.innerHTML = `<b>${cat} ${on.length}/${all.length}</b>` + (on.length ? '<br>' + on.map((x) => `${x.name}${x.outside ? ' <span class="tag-out">교과서 밖</span>' : ''}`).join(' · ') : '');
+      li.innerHTML = `<b>${cat} ${on.length}/${all.length}</b>` + (on.length ? '<br>' + on.map((x) => `${x.name}${x.outside ? ' <span class="tag-out">교과서 밖</span>' : ''}${stateBand(x)}`).join(' · ') : '');
       cx.appendChild(li);
     }
     list($('#recFalls'), D.falls, (f) => m.falls[f.id], (f) => `${f.name} (${m.falls[f.id]}번)`, () => '？？？');

@@ -233,3 +233,29 @@ body:not(.portrait) #skyText { right: var(--panel-w); }
 /* 성문 글자 빛 (仁·義·禮) */
 .b-label.glyph { background: none; box-shadow: none; border: 0; font-size: 46px; color: #fff3c4; text-shadow: 0 0 12px #ffcf5a, 0 0 28px #ffb12e; }
 .b-label.glyph::after { display: none; }
+
+/* ===== 담임 피드백: 그래도 역사는 흘렀다 · 건물 모습 · 난이도 ===== */
+#runBox.against { background: rgba(255,236,230,.85); border: 2px solid #b23b30; }
+#runBox.against .run-label { color: #b23b30; font-weight: bold; }
+#stamp { position: absolute; right: 20px; top: 13%; z-index: 4; width: 92px; height: 92px; border-radius: 12px; border: 4px solid rgba(178,59,48,.9); color: rgba(178,59,48,.95); font-family: 'JKTitle', serif; font-size: 17px; line-height: 1.15; display: grid; place-items: center; text-align: center; transform: rotate(-12deg) scale(0); opacity: 0; pointer-events: none; background: rgba(255,248,236,.55); }
+#stamp.show { animation: stampIn .55s .25s cubic-bezier(.2,1.6,.4,1) forwards; }
+@keyframes stampIn { 0% { transform: rotate(-12deg) scale(2.2); opacity: 0; } 100% { transform: rotate(-12deg) scale(1); opacity: 1; } }
+body.beat #gauges { animation: beatShake .9s cubic-bezier(.36,.07,.19,.97); }
+@keyframes beatShake { 10%,90% { transform: translate(-2px,0) rotate(-.5deg); } 20%,80% { transform: translate(5px,0) rotate(1deg); } 30%,50%,70% { transform: translate(-8px,2px) rotate(-1.5deg); } 40%,60% { transform: translate(8px,-2px) rotate(1.5deg); } }
+.gauge.hit .g-icon { animation: ghit 1.1s; }
+@keyframes ghit { 15% { transform: scale(1.35) rotate(-10deg); filter: drop-shadow(0 0 12px #ff5040); } 35% { transform: scale(.8) rotate(8deg); } 60% { transform: scale(1.1); } }
+.gauge.warn .g-fill { animation: gwarn 1s infinite; }
+@keyframes gwarn { 50% { fill: #ff7a66; } }
+/* 미리보기 ▲▼ (새싹) */
+.gauge.pv-arrow .g-dot { width: auto; height: auto; background: none; box-shadow: none; font-size: 12px; color: #fff3d0; line-height: 1; }
+.gauge.pv-arrow.pv-mid .g-dot { font-size: 16px; }
+.gauge.pv-arrow.pv-big .g-dot { font-size: 21px; }
+.gauge.pv-arrow .g-dot { transform: none !important; }
+/* 건물 모습 띠 */
+.bst { display: inline-block; font-size: 12px; padding: 1px 7px; border-radius: 999px; background: #e7f1e4; color: #2f5f3a; margin: 2px 2px 0 0; }
+.bst.forced { background: #eee0dc; color: #7d2820; font-family: 'JKTitle', serif; }
+.bst.late { background: #efe7d2; color: #6b4a1e; font-family: 'JKTitle', serif; }
+#soonBuilt { margin-top: 6px; max-width: 520px; }
+#fallHint { font-size: 15px; color: #2f5f3a; background: #eef5ea; border-radius: 10px; padding: 6px 10px; margin: 8px 0 0; }
+#optDiff { font-family: inherit; font-size: 15px; padding: 4px 6px; border-radius: 8px; }
+#runText { white-space: pre-line; }

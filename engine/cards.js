@@ -38,7 +38,16 @@
     $('#whoTitle').style.display = v.tag ? '' : 'none';
     $('#text').textContent = v.text || '';
     $('#runBox').style.display = v.run ? '' : 'none';
-    $('#runText').textContent = v.run || '';
+    $('#runBox').classList.toggle('against', !!v.against);
+    $('#runLabel').textContent = v.against ? '이번 판에서 — 거스른 대가' : '이번 판에서';
+    const stamp = $('#stamp');
+    stamp.classList.remove('show');
+    if (v.against) {
+      void stamp.offsetWidth;
+      stamp.classList.add('show');
+    }
+    // 4단계 결과("~했지만 → … → … → …")는 화살표마다 줄을 바꾼다
+    $('#runText').textContent = (v.run || '').replace(/\s*→\s*/g, '\n→ ');
     $('#realLabel').style.display = v.record ? '' : 'none';
     $('#chL').textContent = v.single || v.left || '';
     $('#chR').textContent = v.single || v.right || '';
@@ -85,22 +94,41 @@
       }
     }
   };
-  C.flash = function (fx) {
+  // heavy: "그래도 역사는 흘렀다" 때 크게 흔들리며 깎임
+  C.flash = function (fx, heavy) {
     for (const k in fx) {
       const el = document.querySelector(`.gauge[data-key="${k}"]`);
       if (!el || !fx[k]) continue;
-      el.classList.remove('up', 'down');
+      el.classList.remove('up', 'down', 'hit');
       void el.offsetWidth;
       el.classList.add(fx[k] > 0 ? 'up' : 'down');
+      if (heavy && fx[k] < 0) el.classList.add('hit');
     }
   };
+  // 위험 경고: 경계를 넘은 게이지가 깜빡인다(난이도별 경계)
+  C.setWarn = function (keys) {
+    for (const g of gauges) document.querySelector(`.gauge[data-key="${g.key}"]`).classList.toggle('warn', keys.includes(g.key));
+  };
+  // "그래도 역사는 흘렀다" 한 박자: 게이지 띠가 크게 흔들린다
+  C.beat = function () {
+    document.body.classList.remove('beat');
+    void document.body.offsetWidth;
+    document.body.classList.add('beat');
+    C.shake();
+  };
+  // 미리보기(난이도별, 설계서 10-7): arrows ▲▼+크기 / dots 점 크기(레인즈) / flat 같은 크기 점 / none 없음
   function preview(dir) {
-    const fx = view && view.fx ? (dir > 0 ? view.fx.right : dir < 0 ? view.fx.left : null) : null;
+    const mode = (view && view.preview) || 'dots';
+    const fx = mode !== 'none' && view && view.fx ? (dir > 0 ? view.fx.right : dir < 0 ? view.fx.left : null) : null;
     for (const g of gauges) {
       const el = document.querySelector(`.gauge[data-key="${g.key}"]`);
-      const v = fx && fx[g.key] ? Math.abs(fx[g.key]) : 0;
+      const raw = fx && fx[g.key] ? fx[g.key] : 0;
+      const v = Math.abs(raw);
       el.classList.toggle('pv', v > 0);
-      el.classList.toggle('pv-big', v >= 15);
+      el.classList.toggle('pv-big', v >= 15 && mode !== 'flat');
+      el.classList.toggle('pv-mid', v >= 8 && v < 15 && mode === 'arrows');
+      el.classList.toggle('pv-arrow', v > 0 && mode === 'arrows');
+      el.querySelector('.g-dot').textContent = v > 0 && mode === 'arrows' ? (raw > 0 ? '▲' : '▼') : '';
     }
   }
   C.shake = function () {

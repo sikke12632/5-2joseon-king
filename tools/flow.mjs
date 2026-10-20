@@ -58,7 +58,7 @@ export default async function (t) {
   // 사관 퀴즈: 첫 문항은 정답, 둘째는 오답, 셋째 정답
   for (let q = 0; q < 3; q++) {
     await t.waitFor("!document.querySelector('#quiz').classList.contains('hide')", 9000);
-    const pick = await t.eval(`(()=>{const q=JK.era.data.quizzes.find(x=>x.q===document.querySelector('#qText').textContent);const bs=[...document.querySelectorAll('.q-opt')];
+    const pick = await t.eval(`(()=>{const q=JK.era.data.quizzes.find(x=>x.question===document.querySelector('#qText').textContent);const bs=[...document.querySelectorAll('.q-opt')];
       const b = ${q === 1} ? bs.find(b=>b.textContent!==q.answer) : bs.find(b=>b.textContent===q.answer); b.click(); return document.querySelector('#qText').textContent+' → '+b.textContent;})()`);
     await t.sleep(500);
     console.log('퀴즈', pick, '|', await t.eval("document.querySelector('#qFeedback').textContent"));

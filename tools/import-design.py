@@ -2,6 +2,8 @@
 
     python tools/import-design.py [왕 id ...]      (기본: taejo)
 
+결과(설계서 10-5 필드): eras/joseon/data/<왕>/cards.js · quizzes.js, data/common/daily.js · records.js
+
 설계서의 글을 손으로 옮기지 않고 이 스크립트로 옮긴다. 글을 고칠 일이 생기면 설계서를 고치고 다시 돌린다.
 화면 연출(세워지는 건물·건물 상태·하늘 글씨 등)처럼 설계서 표에 기계로 읽을 칸이 없는 것은 아래 STAGE_FX에 적는다.
 만든 뒤: node tools/check-data.mjs → python tools/subset-fonts.py tools/fonts-src
@@ -288,15 +290,96 @@ def role_of(name, cid):
     return ['official_blue', 'official_green', 'official_red'][sum(map(ord, n)) % 3]
 
 
-def js(var, items):
-    body = json.dumps(items, ensure_ascii=False, indent=1)
-    return f"""/* 설계서 v2에서 tools/import-design.py 로 만든 파일 — 직접 고치지 말고 설계서를 고친 뒤 다시 만든다 */
+def js(body):
+    return f"""/* 설계서 v2에서 tools/import-design.py 로 만든 파일 — 직접 고치지 말고 설계서를 고친 뒤 다시 만든다.
+ * 필드는 설계서 10-5 형식이다(스키마: eras/joseon/data/스키마.md). */
 (function () {{
   'use strict';
   const D = window.JK.eraData;
-  {var}
+  {body}
 }})();
 """
+
+
+def src105(lst):
+    out = []
+    for s in lst:
+        if s.get('url') is not None and 'site' in s:
+            out.append({'type': 'web', 'title': s['site'], 'url': s['url']})
+        else:
+            e = {'type': 'guide', 'page': s['page']}
+            if s.get('tb'):
+                e['tb'] = s['tb']
+            out.append(e)
+    return out
+
+
+def against_side(c):
+    # 반대가 있는 카드(oppose): 결과가 "~했지만 →"로 시작하는 쪽이 역사를 거스른 선택이다
+    if c.get('choice') != 'oppose':
+        return None
+    for side in ('right', 'left'):
+        first = c[side].get('result', '').split('→')[0]
+        if '지만' in first:
+            return side
+    return None
+
+
+def to105(c):
+    o = {'id': c['id']}
+    o['kind'] = {'scroll': 'sagwan', 'history': 'history', 'daily': 'daily'}[c['type']]
+    o['stages'] = [c['stage']] if 'stage' in c else c['daily']['kings']
+    if 'order' in c:
+        o['order'] = c['order']
+    if c.get('daily', {}).get('required'):
+        o['required_in'] = c['daily']['required']
+    if c.get('daily', {}).get('cond'):
+        o['conditions'] = [c['daily']['cond']]
+    if c['type'] == 'daily':
+        o['rarity'] = 'common'
+    if c.get('year'):
+        o['year'] = c['year']
+    o['who'] = {'name': c.get('whoName') or '', 'doll': c['who']}
+    o['line'] = c['text']
+    if c.get('single'):
+        o['single'] = c['single']
+    else:
+        o['choice_type'] = c.get('choice') or 'free'
+        o['choices'] = {}
+        for side in ('right', 'left'):
+            s = c[side]
+            ch = {'label': s['label'], 'effects': s['fx']}
+            if s.get('dev'):
+                ch['device'] = s['dev']
+            if s.get('result'):
+                ch['this_run'] = s['result']
+            if c.get('build'):
+                ch['build'] = c['build']
+                if s.get('state'):
+                    ch['build_state'] = s['state']
+            o['choices'][side] = ch
+        ag = against_side(c)
+        if ag:
+            o['against'] = ag
+    if c.get('record'):
+        o['real_history'] = c['record']
+    o['out_of_textbook'] = bool(c.get('outside'))
+    o['sources'] = src105(c.get('source', []))
+    if c.get('sourceText'):
+        o['sources_text'] = c['sourceText']
+    if c.get('general'):
+        o['general'] = True
+    if c.get('learn'):
+        o['learn'] = c['learn']
+    fx = dict(c.get('fx', {}))
+    if c.get('build'):
+        fx['build'] = c['build']
+    if c.get('direction'):
+        fx['note'] = c['direction']
+    o['fx'] = fx
+    if c.get('note'):
+        o['caution'] = c['note']
+    return o
 
 
 cards = block_cards() + daily_cards()
@@ -308,14 +391,40 @@ for c in cards:
 qs = quizzes()
 falls, titles, codex = records()
 
-open(os.path.join(OUT, 'cards.js'), 'w', encoding='utf-8', newline='\n').write(
-    js('', None).replace('  \n})', '') if False else js(f"D.cards.push(...{json.dumps(cards, ensure_ascii=False, indent=1)});", None))
-open(os.path.join(OUT, 'quizzes.js'), 'w', encoding='utf-8', newline='\n').write(js(f"D.quizzes.push(...{json.dumps(qs, ensure_ascii=False, indent=1)});", None))
-open(os.path.join(OUT, 'records.js'), 'w', encoding='utf-8', newline='\n').write(js(
-    f"D.falls.push(...{json.dumps(falls, ensure_ascii=False, indent=1)});\n  D.titles.push(...{json.dumps(titles, ensure_ascii=False, indent=1)});\n  D.codex.push(...{json.dumps(codex, ensure_ascii=False, indent=1)});", None))
+# 왕별 파일: data/<왕>/cards.js(그 왕의 역사·사관·전용 일상), data/<왕>/quizzes.js
+# 여러 왕에 나오는 일상 카드(D001~)는 data/common/daily.js. 공통 기록은 data/common/records.js
+for st in STAGES:
+    d = os.path.join(OUT, st)
+    os.makedirs(d, exist_ok=True)
+    mine = [to105(c) for c in cards if c['type'] != 'daily' and c['stage'] == st]
+    mine += [to105(c) for c in cards if c['type'] == 'daily' and re.match(r'D[A-Z]\d{3}$', c['id']) and st in c['daily']['kings']]
+    open(os.path.join(d, 'cards.js'), 'w', encoding='utf-8', newline='\n').write(js(f"D.cards.push(...{json.dumps(mine, ensure_ascii=False, indent=1)});"))
+    qq = []
+    for q in qs:
+        if q['stage'] != st:
+            continue
+        e = {'id': q['id'], 'stage': q['stage'], 'question': q['q'], 'answer': q['answer'], 'wrong': q['wrong'], 'sources': src105(q['source']), 'sources_text': q['sourceText'], 'out_of_textbook': bool(q.get('outside')), 'checked_against_review_site': False}
+        qq.append(e)
+    open(os.path.join(d, 'quizzes.js'), 'w', encoding='utf-8', newline='\n').write(js(f"D.quizzes.push(...{json.dumps(qq, ensure_ascii=False, indent=1)});"))
+common = os.path.join(OUT, 'common')
+os.makedirs(common, exist_ok=True)
+# 공통 일상 카드는 지금까지 가져온 모든 왕의 것을 합친다(이미 있는 파일과 합침)
+daily_path = os.path.join(common, 'daily.js')
+old = {}
+if os.path.exists(daily_path):
+    t = open(daily_path, encoding='utf-8').read()
+    m = re.search(r'D\.cards\.push\(\.\.\.(\[.*\])\);', t, re.S)
+    if m:
+        for c in json.loads(m.group(1)):
+            old[c['id']] = c
+for c in cards:
+    if c['type'] == 'daily' and re.match(r'D\d{3}$', c['id']):
+        old[c['id']] = to105(c)
+daily = [old[k] for k in sorted(old)]
+open(daily_path, 'w', encoding='utf-8', newline='\n').write(js(f"D.cards.push(...{json.dumps(daily, ensure_ascii=False, indent=1)});"))
+open(os.path.join(common, 'records.js'), 'w', encoding='utf-8', newline='\n').write(js(
+    f"D.falls.push(...{json.dumps(falls, ensure_ascii=False, indent=1)});\n  D.titles.push(...{json.dumps(titles, ensure_ascii=False, indent=1)});\n  D.codex.push(...{json.dumps(codex, ensure_ascii=False, indent=1)});"))
 roles = sorted(set(c['who'] for c in cards))
 print(f'카드 {len(cards)}장 (역사·사관 {sum(1 for c in cards if c["type"] != "daily")}, 일상 {sum(1 for c in cards if c["type"] == "daily")}) · 퀴즈 {len(qs)} · 실각 {len(falls)} · 칭호 {len(titles)} · 도감 {len(codex)}')
 print('쓰인 인형:', ', '.join(roles))
-for c in cards:
-    if c['type'] != 'scroll' and ('right' not in c or 'left' not in c):
-        print('버튼 없음', c['id'])
+print('거스른 쪽(against):', ', '.join(f"{c['id']}={against_side(c)}" for c in cards if against_side(c)))

@@ -41,7 +41,7 @@
     cardsPlayed: 0,
     quiz: { asked: 0, right: 0 },
   });
-  const defaultSettings = () => ({ sound: false, music: false, tier: 'auto', short: false });
+  const defaultSettings = () => ({ sound: false, music: false, tier: 'auto', short: false, difficulty: 'normal' });
 
   const S = (JK.Save = {
     era: 'joseon',

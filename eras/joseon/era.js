@@ -39,6 +39,7 @@
         tod: [0.06, 0.92],
         // 섬에 처음부터 서 있는 것 (설계서 T00: 초가 몇 채뿐)
         prebuilt: { choga: 5 },
+        kingRole: 'taejo',
         randomSlots: [5, 8], // 무작위 일상 카드 칸 수(설계서 10-2). ★필수 카드는 따로
         realEnd: '실제로 태조는 1398년까지 왕위에 있었다.',
         tutorial: 3, // 처음 세 장은 손 모양 안내
@@ -49,5 +50,36 @@
       { id: 'gojong', king: '고종', seal: '高宗', title: '개항 압력', years: '1863~1899', ready: false },
     ],
     data: D,
+    // 난이도 (설계서 10-7). 역사·카드 순서·「실제 역사」는 난이도와 무관하고, 숫자와 도움말만 바뀐다.
+    //  mult 게이지 변화 배율 · safe 안전 구간(이 값 아래/100−값 위에서 실각 쪽 변화에 k를 곱함)
+    //  warn 위험 경고(이 값 이하·100−값 이상에서 깜빡임) · preview 미리보기 · carry 다음 왕이 이어받는 몫
+    //  quizOptions 보기 수 · quizRetry 틀리면 한 번 더 · quizBonus 정답 하나당 50 쪽으로 당김
+    //  afterFall 실각 뒤(reset50 시작 게이지 50 + 처음 3장 큰 미리보기 / same 그대로 / run 판 전체 처음부터)
+    //  hint 사관의 귀띔(full / gauge / none) · stage 왕별 장치 숫자(P1~P4에서 씀) · unlock 열리는 때
+    difficultyDefault: 'normal',
+    difficulty: {
+      sprout: {
+        name: '새싹', icon: '🌱', mult: 0.6, safe: { below: 20, k: 0.5 }, warn: 25, preview: 'arrows', carry: 0.25,
+        quizOptions: 3, quizRetry: true, quizBonus: 8, afterFall: 'reset50', hint: 'full', rareMult: 1.0, scoreMult: 0.7,
+        stage: { warCost: 0, food: 8, starvePeople: -3, scaleFall: 6, shipThreat: -10, sejongTriggers: [1, 2, 4] },
+      },
+      normal: {
+        name: '보통', icon: '🙂', mult: 1.0, safe: { below: 10, k: 0.75 }, warn: 15, preview: 'dots', carry: 0.5,
+        quizOptions: 3, quizRetry: false, quizBonus: 5, afterFall: 'same', hint: 'gauge', rareMult: 1.0, scoreMult: 1.0,
+        stage: { warCost: -1, food: 6, starvePeople: -5, scaleFall: 5, shipThreat: -15, sejongTriggers: [2, 3, 5] },
+      },
+      sage: {
+        name: '성군', icon: '👑', mult: 1.3, safe: null, warn: 10, preview: 'flat', carry: 0.75,
+        quizOptions: 4, quizRetry: false, quizBonus: 5, afterFall: 'same', hint: 'none', rareMult: 1.2, scoreMult: 1.3,
+        stage: { warCost: -2, food: 5, starvePeople: -8, scaleFall: 4, shipThreat: -20, sejongTriggers: [2, 4, 6] },
+        unlock: { rule: 'fullRunNormal', text: '보통으로 한 판 끝내면 열려요' },
+      },
+      annals: {
+        name: '실록 도전', icon: '📜', mult: 1.5, safe: null, warn: 0, preview: 'none', carry: 0.75,
+        quizOptions: 4, quizRetry: false, quizBonus: 3, afterFall: 'run', hint: 'none', rareMult: 1.5, scoreMult: 1.6,
+        stage: { warCost: -2, food: 5, starvePeople: -8, scaleFall: 4, shipThreat: -20, sejongTriggers: [2, 4, 6] },
+        unlock: { rule: 'archive30', text: '기록관 30권이 쌓이면 열려요' },
+      },
+    },
   };
 })();

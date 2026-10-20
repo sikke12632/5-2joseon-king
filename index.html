@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>조선의 왕</title>
 <!-- 배포할 때마다 ?v= 숫자를 올린다(캐시) -->
-<link rel="stylesheet" href="engine/engine.css?v=3">
+<link rel="stylesheet" href="engine/engine.css?v=4">
 </head>
 <body>
 <div id="app">
@@ -38,7 +38,8 @@
         <div id="outside">교과서 밖</div>
         <div class="por-wrap"><img id="portrait" alt="" draggable="false"></div>
         <div class="who-line"><span id="who"></span><span id="whoTitle"></span></div>
-        <div id="runBox"><span class="run-label">이번 판에서</span><span id="runText"></span></div>
+        <div id="runBox"><span class="run-label" id="runLabel">이번 판에서</span><span id="runText"></span></div>
+        <div id="stamp" aria-hidden="true">그래도<br>역사는<br>흘렀다</div>
         <div id="realLabel">📜 실제 역사</div>
         <p id="text"></p>
         <div id="turn"></div>
@@ -80,6 +81,7 @@
       <div id="fallName"></div>
       <p id="fallMsg"></p>
       <p id="fallReal"></p>
+      <p id="fallHint"></p>
       <div class="btns"><button id="btnRetry">다시 도전</button><button id="btnFallHome" class="ghost">첫 화면</button></div>
     </div>
   </div>
@@ -91,6 +93,7 @@
       <div id="soonQuiz"></div>
       <div id="soonTitles" class="e-title"></div>
       <div id="soonVals"></div>
+      <div id="soonBuilt"></div>
       <p id="soonNext"></p>
       <div class="btns"><button id="btnSoonRecords" class="ghost">나의 기록</button><button id="btnSoonHome">첫 화면</button></div>
     </div>
@@ -118,6 +121,8 @@
       </div>
       <div class="row small" id="tierNow"></div>
       <div class="row"><label><input type="checkbox" id="optSound">효과음</label><label><input type="checkbox" id="optMusic">음악</label></div>
+      <div class="row"><span>난이도</span><select id="optDiff"></select></div>
+      <div class="row small" id="diffNote"></div>
       <div class="row"><label><input type="checkbox" id="optShort">짧은 판 (꼭 나올 카드만)</label></div>
       <h4>기록 코드</h4>
       <div class="row small">다른 기기에서 이어 하려면 코드를 복사해 두었다가 그 기기에서 붙여 넣으세요.</div>
@@ -133,24 +138,26 @@
   <div id="lost" class="hide"><p>그래픽을 다시 불러오는 중…</p></div>
   <div id="loading"><p>섬을 띄우는 중…</p></div>
 </div>
-<script src="engine/lib/three.min.js?v=3"></script>
-<script src="engine/toy.js?v=3"></script>
-<script src="engine/props.js?v=3"></script>
-<script src="eras/joseon/map.js?v=3"></script>
-<script src="eras/joseon/models.js?v=3"></script>
-<script src="eras/joseon/models-taejo.js?v=3"></script>
-<script src="eras/joseon/era.js?v=3"></script>
-<script src="eras/joseon/data/roles.js?v=3"></script>
-<script src="eras/joseon/data/cards.js?v=3"></script>
-<script src="eras/joseon/data/quizzes.js?v=3"></script>
-<script src="eras/joseon/data/records.js?v=3"></script>
-<script src="engine/save.js?v=3"></script>
-<script src="engine/world.js?v=3"></script>
-<script src="engine/audio.js?v=3"></script>
-<script src="engine/cards.js?v=3"></script>
-<script src="engine/quiz.js?v=3"></script>
-<script src="engine/game.js?v=3"></script>
-<script src="engine/ui.js?v=3"></script>
-<script src="engine/main.js?v=3"></script>
+<script src="engine/lib/three.min.js?v=4"></script>
+<script src="engine/toy.js?v=4"></script>
+<script src="engine/props.js?v=4"></script>
+<script src="eras/joseon/map.js?v=4"></script>
+<script src="eras/joseon/models.js?v=4"></script>
+<script src="eras/joseon/models-taejo.js?v=4"></script>
+<script src="eras/joseon/era.js?v=4"></script>
+<!-- 데이터: 공통 + 왕별 (왕이 늘면 그 왕 폴더의 두 줄을 더한다) -->
+<script src="eras/joseon/data/common/roles.js?v=4"></script>
+<script src="eras/joseon/data/common/records.js?v=4"></script>
+<script src="eras/joseon/data/common/daily.js?v=4"></script>
+<script src="eras/joseon/data/taejo/cards.js?v=4"></script>
+<script src="eras/joseon/data/taejo/quizzes.js?v=4"></script>
+<script src="engine/save.js?v=4"></script>
+<script src="engine/world.js?v=4"></script>
+<script src="engine/audio.js?v=4"></script>
+<script src="engine/cards.js?v=4"></script>
+<script src="engine/quiz.js?v=4"></script>
+<script src="engine/game.js?v=4"></script>
+<script src="engine/ui.js?v=4"></script>
+<script src="engine/main.js?v=4"></script>
 </body>
 </html>

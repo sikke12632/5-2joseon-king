@@ -1,4 +1,5 @@
-/* 설계서 v2에서 tools/import-design.py 로 만든 파일 — 직접 고치지 말고 설계서를 고친 뒤 다시 만든다 */
+/* 설계서 v2에서 tools/import-design.py 로 만든 파일 — 직접 고치지 말고 설계서를 고친 뒤 다시 만든다.
+ * 필드는 설계서 10-5 형식이다(스키마: eras/joseon/data/스키마.md). */
 (function () {
   'use strict';
   const D = window.JK.eraData;
@@ -170,7 +171,7 @@
   "id": "title16",
   "name": "무너지지 않은 왕조",
   "hint": "다섯 번 모두 한 번에",
-  "cond": "판 전체에서 실각 0번",
+  "cond": "판 전체에서 실각 0번(보통 이상, 10-7)",
   "rule": "later"
  }
 ]);
