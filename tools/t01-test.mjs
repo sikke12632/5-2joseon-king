@@ -37,7 +37,7 @@ export default async function (t) {
       }
       await ready();
       await t.sleep(300);
-      const st = JSON.parse(await t.eval(`JSON.stringify({card:__jk.G.run.deck[__jk.G.run.pos], vals:__jk.G.run.vals, locked:document.querySelector('#altBtn').classList.contains('locked'), why:document.querySelector('#altWhy').innerText.replace(/\\n/g,' | ')})`));
+      const st = JSON.parse(await t.eval(`JSON.stringify({card:__jk.G.run.deck[__jk.G.run.pos], vals:__jk.G.run.vals, locked:!(__jk.G.run.shownAlt && __jk.G.run.shownAlt.opts && __jk.G.run.shownAlt.opts[0].open), why:document.querySelector('#altWhy').innerText.replace(/\\n/g,' | ')})`));
       if (st.card === 'T01' && !st.locked) {
         opened++;
         if (!shot) {
@@ -47,6 +47,12 @@ export default async function (t) {
           const b = JSON.parse(await t.eval(`JSON.stringify(document.querySelector('#altBtn').getBoundingClientRect())`));
           await t.send('Input.dispatchMouseEvent', { type: 'mousePressed', x: b.x + b.width / 2, y: b.y + b.height / 2, button: 'left', buttons: 1, clickCount: 1 });
           await t.send('Input.dispatchMouseEvent', { type: 'mouseReleased', x: b.x + b.width / 2, y: b.y + b.height / 2, button: 'left', buttons: 0, clickCount: 1 });
+          // 다른 길이 둘이라 부채꼴이 펼쳐진다(10-14) — "정몽주를 곁에 둔다"를 사람 손으로 누른다
+          await t.sleep(700);
+          await t.shot(`${OUT}/t01-fan-${diff}.png`);
+          const o = JSON.parse(await t.eval(`JSON.stringify([...document.querySelectorAll('#altFan .af-opt')].find(x=>x.textContent.includes('정몽주를 곁에')).getBoundingClientRect())`));
+          await t.send('Input.dispatchMouseEvent', { type: 'mousePressed', x: o.x + o.width / 2, y: o.y + o.height / 2, button: 'left', buttons: 1, clickCount: 1 });
+          await t.send('Input.dispatchMouseEvent', { type: 'mouseReleased', x: o.x + o.width / 2, y: o.y + o.height / 2, button: 'left', buttons: 0, clickCount: 1 });
           await t.sleep(1300);
           const r = JSON.parse(await t.eval(`JSON.stringify({ch:__jk.G.run.choices.T01, flag:!!__jk.G.run.flagsRun['F_정몽주'], toast:document.querySelector('#result').textContent})`));
           ok(`[${diff}] 다른 길을 눌러 골랐다 · 깃발 F_정몽주`, r.ch === 'alt' && r.flag, r.toast);

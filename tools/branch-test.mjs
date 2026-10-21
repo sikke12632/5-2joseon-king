@@ -9,6 +9,11 @@ export default async function (t) {
     await t.waitFor('window.__jk && __jk.W.stats.frames > 20');
   };
   const ready = () => t.waitFor('JK.Cards.isReady()', 12000);
+  // 다른 길이 여럿이면(10-14) 부채꼴이 펼쳐진다 — 이름으로 하나를 누른다
+  const pickFan = async (label) => {
+    await t.sleep(500);
+    await t.eval(`(()=>{const f=document.querySelector('#altFan'); const b=[...f.querySelectorAll('.af-opt')].find(x=>x.textContent.includes('${label}')); if(b) b.click();})()`);
+  };
   const setVals = (o) => t.eval(`(()=>{const r=__jk.G.run;Object.assign(r.vals,{people:50,nobles:50,treasury:50,army:50},${JSON.stringify(o)});r.zones={};JK.Cards.setGauges(r.vals,true);JK.Crisis.apply(r,true);})()`);
   const show = async (id, vals) => {
     await ready();
@@ -42,6 +47,7 @@ export default async function (t) {
   await t.sleep(900);
   ok('잠긴 쪽으로는 안 넘어감', await t.eval(`__jk.G.run.deck[__jk.G.run.pos]==='T04' && JK.Cards.isReady()`));
   await t.eval(`document.querySelector('#altBtn').click()`);
+  await pickFan('개경에 머문다');
   await t.sleep(1200);
   const a1 = JSON.parse(await t.eval(`JSON.stringify({ch:__jk.G.run.choices.T04, flag:__jk.G.run.flagsRun, built:__jk.G.run.built, result:document.querySelector('#result').textContent, pending:!!__jk.G.run.pending})`));
   ok('다른 길 고름 · 깃발 F_개경', a1.ch === 'alt' && a1.flag['F_개경'], JSON.stringify(a1.flag));
@@ -53,12 +59,15 @@ export default async function (t) {
   console.log('2) T05 경복궁, 보통 게이지: 다른 길 잠김(이유) · 실제 경로로 지으면 옛 궁궐 자리를 치움');
   // 개경에 머문 판에서는 T05가 변형판 T05v1로 바뀐다(more-test에서 확인). 여기서는 T05 자체를 보려고 변형판을 끈다
   await t.eval(`__jk.G.run.variants = {}`);
-  await show('T05', {});
+  // 백성 40·국고 50: 옛 집을 고쳐 쓴다(국고 30 이하 또는 백성 30 이하)·관청부터 짓는다(백성 45 이상) 모두 잠김
+  await show('T05', { people: 40 });
   const v2 = JSON.parse(await t.eval(`JSON.stringify({locked:document.querySelector('#altBtn').classList.contains('locked'), why:document.querySelector('#altWhy').textContent})`));
   ok('다른 길 🔒 + 이유', v2.locked && /🔒/.test(v2.why), v2.why);
   await t.eval(`document.querySelector('#altBtn').click()`);
+  await pickFan('옛 집을 고쳐 쓴다');
   await t.sleep(700);
   ok('잠긴 다른 길은 눌러도 안 넘어감', await t.eval(`__jk.G.run.deck[__jk.G.run.pos]==='T05'`));
+  await t.eval(`JK.Cards.fan(false)`);
   await t.eval('__jk.G.commit(-1)');
   await t.sleep(2500);
   ok('경복궁이 옛 궁궐을 대신함', await t.eval(`__jk.G.run.built.includes('gyeongbok') && !__jk.G.run.built.includes('altPalace')`));
@@ -76,6 +85,7 @@ export default async function (t) {
   const hot = await t.eval(`document.querySelector('#altBtn').classList.contains('hot')`);
   if (OUT) await t.shot(`${OUT}/branch-dragup.png`);
   await mouse('mouseReleased', cx, cy - 200);
+  await pickFan('성 없이 문만');
   await t.sleep(3500);
   const a3 = JSON.parse(await t.eval(`JSON.stringify({ch:__jk.G.run.choices.T07, built:__jk.G.run.built, mult:__jk.G.run.crisisMult})`));
   ok('위로 끌어 다른 길(끄는 동안 버튼 강조)', hot && a3.ch === 'alt');
@@ -83,8 +93,9 @@ export default async function (t) {
   ok('국방 낮음 위기 ×1.5', a3.mult['army:low'] === 1.5, JSON.stringify(a3.mult));
 
   console.log('4) 한 왕 다른 길 3개 한도');
-  await show('T02', { people: 70 });
+  await show('T02', { people: 70, nobles: 40 });
   await t.eval(`document.querySelector('#altBtn').click()`);
+  await pickFan('불교와 함께');
   await t.sleep(2500);
   await t.eval(`__jk.G.run.variants = {}`); // T02 다른 길 뒤 T08은 변형판 T08v1이 된다 — 여기서는 T08 자체로 한도를 본다
   await show('T08', { people: 70 });

@@ -48,6 +48,12 @@ export default async function (t) {
       d = (await t.eval(`JK.Cards.isLocked(${dir === 'R' ? -1 : 1})`)) ? 'U' : dir === 'R' ? 'L' : 'R';
     }
     await key(d);
+    // 다른 길이 여럿이면(10-14) 부채꼴이 펼쳐진다 — 열린 첫 길의 번호 키
+    if (d === 'U' && (await t.eval(`JK.Cards.fanOpen()`))) {
+      const n = await t.eval(`(()=>{const o=((__jk.G.run.shownAlt||{}).opts||[]).find(x=>x.open);return o?o.idx+1:1;})()`);
+      await t.send('Input.dispatchKeyEvent', { type: 'keyDown', key: String(n), code: 'Digit' + n, windowsVirtualKeyCode: 48 + n });
+      await t.send('Input.dispatchKeyEvent', { type: 'keyUp', key: String(n), code: 'Digit' + n, windowsVirtualKeyCode: 48 + n });
+    }
     if (SHOTS.includes('num') && OUT && !numShot && cur !== '기록') {
       await t.sleep(450);
       if (await t.eval(`!!document.querySelector('.g-num')`)) {

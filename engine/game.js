@@ -180,6 +180,7 @@
     run.variants = {};
     run.altSkipped = [];
     run.crisisMult = {};
+    run.branchDone = [];
     run.flagsRun = Object.assign({}, run.flagsRunBefore || {});
     // 돌발 이벤트·왕의 마음(10-13): 판마다 처음부터(선조·인조·고종은 마음 20에서, 10-12)
     run.lastShown = '';
@@ -453,6 +454,8 @@
         }, 900);
       }
     }
+    // 갈래 카드의 세계 연출(10-14-3 연출 칸: 두 대감의 논쟁 · 한양을 그리워하는 신하 · 역참 길)
+    if (!isEv && first && c.fx && c.fx.scene && JK.EvFx) JK.EvFx.play(c.fx.scene, c);
     // 기질이 붙음·풀림·무너질 듯한 밤 알림, 사관의 한 줄(세 장에 한 번)
     for (const p of JK.Events.takePending()) setTimeout(() => JK.Events.announce(p), 1200);
     JK.Events.flush(run);
@@ -491,23 +494,41 @@
     const alts = c.paths.alt || [];
     // 다른 길 열림 조건은 난이도별일 수 있다({ sprout, normal, sage, annals })
     const unlockOf = (a) => (a.unlock && typeof a.unlock === 'object' ? a.unlock[G.diffId()] : a.unlock);
-    let ai = realShut ? 0 : alts.findIndex((a) => JK.Cond.test(unlockOf(a), cctx(run)));
     const full = run.altCards.length >= (branchCfg().maxPerStage || 3);
-    const open = ai >= 0 && !full;
+    const fullWhy = `${branchCfg().fullReason || '이미 나라가 많이 흔들렸다'} (한 왕에 다른 길은 ${branchCfg().maxPerStage || 3}번까지)`;
+    // 다른 길 2~3개(10-14): 조건이 맞는 길만 열린다. 실제 경로가 잠겼는데(10-11-2) 맞는 길이 하나도 없으면 모두 조건 없이 열린다
+    const conds = alts.map((a) => JK.Cond.test(unlockOf(a), cctx(run)));
+    const freeAll = realShut && !conds.some(Boolean);
+    const opts = alts.map((a, i) => {
+      const op = !full && (conds[i] || freeAll);
+      return {
+        idx: i,
+        label: a.label,
+        branch: a.branch || '',
+        open: op,
+        locked: !op,
+        reason: op ? '' : full ? fullWhy : needText(run, unlockOf(a)) || a.lock_reason || a.lock_hint || '',
+        flavor: op || full ? '' : a.lock_reason || '',
+        fx: op ? Object.fromEntries(Object.entries(a.effects || {}).map(([k, x]) => [k, G.effect(k, x, run.vals)])) : null,
+      };
+    });
+    let ai = opts.findIndex((o) => o.open);
+    const open = ai >= 0;
     if (ai < 0) ai = 0;
-    const a = alts[ai];
     // 막다른 길 금지: 세 버튼이 모두 잠기면 실제 경로의 가벼운 방식(움직임이 작은 쪽) 하나를 연다
     if (lock.right && lock.left && !open) {
       const size = (sk) => Object.values(c.choices[sk].effects || {}).reduce((s, x) => s + Math.abs(x), 0);
       delete lock[size('right') <= size('left') ? 'right' : 'left'];
     }
-    run.shownAlt = a ? { card: c.id, idx: ai, open } : null;
+    run.shownAlt = alts.length ? { card: c.id, idx: ai, open, opts: opts.map((o) => ({ idx: o.idx, open: o.open })) } : null;
     const out = { lock, flavor, need: realShut ? missingGauges(run, need) : [], realShut };
-    if (a) {
-      const fullWhy = `${branchCfg().fullReason || '이미 나라가 많이 흔들렸다'} (한 왕에 다른 길은 ${branchCfg().maxPerStage || 3}번까지)`;
-      out.alt = { label: a.label, locked: !open, reason: open ? '' : full ? fullWhy : needText(run, unlockOf(a)) || a.lock_reason || '', flavor: open || full ? '' : a.lock_reason || '' };
+    if (alts.length) {
+      // alt: 한 개일 때의 버튼(예전 모양) · alts: 부채꼴로 펼칠 2~3개
+      const o = opts[ai];
+      out.alt = { label: o.label, locked: !open, reason: o.reason, flavor: o.flavor };
+      out.alts = opts;
+      if (open) out.fxAlt = o.fx;
     }
-    if (a && open) out.fxAlt = ((s) => s)(Object.fromEntries(Object.entries(a.effects || {}).map(([k, x]) => [k, G.effect(k, x, run.vals)])));
     return out;
   }
   // 잠긴 조건을 글로(담임 피드백): "양반 35 이상 필요 · 지금 22", 플래그는 "앞에서 「…」을 … 해야 열림"
@@ -666,6 +687,12 @@
     const c = cardsById[run.deck[run.pos]];
     // dir 2 = 카드 아래 '다른 길'(10-10)
     const isAlt = dir === 2 && c.paths && run.shownAlt && run.shownAlt.card === c.id && run.shownAlt.open;
+    // 부채꼴(10-14)에서 고른 다른 길. 열린 길만 받는다
+    if (isAlt && Cards.altChoice !== undefined && run.shownAlt.opts) {
+      const o = run.shownAlt.opts.find((x) => x.idx === Cards.altChoice);
+      if (o && o.open) run.shownAlt.idx = o.idx;
+    }
+    Cards.altChoice = undefined;
     const sideKey = isAlt ? 'alt' : dir > 0 ? 'right' : 'left';
     const alt = isAlt ? c.paths.alt[run.shownAlt.idx] : null;
     const side = c.single ? null : isAlt ? alt : c.choices[sideKey];
@@ -688,7 +715,14 @@
     // 도박형(10-9): 도박 쪽을 고르면 이 자리에서 굴려 이기면 win, 지면 lose 효과
     let gres = null;
     let sideEff = side;
-    if (side && c.gamble && c.gamble.side === sideKey) {
+    // 판의 상황에 따라 「이번 판에서」 문장만 바뀌는 쪽(this_run_if) — 예: 계룡산 갈래의 CT01c
+    //  (그 문장이 맞는 판에서는 도박을 굴리지 않는다 — 계룡산 판의 CT01c는 돌을 먼 길로 나르지 않으므로)
+    let runIf = null;
+    if (side && side.this_run_if) {
+      runIf = side.this_run_if.find((r) => JK.Cond.test(r.when, cctx(run))) || null;
+      if (runIf) sideEff = Object.assign({}, side, { this_run: runIf.this_run });
+    }
+    if (side && c.gamble && c.gamble.side === sideKey && !runIf) {
       const won = gambleRoll(run, c);
       const o = won ? c.gamble.win : c.gamble.lose;
       gres = { won };
@@ -781,7 +815,7 @@
             setTimeout(() => W.setBuildState(t, 'damaged', 0), 1600);
           }
         }
-      }
+      } else if (c.fx && c.fx.scene && JK.EvFx) JK.EvFx.chose(c.fx.scene, sideKey, c);
       if (isAlt) takeAlt(run, c, alt);
       // 수습("버텼다!"): 붉은 도장 "버팀", 북 세 번, 아이콘이 원래 색으로. 아직 거리 15 이하면 후속 예약
       if (cres) {
@@ -858,8 +892,14 @@
         if (f) run.deck.splice(run.pos, 0, f.id);
       }
     }
+    // 갈래 이야기(10-14-2): 완성 조건을 처음 채운 순서대로 적어 둔다(엔딩은 먼저 채운 갈래). 채우면 알림
+    for (const b of era.data.branches || []) {
+      if (b.stage !== run.stage || (run.branchDone || []).includes(b.id) || !JK.Cond.test(b.done, cctx(run))) continue;
+      run.branchDone = (run.branchDone || []).concat(b.id);
+      setTimeout(() => Cards.toast(`📘 갈래 이야기 「${b.name}」 — 끝까지 왔어요`, 3200, '이 왕을 마치면 갈래 엔딩'), 2600);
+    }
     // 실제 경로는 「실제 역사」 두루마리. 다른 길은 그 자리에서 길게 보여 주지 않고 비교 화면에서 한꺼번에(10-10-5)
-    if (c.real_history && !isAlt) run.pending = { text: c.real_history, run: side ? side.this_run : '', against, outside: !!c.out_of_textbook, year: c.year };
+    if (c.real_history && !isAlt) run.pending = { text: c.real_history, run: sideEff ? sideEff.this_run : '', against, outside: !!c.out_of_textbook, year: c.year };
     setTOD(false);
     save();
     S.saveMeta();
@@ -1048,6 +1088,11 @@
     const route = routeSummary(run);
     const dId = run.easiest || G.diffId();
     const kingTrue = !route.broken;
+    // 갈래 엔딩(10-14-2): 완성 조건을 채우고 클리어 — 먼저 채운 갈래 하나. 둘 이상 채웠으면 「두 갈래의 임금」도
+    const brDone = (run.branchDone || []).map((id) => (era.data.branches || []).find((b) => b.id === id && b.stage === st.id)).filter(Boolean);
+    const branch = brDone[0] || null;
+    if (branch) got.push('branch:' + branch.id);
+    if (brDone.length >= 2) got.push('branch:two');
     W.setTOD(Math.min(1, st.tod[1] + 0.06));
     const qs = pickQuiz(st.id, run.stageSeed);
     // 나의 역사 vs 실제 역사(10-10-5): 퀴즈 바로 앞. 기록관에도 남긴다
@@ -1070,6 +1115,14 @@
       k.stars = Math.max(k.stars || 0, right);
       k.asked = Math.max(k.asked || 0, res.length);
       if (kingTrue) k.trueEnd[dId] = k.trueEnd[dId] || new Date().toISOString().slice(0, 10);
+      // 갈래 엔딩은 기록관에 푸른 실록으로(진엔딩은 금빛)
+      if (branch) {
+        const day = new Date().toISOString().slice(0, 10);
+        k.branches = k.branches || {};
+        k.branches[branch.id] = k.branches[branch.id] || day;
+        S.meta.endings = S.meta.endings || {};
+        (S.meta.endings.branch = S.meta.endings.branch || {})[branch.id] = (S.meta.endings.branch || {})[branch.id] || day;
+      }
       // 다섯 왕 모두 그 난이도 진엔딩을 모으면 최종 진엔딩 칭호(지금은 태조만 있어 아직 못 받음)
       const all = era.stages.every((x) => ((kings[x.id] || {}).trueEnd || {})[dId]);
       if (all) {
@@ -1080,7 +1133,7 @@
       const newTitles = awardTitles(got);
       // 이 왕에서 지은 것과 그 모습(상태)
       const built = run.built.map((x) => [x, run.states[x] || 'smooth']);
-      const end = { from: st.id, right, asked: res.length, titles: newTitles, unlockedAll: firstClear, vals: Object.assign({}, run.vals), built, kingTrue, diff: dId, route, allTrue: all };
+      const end = { from: st.id, right, asked: res.length, titles: newTitles, unlockedAll: firstClear, vals: Object.assign({}, run.vals), built, kingTrue, diff: dId, route, allTrue: all, branch };
       run.ended = true;
       G.state = 'ended';
       G.lastEnd = end;
@@ -1090,6 +1143,10 @@
       W.camTo({ dist: 31, el: 0.42, fov: 30 }, 3);
       if (JK.Audio) JK.Audio.chime();
       if (all) JK.UI.showEnding('true', { diff: dId, route, titles: newTitles });
+      else if (branch) {
+        JK.UI.showEnding('branch', { diff: dId, route, titles: newTitles, branch });
+        if (JK.EvFx) JK.EvFx.branchEnd(branch);
+      }
       setTimeout(() => JK.UI.showKingEnd(end), 1200);
     });
   }
@@ -1156,4 +1213,12 @@
     setTimeout(showCurrent, 300);
   };
   G.commit = (dir) => Cards.commit(dir);
+  // 시험용: 지금 카드의 다른 길을 id로 골라 넘긴다(부채꼴을 거치지 않음)
+  G.commitAlt = function (id) {
+    const c = cardsById[G.run.deck[G.run.pos]];
+    const i = c && c.paths ? c.paths.alt.findIndex((a) => a.id === id) : -1;
+    if (i < 0) return false;
+    Cards.altChoice = i;
+    return Cards.commit(2);
+  };
 })();

@@ -37,6 +37,8 @@ export default async function (t) {
               if (c && !c.single) { const cost=(fx)=>{let m=0;for(const k in r.vals){const v=r.vals[k]+(fx[k]||0);m=Math.max(m,Math.abs(v-50));}return m;};
                 dir = '${STRAT}'==='random' ? (Math.random()<0.5?1:-1) : cost(c.choices.right.effects||{})<=cost(c.choices.left.effects||{}) ? 1 : -1;
                 if (JK.Cards.isLocked(dir)) dir = JK.Cards.isLocked(-dir) ? 2 : -dir; } }
+            // 다른 길이 여럿이면(10-14) 열린 첫 길을 고른다
+            if (dir===2) { const o=((r.shownAlt||{}).opts||[]).find(x=>x.open); if (o) JK.Cards.altChoice=o.idx; }
             steps++; G.commit(dir); setTimeout(tick,5); };
           tick(); })`)
       );

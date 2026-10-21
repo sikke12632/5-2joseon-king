@@ -86,6 +86,17 @@
       ab.classList.toggle('locked', !!v.alt.locked);
       ab.disabled = false;
     }
+    // 다른 길 2~3개(10-14): 버튼은 하나. 누르거나 위로 끌면 부채꼴로 펼친다
+    C.fan(false);
+    C.altChoice = undefined;
+    const multi = !!(v.alts && v.alts.length > 1);
+    ab.classList.toggle('multi', multi);
+    if (multi) {
+      const n = v.alts.filter((o) => o.open).length;
+      $('#altLabel').textContent = `갈림길 ${v.alts.length}개`;
+      $('#altWhy').innerHTML = n ? `<small>열린 길 ${n}개 · 눌러서 펼쳐요</small>` : `<b>🔒 열린 길이 없어요</b><small>눌러서 까닭을 봐요</small>`;
+      ab.classList.toggle('locked', !n);
+    }
     $('#turn').textContent = [v.year, v.turn].filter(Boolean).join(' · ');
     $('#outside').style.display = v.outside ? '' : 'none';
     // 위기 카드: [게임 속 일] 표시, 버튼 아래 무너질 확률, 비슷한 실제 일(작게)
@@ -125,6 +136,7 @@
     C.busy = false;
   };
   C.hide = function () {
+    C.fan(false);
     deck.classList.remove('show');
     card.style.opacity = '0';
     C.hand(false);
@@ -305,8 +317,65 @@
     if (reason) C.toast('🔒 ' + reason, 2200);
     C.busy = false;
   }
+  // 부채꼴: 다른 길 2~3개를 카드 아래쪽에 펼친다. 열린 길은 밝게, 잠긴 길은 회색에 🔒 까닭
+  C.fan = function (on) {
+    const f = $('#altFan');
+    if (!f) return;
+    if (!on || !view || !view.alts) {
+      f.className = '';
+      f.innerHTML = '';
+      return;
+    }
+    const alts = view.alts;
+    f.innerHTML =
+      alts
+        .map(
+          (o, i) =>
+            `<button class="af-opt ${o.open ? 'open' : 'locked'}" data-i="${i}" style="--k:${i - (alts.length - 1) / 2}"><span class="af-l">${o.open ? '' : '🔒 '}${esc(o.label)}</span>${o.branch ? `<span class="af-br">갈래 ${esc(o.branch)}</span>` : ''}<span class="af-why">${o.open ? '이 길로 간다 ↑' : esc(o.reason)}</span></button>`
+        )
+        .join('') + '<button class="af-close" aria-label="닫기">✕</button>';
+    f.className = 'show';
+    for (const b of f.querySelectorAll('.af-opt')) {
+      const i = +b.dataset.i;
+      b.onclick = (e) => {
+        e.stopPropagation();
+        C.pickAlt(i);
+      };
+      b.onpointerenter = () => {
+        if (!alts[i].open) return;
+        view.fxAlt = alts[i].fx;
+        preview(2);
+      };
+      b.onpointerleave = () => preview(0);
+    }
+    f.querySelector('.af-close').onclick = (e) => {
+      e.stopPropagation();
+      C.fan(false);
+    };
+  };
+  C.fanOpen = () => !!($('#altFan') && $('#altFan').classList.contains('show'));
+  C.pickAlt = function (i) {
+    const o = view && view.alts && view.alts[i];
+    if (!o || C.busy) return;
+    if (!o.open) {
+      C.shake();
+      C.toast('🔒 ' + o.reason, 2200);
+      return;
+    }
+    C.altChoice = i;
+    C.fan(false);
+    fly(2);
+  };
   function fly(dir) {
     const lock = (view && view.lock) || {};
+    // 다른 길이 여럿이면 먼저 부채꼴을 펼친다(고른 뒤 다시 들어옴)
+    if (dir === 2 && view && view.alts && view.alts.length > 1 && C.altChoice === undefined) {
+      card.style.transition = 'transform .35s cubic-bezier(.2,1.4,.4,1)';
+      card.style.transform = '';
+      setChoice(0);
+      C.busy = false;
+      return C.fan(true);
+    }
     if (dir === 2 && (!view.alt || view.alt.locked)) return refuse(view.alt && view.alt.reason);
     if (dir === 1 && lock.right) return refuse(lock.right);
     if (dir === -1 && lock.left) return refuse(lock.left);
@@ -323,6 +392,7 @@
   C.commit = (dir) => !C.busy && fly(dir);
   C.isLocked = (dir) => {
     const lock = (view && view.lock) || {};
+    if (dir === 2 && view && view.alts && view.alts.length > 1) return !view.alts.some((o) => o.open);
     return dir === 2 ? !view || !view.alt || view.alt.locked : dir > 0 ? !!lock.right : !!lock.left;
   };
   function setupDrag() {
@@ -363,6 +433,13 @@
   }
   function onKey(e) {
     if (C.busy || document.querySelector('.modal:not(.hide)')) return;
+    // 부채꼴이 펼쳐져 있으면: 1·2·3 고르기, Esc 닫기
+    if (C.fanOpen()) {
+      if (e.key === 'Escape') return C.fan(false);
+      const n = parseInt(e.key, 10);
+      if (n >= 1 && n <= view.alts.length) return C.pickAlt(n - 1);
+      if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') C.fan(false);
+    }
     if (e.key === 'ArrowUp' && view && view.alt) return fly(2);
     if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
       const dir = e.key === 'ArrowRight' ? 1 : -1;

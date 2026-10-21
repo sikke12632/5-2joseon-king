@@ -380,11 +380,14 @@
     const d = era.difficulty[o.diff] || {};
     const t = era.data.titles.find((x) => x.rule === 'true:' + o.diff);
     const el = $('#ending');
-    el.classList.toggle('other', kind !== 'true');
-    $('#endKind').textContent = kind === 'true' ? '진엔딩' : '다른 조선의 한양';
-    $('#endTitle').textContent = kind === 'true' ? (t ? `「${t.name}」` : '') : '';
+    el.classList.toggle('other', kind === 'other');
+    // 갈래 엔딩(10-14-2): 푸른 실록 · 갈래 이름과 칭호 · 사관의 말
+    el.classList.toggle('branch', kind === 'branch');
+    const br = o.branch || {};
+    $('#endKind').textContent = kind === 'true' ? '진엔딩' : kind === 'branch' ? `갈래 엔딩 · ${br.name || ''}` : '다른 조선의 한양';
+    $('#endTitle').textContent = kind === 'true' ? (t ? `「${t.name}」` : '') : kind === 'branch' ? `「${br.title || ''}」` : '';
     $('#endDiff').textContent = `${d.icon || ''} ${d.name || ''}`;
-    $('#endLine').textContent = kind === 'true' ? '이 임금의 실록은 실제와 같았다.' : '이 실록은 실제와 달랐지만, 이 또한 한 임금의 길이었다.';
+    $('#endLine').textContent = kind === 'true' ? '이 임금의 실록은 실제와 같았다.' : kind === 'branch' ? br.sagwan || '' : '이 실록은 실제와 달랐지만, 이 또한 한 임금의 길이었다.';
     $('#endCount').textContent = o.route ? `실제 역사와 같은 사건 ${o.route.same} / ${o.route.counted}` : '';
     $('#endPreview').style.display = o.preview ? '' : 'none';
     W.setOrbit(true);
@@ -436,6 +439,9 @@
       ? `🏅 <b>실제 역사대로 클리어</b> — ${esc(from.king)}의 진엔딩 (${(era.difficulty[w.diff] || {}).icon || ''} ${esc((era.difficulty[w.diff] || {}).name || '')})`
       : `실제 역사와 같은 사건 ${w.route.same} / ${w.route.counted} — 다음에는 모두 실제대로 가 보세요`;
     $('#soonTrue').classList.toggle('gold', !!w.kingTrue);
+    // 갈래 엔딩(10-14-2): 푸른 실록
+    if (w.branch) $('#soonTrue').innerHTML = `📘 <b>갈래 엔딩</b> 「${esc(w.branch.title)}」 — ${esc(w.branch.name)}, 푸른 실록에 꽂혔어요`;
+    $('#soonTrue').classList.toggle('blue', !!w.branch);
     $('#soonTitles').textContent = (w.titles && w.titles.length ? `새 칭호: ${w.titles.map((t) => `「${t.name}」`).join(' ')}` : '') + (w.unlockedAll ? `${w.titles && w.titles.length ? ' · ' : ''}🔓 모든 난이도가 열렸어요!` : '');
     const others = era.stages.filter((s) => s.ready && s.id !== w.from).length;
     $('#soonNext').textContent = others ? '' : '다른 왕(세종~고종)은 준비 중이에요.';
@@ -518,7 +524,16 @@
     for (const c of D.cards.filter((x) => x.paths)) {
       const li = document.createElement('li');
       const seen = mp[c.id] || {};
-      li.innerHTML = `<b>${esc(c.event || c.id)}</b> <span class="pth ${seen.real ? 'on' : ''}">실제 경로</span>` + c.paths.alt.map((a) => `<span class="pth alt ${seen[a.id] ? 'on' : ''}">${seen[a.id] ? esc(a.label) : '？？？'}</span>`).join('');
+      // 변형판(예: T08v1)은 원래 사건 이름으로
+      const base = c.variant_of ? D.cards.find((x) => x.id === c.variant_of) : null;
+      li.innerHTML = `<b>${esc(c.event || (base && base.event) || c.id)}${base ? ' <small>(바뀐 사건)</small>' : ''}</b> <span class="pth ${seen.real ? 'on' : ''}">실제 경로</span>` + c.paths.alt.map((a) => `<span class="pth alt ${seen[a.id] ? 'on' : ''}">${seen[a.id] ? esc(a.label) : '？？？'}</span>`).join('');
+      rp.appendChild(li);
+    }
+    // 갈래 이야기(10-14-2): 이룬 갈래는 이름, 못 이룬 것은 ？？？
+    if ((D.branches || []).length) {
+      const eb = (m.endings || {}).branch || {};
+      const li = document.createElement('li');
+      li.innerHTML = '<b>갈래 이야기</b> ' + D.branches.map((b) => `<span class="pth branch ${eb[b.id] ? 'on' : ''}">${eb[b.id] ? '📘 ' + esc(b.name) : '？？？'}</span>`).join('');
       rp.appendChild(li);
     }
     // 돌발 사건 도감(10-13): 만난 것은 이름과 종류, 못 만난 것은 ???. 상자는 나온 결과(좋은·나쁜·빈)를 작게
@@ -554,6 +569,10 @@
     const en = m.endings || {};
     const shelf = [];
     for (const k of ['true', 'other']) for (const dId in en[k] || {}) shelf.push(`<span class="book ${k} ${dId}" title="${en[k][dId]}">${k === 'true' ? '금빛 실록' : '붉은 실록'} · ${esc((era.difficulty[dId] || {}).name || dId)}</span>`);
+    for (const id in en.branch || {}) {
+      const b = (D.branches || []).find((x) => x.id === id);
+      shelf.push(`<span class="book branch" title="${en.branch[id]}">푸른 실록 · ${esc(b ? b.title : id)}</span>`);
+    }
     $('#recShelf').innerHTML = shelf.length ? shelf.join('') : '<span class="off">아직 엔딩을 본 실록이 없어요.</span>';
     list($('#recTitles'), D.titles, (t) => m.titles[t.id], (t) => `「${t.name}」`, (t) => `？？？ — ${t.hint}`);
     open('#records');

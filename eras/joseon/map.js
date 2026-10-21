@@ -123,7 +123,7 @@
     // 화면에 세워지는 것. kind: single(한 채) | village(마을, 인스턴싱) | wall(도성 성곽)
     // name이 있으면 이름표가 뜬다 → 근거가 있어야 한다(CREDITS.md).
     buildings: {
-      gyeongbok: { kind: 'single', name: '경복궁', model: 'gyeongbok', at: { site: 'gyeongbok' }, label: 2.2, shadowR: [2.4, 1.9], replaces: ['altPalace'] },
+      gyeongbok: { kind: 'single', name: '경복궁', model: 'gyeongbok', at: { site: 'gyeongbok' }, label: 2.2, shadowR: [2.4, 1.9], replaces: ['altPalace', 'altOffice'] },
       jongmyo: { kind: 'single', name: '종묘', model: 'jongmyo', at: { site: 'jongmyo' }, label: 1.0, shadowR: [1.6, 1.05] },
       sungnye: { kind: 'single', name: '숭례문', model: 'sungnye', at: { gate: 'sungnye' }, label: 1.4, shadowR: [0.7, 0.4] },
       heungin: { kind: 'single', name: '흥인지문', model: 'heungin', at: { gate: 'heungin' }, label: 1.3, shadowR: [0.8, 0.8] },
@@ -158,6 +158,13 @@
       muak: { kind: 'single', name: '', model: 'muak', at: { x: -6.1, z: -4.4 }, rot: 0.7, label: 0, shadowR: [0.9, 0.6] },
       wihwa: { kind: 'single', name: '', model: 'wihwa', at: { riverPhi: 2.25 }, label: 0, shadowR: [0, 0], y: 0.0 },
       workyard: { kind: 'single', name: '', model: 'workyard', at: { x: 5.6, z: 4.3 }, label: 0, shadowR: [0.6, 0.45], removeAfter: ['T08', 'T08v1'] },
+      // 루트 늘리기(10-14): 갈래·새 다른 길의 이름 없는 장식(그 판 동안만)
+      gyeryongPalace: { kind: 'single', name: '', model: 'gyeryongPalace', at: { x: -0.9, z: 4.9 }, label: 0, shadowR: [1.0, 0.75], alt: true },
+      gyeryongFort: { kind: 'single', name: '', model: 'gyeryongFort', at: { x: -0.3, z: 5.4 }, label: 0, shadowR: [0, 0], alt: true },
+      yeokcham: { kind: 'single', name: '', model: 'yeokcham', at: { x: -5.0, z: 2.9 }, label: 0, shadowR: [0.3, 0.2], alt: true },
+      palisade: { kind: 'single', name: '', model: 'palisade', at: { x: 0, z: -0.4 }, label: 0, shadowR: [0, 0], alt: true },
+      wonchal: { kind: 'single', name: '', model: 'wonchal', at: { x: 6.95, z: -2.3 }, label: 0, shadowR: [0.4, 0.35], alt: true },
+      altOffice: { kind: 'single', name: '', model: 'altOffice', at: { site: 'gyeongbok' }, label: 0, shadowR: [0.8, 0.6], alt: true },
       // 초가 마을은 이름 없는 장식 무리(연출표 7-1): 처음 몇 채에서 카드마다 조금씩 늘어난다
       choga: { kind: 'village', name: '', grow: 2, model: 'choga', max: 40, focus: [-1.5, 2.6], extra: [[-4.6, 7.0], [-5.6, 6.2], [-1.2, 7.4], [0.6, 7.3], [-7.8, 1.4], [-7.6, 0.3]] },
       giwa: { kind: 'village', name: '기와집 마을', model: 'giwa', max: 30, focus: [1.0, 0.8] },

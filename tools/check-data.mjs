@@ -135,7 +135,7 @@ for (const c of D.cards) {
       for (const k in a.crisis_mult || {}) if (!/^(people|nobles|treasury|army):(low|high)$/.test(k)) err(id, `crisis_mult 키 이상: ${k}`);
       for (const [from, to] of Object.entries(a.variants || {})) if (!D.cards.some((x) => x.id === to)) warn(id, `다른 길 변형판 ${to}(${from} 대신) 아직 없음 — 원래 카드가 나온다`);
     }
-    if ((c.paths.alt || []).length > 2) err(id, '다른 길은 사건 하나에 최대 2개');
+    if ((c.paths.alt || []).length > 3) err(id, '다른 길은 사건 하나에 최대 3개(10-14)');
   }
   // 결(10-9): 위기·예고·사관 빼고 모두. 역사 사건 카드에는 도박형을 쓰지 않는다
   const GRAINS = ['balance', 'complex', 'gift', 'mire', 'seed', 'gamble'];
@@ -273,6 +273,13 @@ for (const id in era.difficulty || {}) {
             const vals = ['right', 'left'].map((sk) => eff((c.choices[sk].effects || {})[k] || 0));
             range[k] = [Math.max(0, range[k][0] + Math.min(0, ...vals)), Math.min(100, range[k][1] + Math.max(0, ...vals))];
           }
+        // 변형판에 놓인 다른 길(예: T02a1을 고른 판의 T08v1에 둔 T08a2)
+        for (const v of D.cards.filter((x) => x.variant_of === c.id && x.paths && x.stages.includes(st.id)))
+          for (const a of v.paths.alt || []) {
+            const u = a.unlock && typeof a.unlock === 'object' ? a.unlock[dId] : a.unlock;
+            if (u && !exprOk(u)) err(v.id, `[${dId}] 다른 길 「${a.label}」 열림 조건을 채울 수 없음: ${show(u)}`);
+            if (a.set_flag) flagsBefore.add(a.set_flag);
+          }
         for (const a of (c.paths && c.paths.alt) || []) if (a.set_flag) flagsBefore.add(a.set_flag);
         seenBefore.add(c.id);
       }
@@ -309,6 +316,16 @@ for (const id in era.difficulty || {}) {
     }
   }
 }
+
+/* ---------- 갈래 이야기(설계서 10-14-2) ---------- */
+for (const b of D.branches || []) {
+  checkCond('갈래 ' + b.id, 'done', b.done);
+  if (!D.titles.some((t) => t.rule === 'branch:' + b.id)) err('갈래 ' + b.id, '갈래 칭호(rule branch:id) 없음');
+  if (!D.cards.some((c) => ((c.paths && c.paths.alt) || []).some((a) => a.set_flag === b.flag))) err('갈래 ' + b.id, `시작 플래그 ${b.flag}를 세우는 다른 길 없음`);
+  for (const m of String(b.done).matchAll(/seen\((\w+)\)/g)) if (!D.cards.some((c) => c.id === m[1])) err('갈래 ' + b.id, `완성 조건의 카드 없음: ${m[1]}`);
+  if (!b.sagwan) warn('갈래 ' + b.id, '갈래 엔딩 사관의 말 없음');
+}
+if ((D.branches || []).length && !D.titles.some((t) => t.rule === 'branch:two')) err('갈래', '「두 갈래의 임금」 칭호 없음');
 
 /* ---------- 퀴즈 ---------- */
 const qids = new Set();

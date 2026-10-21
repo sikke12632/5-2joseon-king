@@ -287,6 +287,35 @@
       for (const x of [-0.2, 0, 0.2]) b.box(x, 0.17, 0, 0.03, 0.06, 0.005, col('#f4f0e6'));
       return mk(b);
     },
+    rider() {
+      // 말 탄 인형(역참 관리): 밤색 말 + 푸른 옷 사람
+      const b = new JK.Builder();
+      const horse = col('#7a4a2a'),
+        mane = col('#3a2418'),
+        cloth = col('#3f6f9f'),
+        face = col('#f0c9a0'),
+        hat = col('#2b2b30');
+      b.box(0, 0.17, 0, 0.1, 0.09, 0.26, horse);
+      for (const [x, z] of [[-0.035, 0.09], [0.035, 0.09], [-0.035, -0.09], [0.035, -0.09]]) b.box(x, 0.07, z, 0.026, 0.14, 0.026, horse);
+      b.cylAB([0, 0.2, 0.11], [0, 0.3, 0.17], 0.03, 0.022, 4, horse);
+      b.box(0, 0.3, 0.2, 0.05, 0.05, 0.09, horse);
+      b.box(0, 0.27, 0.13, 0.012, 0.08, 0.06, mane);
+      b.box(0, 0.2, -0.14, 0.02, 0.08, 0.02, mane);
+      b.box(0, 0.27, -0.01, 0.07, 0.12, 0.06, cloth);
+      b.ball(0, 0.37, 0, 0.035, 0, face);
+      b.cyl(0, 0.39, 0, 0.055, 0.055, 0.01, 6, hat);
+      b.cyl(0, 0.395, 0, 0.025, 0.02, 0.04, 6, hat);
+      return mk(b);
+    },
+    scroll() {
+      // 펼친 두루마리(두 대감 사이)
+      const b = new JK.Builder();
+      b.box(0, 0.012, 0, 0.3, 0.006, 0.16, col('#f3e6c4'));
+      b.cyl(-0.15, 0.012, -0.09, 0.014, 0.014, 0.18, 6, col('#8a5a3a'));
+      b.cyl(0.15, 0.012, -0.09, 0.014, 0.014, 0.18, 6, col('#8a5a3a'));
+      for (let i = 0; i < 4; i++) b.box(-0.08 + i * 0.05, 0.016, 0, 0.012, 0.002, 0.11, col('#3a2a1e'));
+      return mk(b);
+    },
     lamp() {
       // 밤의 궁궐: 왕의 방 등불(빛 번짐은 입자로)
       const b = new JK.Builder();
@@ -623,6 +652,75 @@
       h.em.push(emit(5, () => ({ p: [x, H(x, z) + 0.68, z], v: [0, 0.02, 0, 0], life: 1.6, size: 1.3, kind: 0, color: col('#ffcf7a') })));
     },
   };
+  // 갈래 카드(10-14-3)
+  Object.assign(SCENES, {
+    // 두 대감의 논쟁(AT05): 궁궐 마루에 붉은 관복과 푸른 관복이 마주 앉고 가운데 두루마리. 갈래 엔딩 ①에서는 성균관 마당
+    debate(h) {
+      const s = (h.opts && h.opts.at) || W.buildingPos('gyeongbok') || [0, -3.1];
+      const x = s[0],
+        z = s[1] + (h.opts && h.opts.at ? 0.7 : 1.9);
+      W.eventScene({
+        crowds: [
+          { at: [x - 0.3, z], n: 1, clothes: ['#b23b30'], hat: 'samo', face: [x + 0.3, z], mode: 'stand' },
+          { at: [x + 0.3, z], n: 1, clothes: ['#2f5f9f'], hat: 'samo', face: [x - 0.3, z], mode: 'stand' },
+        ].concat(h.opts && h.opts.king ? [{ at: [x, z - 0.35], n: 1, clothes: ['#c0392b'], face: [x, z + 1], mode: 'stand' }] : []),
+      });
+      const sc = MODELS.scroll();
+      sc.position.set(x, H(x, z), z);
+      sc.scale.setScalar(2);
+      h.things.push(addThing(sc, () => {}));
+      sparkleAt(x, H(x, z) + 0.5, z, 26, '#ffe8b0', 0.6, 1.2);
+    },
+    // 한양을 그리워하는 신하(AT06): 섬 남쪽 가장자리에서 신하 둘이 지도를 펼쳐 남쪽을 가리킨다
+    longing(h) {
+      const x = 1.6,
+        z = 6.5;
+      W.eventScene({
+        crowds: [
+          { at: [x - 0.18, z], n: 1, clothes: ['#3f7d5a'], face: [x, 12], mode: 'stand' },
+          { at: [x + 0.18, z], n: 1, clothes: ['#3f7d5a'], face: [x, 12], mode: 'stand' },
+        ],
+      });
+      const sc = MODELS.scroll();
+      sc.position.set(x, H(x, z) + 0.25, z + 0.15);
+      sc.rotation.x = -0.9;
+      sc.scale.setScalar(1.6);
+      h.things.push(addThing(sc, (t, el) => (sc.position.y = H(x, z) + 0.25 + Math.sin(el * 2) * 0.02)));
+      sparkleAt(x, H(x, z) + 0.6, z + 0.6, 14, '#bfe2ff', 0.5, 0.8);
+    },
+    // 먼 도읍(AT07): 섬 북쪽 끝에서 계룡산까지 점선 길 위를 말 탄 인형이 달린다
+    relay(h) {
+      const road = (JK.eraModels && JK.eraModels.relayRoad) || [[-1, -5.6], [-1.5, 5.2]];
+      const L = [];
+      let tot = 0;
+      for (let i = 0; i < road.length - 1; i++) {
+        const d = Math.hypot(road[i + 1][0] - road[i][0], road[i + 1][1] - road[i][1]);
+        L.push(d);
+        tot += d;
+      }
+      const m = MODELS.rider();
+      const th = addThing(
+        m,
+        (t, el) => {
+          let s = ((el * 1.6) % tot + tot) % tot;
+          let i = 0;
+          while (i < L.length - 1 && s > L[i]) s -= L[i++];
+          const u = Math.min(1, s / L[i]);
+          const a = road[i],
+            b = road[i + 1];
+          const x = lerp(a[0], b[0], u),
+            z = lerp(a[1], b[1], u);
+          m.position.set(x, H(x, z) + Math.abs(Math.sin(el * 11)) * 0.03, z);
+          m.rotation.y = Math.atan2(b[0] - a[0], b[1] - a[1]);
+          if (el < 0.4) pop(t, el / 0.4);
+          if (Math.random() < 0.3) spawn({ p: [x, H(x, z) + 0.05, z], v: [(R() - 0.5) * 0.3, 0.25, (R() - 0.5) * 0.3, 0], life: 1.1, size: 0.3, kind: 0, color: col('#d8c8a8') });
+        },
+        { scale: 1.8 }
+      );
+      m.scale.setScalar(0.0001);
+      h.things.push(th);
+    },
+  });
   // 상자를 열었을 때(좋은·나쁜·빈)
   function opened(h, kind) {
     const t = h.box;
@@ -644,13 +742,23 @@
 
   /* ---------- 바깥에서 부르는 것 ---------- */
   // 돌발 카드가 뜰 때
-  X.play = function (name, card) {
+  X.play = function (name, card, opts) {
     ensure();
     X.stop(true);
     const fn = SCENES[name];
     if (!fn) return;
-    cur = { name, em: [], things: [], card: card && card.id, t0: now() };
+    cur = { name, em: [], things: [], card: card && card.id, t0: now(), opts: opts || null };
     fn(cur);
+  };
+  // 갈래 엔딩(10-14-2): ① 성균관 마당에 두 대감과 임금 · ② 개경 장터가 들썩 · ③ 역참 길을 달리는 말. 금빛 대신 푸른 빛
+  X.branchEnd = function (b) {
+    ensure();
+    const at = { '①': W.buildingPos('seonggyun') || [4.0, -4.45], '②': W.buildingPos('altPalace') || [0, -3.1], '③': W.buildingPos('gyeryongPalace') || [-0.9, 4.9] }[b.id] || [0, 0];
+    if (b.id === '①') X.play('debate', null, { at, king: true });
+    else if (b.id === '②') X.play('market', null);
+    else X.play('relay', null);
+    for (let i = 0; i < 4; i++) setTimeout(() => sparkleAt(at[0], H(at[0], at[1]) + 1.2, at[1], 40, i % 2 ? '#bfe2ff' : '#8fc4ff', 1.8, 2), i * 700);
+    W.fx.shock(at[0], H(at[0], at[1]), at[1], 3.6);
   };
   // 고른 뒤: 장면별 마무리, 몇 초 뒤 걷힌다
   X.chose = function (name, side, card) {
@@ -664,7 +772,7 @@
     }
     if (name === 'envoy' && side === 'right') sparkleAt(0, 1.2, -0.75, 24, '#ffd28a', 1.0, 1);
     if (name === 'drought' && side === 'right') sparkleAt(0, 0.8, 0.6, 20, '#f6e6b0', 0.8, 1);
-    const hold = { ship: 6, rain: 1.2, deer: 1.5, market: 6, harvest: 5, envoy: 4, hungry: 4, thief: 2.5, jar: 3, chest: 3, map: 3 }[name];
+    const hold = { ship: 6, rain: 1.2, deer: 1.5, market: 6, harvest: 5, envoy: 4, hungry: 4, thief: 2.5, jar: 3, chest: 3, map: 3, debate: 3, longing: 4, relay: 6 }[name];
     setTimeout(() => X.stop(false, h), (hold !== undefined ? hold : 2.5) * 1000);
   };
   X.open = function (name, kind) {
@@ -691,7 +799,7 @@
       W.state.lightsHold = undefined;
       W.state.lightsTarget = W.state.lightsBase !== undefined ? W.state.lightsBase : 1;
     }
-    if (['hungry', 'fire', 'market', 'envoy'].includes(h.name)) W.eventScene(null);
+    if (['hungry', 'fire', 'market', 'envoy', 'debate', 'longing'].includes(h.name)) W.eventScene(null);
   };
   X.reset = function () {
     if (!W) W = JK.World;

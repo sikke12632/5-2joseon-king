@@ -519,4 +519,201 @@
     flagPole(b, col('#b23b30'), col('#d8b64e'));
     return b.build();
   };
+
+  /* ---------- 루트 늘리기(설계서 10-14) — 갈래·새 다른 길의 이름 없는 장식(실제 이름을 붙이지 않는다) ---------- */
+  // 땅 높이(처음 지을 때 만들므로 섬이 있다) · map.js에 적은 자리
+  const ground = (x, z) => (JK.World && JK.World.height ? JK.World.height(x, z) : 0);
+  const spot = (k) => {
+    const a = ((JK.eraMap.buildings || {})[k] || {}).at || {};
+    return [a.x || 0, a.z || 0];
+  };
+  // 계룡산 아래 궁궐(T05v2, 갈래 ③): 돌 기단 위 큰 전각 · 흙담 · 정문 · 마당 우물
+  M.gyeryongPalace = function () {
+    const b = new JK.Builder();
+    const W = 1.0,
+      D = 0.72;
+    b.box(0, 0.01, 0, W * 2, 0.02, D * 2, C.stoneWarm, { noBottom: true });
+    b.ao(0, 0.25, 0.72);
+    wallRect(b, W, D, 0.16, 0.18, col('#b8865a'));
+    b.push().t(0, 0, -0.15);
+    platform(b, 0.8, 0.42, 0.08, { steps: true });
+    b.push().t(0, 0.08, 0);
+    const t = hall(b, { bw: 0.34, bd: 0.16, h: 0.22, nx: 5, nz: 2, glow: true, wall: C.door, colR: 0.018 });
+    b.ao(0, 0, 1);
+    b.push().t(0, t, 0);
+    roof(b, { type: 'paljak', w: 0.5, d: 0.28, h: 0.24, r: 0.28, lift: 0.08, out: 0.04, nu: 10, nv: 4, dens: 30, bw: 0.36, bd: 0.18, v1: 0.55 });
+    b.pop();
+    b.pop();
+    b.pop();
+    b.push().t(0, 0, D);
+    b.box(0, 0.12, 0, 0.32, 0.24, 0.08, C.door, { noBottom: true });
+    b.push().t(0, 0.24, 0);
+    roof(b, { type: 'gable', w: 0.22, d: 0.1, h: 0.07, nu: 3, nv: 2, dens: 30, soffit: false, ridgeW: 0.016 });
+    b.pop();
+    b.pop();
+    b.cyl(0.62, 0, 0.4, 0.06, 0.06, 0.07, 8, C.stone, { top: col('#5a8a9a') });
+    return b.build();
+  };
+  // 계룡산 산성(T07v2, 갈래 ③): 봉우리를 잇는 돌성 고리 + 이름 없는 문 하나(땅 높이를 따라간다)
+  M.gyeryongFort = function () {
+    const b = new JK.Builder();
+    const [x0, z0] = spot('gyeryongFort');
+    const y0 = ground(x0, z0);
+    const n = 28,
+      rx = 2.1,
+      rz = 1.45,
+      gate = 7;
+    const pts = [];
+    for (let i = 0; i <= n; i++) {
+      const a = (i / n) * Math.PI * 2;
+      const x = Math.cos(a) * rx,
+        z = Math.sin(a) * rz;
+      pts.push([x, ground(x0 + x, z0 + z) - y0, z]);
+    }
+    b.ao(0, 0.2, 0.75);
+    for (let i = 0; i < n; i++) {
+      if (i === gate) continue;
+      const p = pts[i],
+        q = pts[i + 1];
+      const len = Math.hypot(q[0] - p[0], q[2] - p[2]);
+      const lo = Math.min(p[1], q[1]),
+        hi = Math.max(p[1], q[1]);
+      const h = 0.13 + (hi - lo);
+      b.push().t((p[0] + q[0]) / 2, lo - 0.04, (p[2] + q[2]) / 2).ry(-Math.atan2(q[2] - p[2], q[0] - p[0]));
+      b.box(0, h / 2 + 0.02, 0, len + 0.03, h + 0.04, 0.1, i % 2 ? C.stone : C.stoneDark, { top: col('#cfc6b4'), noBottom: true });
+      b.box(-len * 0.25, h + 0.07, 0, len * 0.28, 0.05, 0.1, C.stone, { noBottom: true });
+      b.box(len * 0.25, h + 0.07, 0, len * 0.28, 0.05, 0.1, C.stone, { noBottom: true });
+      b.pop();
+    }
+    const g = pts[gate],
+      g2 = pts[gate + 1];
+    b.push().t((g[0] + g2[0]) / 2, Math.min(g[1], g2[1]), (g[2] + g2[2]) / 2).ry(-Math.atan2(g2[2] - g[2], g2[0] - g[0]));
+    b.box(-0.17, 0.11, 0, 0.1, 0.22, 0.14, C.stoneDark, { noBottom: true });
+    b.box(0.17, 0.11, 0, 0.1, 0.22, 0.14, C.stoneDark, { noBottom: true });
+    b.box(0, 0.25, 0, 0.46, 0.06, 0.16, C.stone);
+    b.push().t(0, 0.28, 0);
+    roof(b, { type: 'gable', w: 0.24, d: 0.1, h: 0.08, nu: 3, nv: 2, dens: 30, soffit: false, ridgeW: 0.016 });
+    b.pop();
+    b.pop();
+    return b.build();
+  };
+  // 역참(AT07, 갈래 ③): 말 바꾸는 작은 집 · 말뚝과 말 · 섬 북쪽에서 계룡산까지 이어진 점선 길
+  M.yeokcham = function () {
+    const b = new JK.Builder();
+    const [x0, z0] = spot('yeokcham');
+    const y0 = ground(x0, z0);
+    b.ao(0, 0.2, 0.75);
+    b.box(0, 0.08, 0, 0.42, 0.16, 0.26, C.wallWhite, { noBottom: true });
+    b.push().t(0, 0.16, 0);
+    roof(b, { type: 'gable', w: 0.28, d: 0.18, h: 0.1, nu: 4, nv: 2, dens: 30, soffit: false, ridgeW: 0.016 });
+    b.pop();
+    b.box(0.36, 0.06, 0.05, 0.02, 0.12, 0.02, C.wood);
+    b.box(0.36, 0.1, 0.05, 0.2, 0.012, 0.012, C.wood);
+    // 말(밤색) 한 마리
+    const horse = col('#7a4a2a');
+    b.push().t(0.42, 0, 0.2).ry(0.4);
+    b.box(0, 0.11, 0, 0.07, 0.06, 0.17, horse);
+    for (const [x, z] of [[-0.025, 0.06], [0.025, 0.06], [-0.025, -0.06], [0.025, -0.06]]) b.box(x, 0.045, z, 0.018, 0.09, 0.018, horse);
+    b.cylAB([0, 0.13, 0.07], [0, 0.2, 0.11], 0.02, 0.016, 4, horse);
+    b.box(0, 0.2, 0.13, 0.035, 0.035, 0.06, horse);
+    b.pop();
+    // 점선 길(세계 좌표를 이 자리 기준으로)
+    const dash = col('#d8c08a');
+    b.ao(0, 0, 1);
+    for (let i = 0; i < M.relayRoad.length - 1; i++) {
+      const [ax, az] = M.relayRoad[i],
+        [bx, bz] = M.relayRoad[i + 1];
+      const L = Math.hypot(bx - ax, bz - az);
+      const k = Math.floor(L / 0.34);
+      for (let j = 0; j < k; j++) {
+        const u = (j + 0.5) / k;
+        const x = ax + (bx - ax) * u,
+          z = az + (bz - az) * u;
+        b.push().t(x - x0, ground(x, z) - y0 + 0.02, z - z0).ry(-Math.atan2(bz - az, bx - ax));
+        b.box(0, 0, 0, 0.17, 0.02, 0.05, dash, { noBottom: true });
+        b.pop();
+      }
+    }
+    return b.build();
+  };
+  // 역참 길(세계 좌표): 섬 북쪽 → 서쪽 → 남쪽 계룡산 아래. engine/evfx.js의 말 탄 인형도 이 길을 달린다
+  M.relayRoad = [[-1.0, -5.6], [-3.6, -3.7], [-5.5, -0.8], [-5.3, 2.0], [-3.3, 4.3], [-1.5, 5.2]];
+  // 통나무 울타리(T07a2): 도성 고리를 따라 선 말뚝과 가로대(문 자리는 비움)
+  M.palisade = function () {
+    const b = new JK.Builder();
+    const [x0, z0] = spot('palisade');
+    const y0 = ground(x0, z0);
+    const ring = JK.eraMap.ring;
+    const gates = Object.values(ring.gates);
+    const n = 132;
+    const log = col('#7a5a3a'),
+      logDark = col('#5e4430');
+    let prev = null;
+    for (let i = 0; i <= n; i++) {
+      const phi = (i / n) * Math.PI * 2;
+      const near = gates.some((g) => Math.abs(Math.atan2(Math.sin(phi - g), Math.cos(phi - g))) < 0.05);
+      const wx = ring.cx + Math.cos(phi) * ring.rx,
+        wz = ring.cz + Math.sin(phi) * ring.rz;
+      const p = [wx - x0, ground(wx, wz) - y0, wz - z0];
+      if (near) {
+        prev = null;
+        continue;
+      }
+      const tilt = Math.sin(i * 2.7) * 0.05;
+      b.push().t(p[0], p[1], p[2]).rz(tilt);
+      b.cyl(0, -0.02, 0, 0.022, 0.018, 0.2, 4, i % 3 ? log : logDark, { noTop: true });
+      b.cyl(0, 0.18, 0, 0.018, 0, 0.04, 4, logDark);
+      b.pop();
+      if (prev) b.cylAB([prev[0], prev[1] + 0.12, prev[2]], [p[0], p[1] + 0.12, p[2]], 0.01, 0.01, 3, logDark);
+      prev = p;
+    }
+    return b.build();
+  };
+  // 원찰(T06a2): 종묘 옆 작은 절 — 법당 하나와 삼층 돌탑
+  M.wonchal = function () {
+    const b = new JK.Builder();
+    b.box(0, 0.01, 0, 0.8, 0.02, 0.7, C.stoneWarm, { noBottom: true });
+    b.ao(0, 0.2, 0.72);
+    b.push().t(0, 0, -0.12);
+    platform(b, 0.5, 0.3, 0.06, { steps: true });
+    b.push().t(0, 0.06, 0);
+    const t = hall(b, { bw: 0.2, bd: 0.11, h: 0.15, nx: 3, nz: 2, glow: true, wall: C.door, colR: 0.014 });
+    b.ao(0, 0, 1);
+    b.push().t(0, t, 0);
+    roof(b, { type: 'paljak', w: 0.3, d: 0.19, h: 0.16, r: 0.2, lift: 0.06, out: 0.03, nu: 8, nv: 3, dens: 30, bw: 0.22, bd: 0.12, v1: 0.55 });
+    b.pop();
+    b.pop();
+    b.pop();
+    b.push().t(0, 0, 0.22);
+    b.box(0, 0.03, 0, 0.12, 0.06, 0.12, C.stoneDark, { top: C.stone, noBottom: true });
+    let y = 0.06;
+    for (let i = 0; i < 3; i++) {
+      const s = 0.07 - i * 0.012;
+      b.box(0, y + 0.025, 0, s, 0.05, s, C.stone, { noBottom: true });
+      b.box(0, y + 0.06, 0, s * 1.6, 0.014, s * 1.6, C.stoneDark, { top: C.stone });
+      y += 0.065;
+    }
+    b.pop();
+    return b.build();
+  };
+  // 관청과 곳간(T05a2): 궁궐 자리는 비워 두고 작은 관청 하나와 높은 마루 곳간 둘
+  M.altOffice = function () {
+    const b = new JK.Builder();
+    b.box(0, 0.01, 0, 1.6, 0.02, 1.2, C.stoneWarm, { noBottom: true });
+    b.ao(0, 0.25, 0.72);
+    wallRect(b, 0.8, 0.6, 0.14, 0.16, col('#c79a6b'));
+    b.push().t(-0.25, 0, -0.15);
+    lectureHall(b, 0.62, true);
+    b.pop();
+    for (const x of [0.38, 0.62]) {
+      b.push().t(x, 0, 0.1);
+      for (const [px, pz] of [[-0.07, -0.06], [0.07, -0.06], [-0.07, 0.06], [0.07, 0.06]]) b.box(px, 0.04, pz, 0.02, 0.08, 0.02, C.wood);
+      b.box(0, 0.13, 0, 0.18, 0.1, 0.15, C.wood, { top: C.woodDark });
+      b.push().t(0, 0.18, 0);
+      roof(b, { type: 'gable', w: 0.12, d: 0.1, h: 0.06, nu: 2, nv: 2, dens: 30, soffit: false, ridgeW: 0.012 });
+      b.pop();
+      b.pop();
+    }
+    return b.build();
+  };
 })();

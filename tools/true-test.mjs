@@ -9,6 +9,11 @@ export default async function (t) {
     await t.waitFor('window.__jk && __jk.W.stats.frames > 20');
   };
   const ready = () => t.waitFor('JK.Cards.isReady()', 12000);
+  // 다른 길이 여럿이면(10-14) 부채꼴이 펼쳐진다 — 이름으로 하나를 누른다
+  const pickFan = async (label) => {
+    await t.sleep(500);
+    await t.eval(`(()=>{const f=document.querySelector('#altFan'); const b=[...f.querySelectorAll('.af-opt')].find(x=>x.textContent.includes('${label}')); if(b) b.click();})()`);
+  };
   const setVals = (o) => t.eval(`(()=>{const r=__jk.G.run;Object.assign(r.vals,{people:50,nobles:50,treasury:50,army:50},${JSON.stringify(o)});r.zones={};JK.Cards.setGauges(r.vals,true);JK.Crisis.apply(r,true);})()`);
   const show = async (id, vals) => {
     await ready();
@@ -70,6 +75,7 @@ export default async function (t) {
   console.log('4) 생명 사건(T01) 다른 길은 진엔딩을 막지 않는다');
   await show('T01', { nobles: 70, army: 40 });
   await t.eval(`document.querySelector('#altBtn').click()`);
+  await pickFan('정몽주를 곁에 둔다');
   await t.sleep(2500);
   const r4 = JSON.parse(await t.eval(`JSON.stringify(__jk.G.routeSummary())`));
   ok('T01 다른 길 뒤에도 진엔딩 가능', !r4.broken && (await t.eval(`__jk.G.run.route.taejo.T01`)) === 'life', JSON.stringify(r4));
@@ -77,6 +83,7 @@ export default async function (t) {
   console.log('5) 보통 사건(T05) 다른 길 → 도장에 금, "진엔딩은 멀어졌어요"');
   await show('T05', { treasury: 20 });
   await t.eval(`document.querySelector('#altBtn').click()`);
+  await pickFan('옛 집을 고쳐 쓴다');
   await t.sleep(3400);
   const r5 = JSON.parse(await t.eval(`JSON.stringify({sum:__jk.G.routeSummary(), seal:document.querySelector('#trueSeal').className, toast:document.querySelector('#result').textContent})`));
   ok('진엔딩이 멀어짐 + 도장 금', r5.sum.broken && /broken/.test(r5.seal), JSON.stringify(r5.sum) + ' ' + r5.seal);
