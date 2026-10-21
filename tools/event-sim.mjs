@@ -1,7 +1,7 @@
 // event-sim.mjs — 무음으로 판을 여러 번 끝까지 두며 돌발 이벤트 숫자를 잰다(설계서 10-13-1 "보통에서 한 판 평균 약 2번")
 //   고르기: 게이지를 50 가까이 지키는 쪽(잠기면 다른 쪽, 둘 다 잠기면 다른 길). 기다림 시간은 줄여 빨리 돈다(연출 시간은 재지 않음)
 //   N=판 수(난이도마다, 기본 20) DIFFS=sprout,normal,sage,annals  node tools/cdp.mjs tools/event-sim.mjs
-//   STRAT=random 이면 아이처럼 아무 쪽이나 고른다(게이지가 출렁여 왕의 마음·기질이 생긴다). CHANCE=1.5 면 돌발 확률에 곱한다(조정 검토용)
+//   STRAT=mix 면 70%는 게이지를 보고 30%는 아무 쪽(실제 아이에 가까움). STRAT=random 이면 아이처럼 아무 쪽이나 고른다(게이지가 출렁여 왕의 마음·기질이 생긴다). CHANCE=1.5 면 돌발 확률에 곱한다(조정 검토용)
 const N = Number(process.env.N || 20);
 const DIFFS = (process.env.DIFFS || 'sprout,normal,sage,annals').split(',');
 const STRAT = process.env.STRAT || 'keep';
@@ -30,7 +30,7 @@ export default async function (t) {
           const tick=()=>{ const G=__jk.G, r=G.run;
             if (r.ended || G.state!=='play' || performance.now()-t0>60000) {
               const tm=JK.Save.meta.traits||{}, a=JSON.parse(tm0); let traits=0; for(const k in tm) traits+=tm[k]-(a[k]||0);
-              return res(JSON.stringify({ev:r.ev.count, chains:Object.keys(r.ev.depth||{}).filter(k=>r.ev.seen.includes(k)).length, boxes:r.ev.boxes.length, traits, nights:r._nights||0, fell:G.state==='fall', cards:r.pos, ids:r.ev.seen, mind:r.mind, maxMind:r._maxMind||0, kinds:r.ev.seen.map(id=>G.card(id).ev), timeout:performance.now()-t0>60000}));
+              return res(JSON.stringify({ev:r.ev.count, chains:Object.keys(r.ev.depth||{}).filter(k=>r.ev.seen.includes(k)).length, boxes:r.ev.boxes.length, traits, nights:r._nights||0, fell:G.state==='fall', fellBy:(G.state==='fall'&&(r.crisisLog||[]).length)?(()=>{const l=r.crisisLog[r.crisisLog.length-1];return l.gauge+':'+(l.side||'')+':'+(l.name||'');})():'', cards:r.pos, ids:r.ev.seen, mind:r.mind, maxMind:r._maxMind||0, kinds:r.ev.seen.map(id=>G.card(id).ev), timeout:performance.now()-t0>60000}));
             }
             r._maxMind=Math.max(r._maxMind||0, r.mind||0);
             if (!JK.Cards.isReady()) return setTimeout(tick,5);
@@ -39,7 +39,7 @@ export default async function (t) {
             let dir=1;
             if (!r.pending) { const c=G.card(r.deck[r.pos]);
               if (c && !c.single) { const cost=(fx)=>{let m=0;for(const k in r.vals){const v=r.vals[k]+(fx[k]||0);m=Math.max(m,Math.abs(v-50));}return m;};
-                dir = '${STRAT}'==='random' ? (Math.random()<0.5?1:-1) : cost(c.choices.right.effects||{})<=cost(c.choices.left.effects||{}) ? 1 : -1;
+                dir = ('${STRAT}'==='random' || ('${STRAT}'==='mix' && Math.random()<0.3)) ? (Math.random()<0.5?1:-1) : cost(c.choices.right.effects||{})<=cost(c.choices.left.effects||{}) ? 1 : -1;
                 if (JK.Cards.isLocked(dir)) dir = JK.Cards.isLocked(-dir) ? 2 : -dir; } }
             // 다른 길이 여럿이면(10-14) 열린 첫 길을 고른다
             if (dir===2) { const o=((r.shownAlt||{}).opts||[]).find(x=>x.open); if (o) JK.Cards.altChoice=o.idx; }
@@ -54,7 +54,7 @@ export default async function (t) {
     for (const x of rows) for (const k of x.kinds) kinds[k] = (kinds[k] || 0) + 1;
     const ids = {};
     for (const x of rows) for (const k of x.ids) ids[k] = (ids[k] || 0) + 1;
-    all[d] = { 판: rows.length, 평균돌발: avg((x) => x.ev), 최대: Math.max(...rows.map((x) => x.ev)), 연쇄: avg((x) => x.chains), 상자: avg((x) => x.boxes), 기질: avg((x) => x.traits), 최고마음: avg((x) => x.maxMind), 밤: avg((x) => x.nights), 실각: rows.filter((x) => x.fell).length, 평균장수: avg((x) => x.cards), 종류: kinds, 카드: ids, 시간초과: rows.filter((x) => x.timeout).length };
+    all[d] = { 판: rows.length, 평균돌발: avg((x) => x.ev), 최대: Math.max(...rows.map((x) => x.ev)), 연쇄: avg((x) => x.chains), 상자: avg((x) => x.boxes), 기질: avg((x) => x.traits), 최고마음: avg((x) => x.maxMind), 밤: avg((x) => x.nights), 실각: rows.filter((x) => x.fell).length, 실각원인: rows.filter((x) => x.fellBy).reduce((o, x) => ((o[x.fellBy] = (o[x.fellBy] || 0) + 1), o), {}), 평균장수: avg((x) => x.cards), 종류: kinds, 카드: ids, 시간초과: rows.filter((x) => x.timeout).length };
     console.log(d, JSON.stringify(all[d]));
   }
   const max = { sprout: 2, normal: 4, sage: 5, annals: 6 };

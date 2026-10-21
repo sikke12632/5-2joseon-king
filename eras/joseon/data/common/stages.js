@@ -52,7 +52,7 @@
    "stars": "☆☆☆"
   },
   "why": "앞 임금들 때 나라의 틀이 잡힌 뒤라 네 게이지가 모두 넉넉한 쪽에서 시작(게임 해석)",
-  "crisisMult": 0.8,
+  "crisisMult": 0.6,
   "mult": 0.9,
   "notes": "예고 카드 상한 3장",
   "forewarnMax": 3,

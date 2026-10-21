@@ -125,11 +125,11 @@
   "choice_type": "free",
   "choices": {
    "right": {
-    "label": "지붕을 고친다",
+    "label": "장정을 불러 고친다",
     "effects": {
-     "treasury": -10
+     "people": -10
     },
-    "this_run": "기와장이들이 지붕에 올라 깨진 기와를 모두 갈았다."
+    "this_run": "마을 장정들을 불러 지붕의 깨진 기와를 모두 갈았다. 사흘 동안 논일이 밀렸다."
    },
    "left": {
     "label": "책을 말린다",
@@ -420,11 +420,11 @@
     "this_run": "선배 학자들이 어린 학자의 글을 돌려 읽으며 무릎을 쳤다."
    },
    "left": {
-    "label": "서당에도 나눈다",
+    "label": "장부를 맡긴다",
     "effects": {
-     "people": 10
+     "treasury": 10
     },
-    "this_run": "어린 학자가 쓴 쉬운 풀이가 고을 서당에까지 퍼졌다."
+    "this_run": "어린 학자가 관청 장부를 맡아 틀린 셈을 찾아냈다. 새던 곡식이 줄었다."
    }
   },
   "grain": "gift",
@@ -611,11 +611,11 @@
   "choice_type": "free",
   "choices": {
    "right": {
-    "label": "닥나무를 사 온다",
+    "label": "닥나무를 베어 온다",
     "effects": {
-     "treasury": -10
+     "people": -10
     },
-    "this_run": "먼 고을에서 닥나무 껍질을 사 왔다. 종이 뜨는 소리가 다시 났다."
+    "this_run": "마을 사람들이 산에 올라 닥나무를 베어 왔다. 그날 밭일은 하지 못했다."
    },
    "left": {
     "label": "책 찍기를 미룬다",
@@ -1191,11 +1191,11 @@
   "choice_type": "free",
   "choices": {
    "right": {
-    "label": "서운관에 상을 준다",
+    "label": "달력을 고친다",
     "effects": {
-     "nobles": 10
+     "treasury": 10
     },
-    "this_run": "서운관 사람들이 그날 하늘을 올려다보며 손뼉을 쳤다.",
+    "this_run": "셈에 맞춰 달력을 고쳤다. 세금 걷는 날이 정확해져 곳간 일이 줄었다.",
     "device": {
      "invention": 1
     }
@@ -1390,12 +1390,11 @@
     "this_run": "떡 바구니가 의원 집 마당에 줄지어 놓였다."
    },
    "left": {
-    "label": "의원을 더 뽑는다",
+    "label": "진으로 보낸다",
     "effects": {
-     "people": 5,
-     "nobles": 5
+     "army": 10
     },
-    "this_run": "의원에게 상을 내리고 의원을 두 명 더 뽑았다."
+    "this_run": "그 의원을 북쪽 진으로 보내 군사들을 돌보게 했다. 앓던 군사들이 일어났다."
    }
   },
   "grain": "gift",
@@ -2071,11 +2070,11 @@
     "this_run": "향교 마당이 새 유생들로 북적였다."
    },
    "left": {
-    "label": "서당을 더 연다",
+    "label": "마을에 맡긴다",
     "effects": {
-     "people": 15
+     "treasury": 10
     },
-    "this_run": "서당 아이들 이야기에 마을마다 서당을 열겠다는 사람이 늘었다."
+    "this_run": "마을마다 스스로 돈을 모아 서당을 열었다. 나라 곳간은 쓰지 않았다."
    }
   },
   "grain": "gift",
@@ -2305,11 +2304,11 @@
   "choice_type": "free",
   "choices": {
    "right": {
-    "label": "목책을 다시 세운다",
+    "label": "장정이 다시 세운다",
     "effects": {
-     "treasury": -10
+     "people": -10
     },
-    "this_run": "나무를 새로 베어 와 목책을 다시 세웠다."
+    "this_run": "강가 마을 장정들이 나무를 베어 와 목책을 다시 세웠다."
    },
    "left": {
     "label": "군사가 메운다",
