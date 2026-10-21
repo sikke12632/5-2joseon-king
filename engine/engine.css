@@ -458,3 +458,64 @@ body:not(.portrait) #panel.extra #deck { aspect-ratio: auto; width: 100%; height
 .dp-card.locked { cursor: default; background: #eee8dc; color: #9a8e7a; border-style: dashed; }
 .dp-card.locked small { color: #8a7a62; }
 .dp-box .close { margin-top: 12px; padding: 8px 22px; border-radius: 999px; border: 0; background: var(--lacquer); color: var(--gold); font-size: 16px; cursor: pointer; font-family: inherit; }
+/* 왕 고르기 · 왕을 마친 뒤(담임 결정 2026-10-21) */
+#kingPick { z-index: 51; }
+.kp-box { width: min(760px, 95%); text-align: center; }
+.kp-box h3 { margin: 0 0 10px; }
+#kpList { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
+.kp-card { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 12px 6px; border-radius: 14px; border: 2px solid #d9c49b; background: #fffaf0; color: var(--ink); cursor: pointer; font-family: inherit; word-break: keep-all; }
+.kp-card:hover:not(:disabled) { border-color: var(--red); transform: translateY(-2px); }
+.kp-card .kp-seal { width: 46px; height: 46px; border-radius: 10px; background: var(--red); color: #fff3d6; font: 16px/46px 'JKTitle', serif; }
+.kp-card b { font-family: 'JKTitle', serif; font-weight: normal; font-size: 21px; }
+.kp-card small { font-size: 13px; color: #6a5440; line-height: 1.3; }
+.kp-card .kp-rec { color: #8a5a10; }
+.kp-card.locked { cursor: default; background: #eee8dc; border-style: dashed; color: #9a8e7a; }
+.kp-card.locked .kp-seal { background: #b7ab96; }
+.kp-box .close { margin-top: 12px; padding: 8px 22px; border-radius: 999px; border: 0; background: var(--lacquer); color: var(--gold); font-size: 16px; cursor: pointer; font-family: inherit; }
+#soonTrue { margin: 6px auto 2px; padding: 6px 12px; border-radius: 10px; background: #efe6d6; color: #5a4630; font-size: 16px; max-width: 520px; }
+#soonTrue.gold { background: linear-gradient(#fff4cf, #f6e3a6); border: 2px solid #d9b14d; color: #6b4a10; }
+.stars { letter-spacing: 2px; }
+
+/* ===== 글씨 크게·또렷하게(담임 수업 피드백 2026-10-21, 디벗 1280×664 기준) =====
+ * 본문은 고운돋움(한 굵기뿐이라 획을 살짝 덧그려 또렷하게), 송명은 제목·이름에만. 글자색은 더 짙게. */
+:root { --ink: #1e1712; }
+.ink-body, #text, #runText, #hint span, .g-name, #result, #wfSub, #chance span, #altWhy, .q-opt, #qFeedback, .c-row, #fallMsg, #fallReal, #fallHint, #soonQuiz, #soonVals, #soonTrue, .dp-card small, .kp-card small {
+  -webkit-text-stroke: 0.35px currentColor;
+}
+#text { font-size: clamp(19px, 1.75vw, 23px); line-height: 1.5; color: var(--ink); min-height: 3.6em; }
+#card.scroll #text { font-family: 'JKBody', sans-serif; font-size: clamp(18px, 1.6vw, 21px); }
+#card.record #text { font-size: clamp(17px, 1.45vw, 20px); color: #2a1d14; }
+#runBox { font-size: clamp(16px, 1.35vw, 18px); background: rgba(255,250,236,.92); }
+.run-label, #realLabel { font-size: 14px; }
+#who { font-size: 26px; }
+#whoTitle { font-size: 14px; }
+#turn, #outside, #gameTag, #chainTag { font-size: 13px; }
+.choice { font-family: 'JKBody', sans-serif; font-size: 21px; -webkit-text-stroke: 0.5px currentColor; }
+#hint { font-size: 16px; color: #2a1d14; opacity: 1; text-shadow: 0 0 4px rgba(255,248,232,.95), 0 0 8px rgba(255,248,232,.8); }
+.g-name { font-size: 15px; color: #fff3dc; }
+#result { font-size: 19px; line-height: 1.45; }
+#chance span b { font-size: 16px; }
+#chance span small { font-size: 13px; }
+#altLabel { font-size: 18px; }
+#altWhy b { font-size: 15px; }
+#altWhy small { font-size: 13px; }
+#zoneAlert { font-size: 18px; }
+#wfText { font-size: 26px; }
+#wfSub { font-size: 19px; }
+.c-row { font-size: 16px; }
+#cmpSum { font-size: 17px; }
+#soonQuiz, #soonVals { font-size: 17px; }
+#fallMsg { font-size: 18px; }
+#fallReal { font-size: 16px; color: #333; }
+.dp-card small, .kp-card small { font-size: 14px; }
+/* 낮은 화면(디벗 664px)에서도 대사는 크게 — 예전 16px 규칙을 덮는다 */
+@media (max-height: 700px) {
+  #text { font-size: 19px; min-height: 3.2em; }
+  #card.record #text { font-size: 17px; }
+  #runBox { font-size: 16px; padding: 6px 9px; }
+  #who { font-size: 23px; }
+  /* 「실제 역사」 두루마리: 글이 길면(반대 카드 4단계 + 실제 역사) 사관 그림을 줄여 글 자리를 만든다 */
+  #card.record .por-wrap { flex: 0 0 13%; }
+  #card.record #runBox { line-height: 1.4; margin-top: 4px; }
+  #card.record #realLabel { margin-top: 4px; }
+}

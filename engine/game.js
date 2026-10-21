@@ -89,14 +89,22 @@
     for (const g of era.gauges) v[g.key] = 50;
     return v;
   };
-  G.hasRun = () => !!(S.run && S.run.era === era.id && S.run.stage);
-  G.newRun = function () {
+  // 판 = 왕 하나(담임 결정 2026-10-21: 왕끼리 이어지지 않는다). 예전 저장의 '다음 왕 기다리는 중'은 끝난 판으로 본다
+  G.hasRun = () => !!(S.run && S.run.era === era.id && S.run.stage && !S.run.waiting && !S.run.ended);
+  // 새 판: 고른 왕 하나를 시작 게이지(50)에서. opts.afterFall: 실각 뒤 다시(새싹은 처음 3장 큰 미리보기, 10-7)
+  G.newRun = function (stageId, diffId, opts) {
+    opts = opts || {};
     S.meta.plays++;
     S.saveMeta();
+    document.body.classList.remove('over');
+    W.state.inkTarget = 0;
+    W.state.ink = 0;
     const seed = (Date.now() ^ (Math.random() * 1e9)) >>> 0;
-    const diff = S.settings.difficulty || 'normal';
-    G.run = { era: era.id, seed, diff, easiest: diff, stage: era.stages[0].id, vals: fifty(), start: fifty(), used: [], stats: { fallsRun: 0, quiz: { asked: 0, right: 0 } } };
-    G.startStage(era.stages[0].id, G.run.start);
+    const diff = diffId || S.settings.difficulty || 'normal';
+    const st = stageOf(stageId) && stageOf(stageId).ready ? stageId : era.stages[0].id;
+    G.run = { era: era.id, seed, diff, easiest: diff, stage: st, vals: fifty(), start: fifty(), used: [], stats: { fallsRun: 0, quiz: { asked: 0, right: 0 } } };
+    if (opts.afterFall && era.difficulty[diff].afterFall === 'reset50') G.run.bigPreview = 3;
+    G.startStage(st, G.run.start);
   };
   // 판 도중 난이도를 바꾸면 그 판의 칭호는 가장 쉬운 단계 기준(설계서 10-7)
   G.setDifficulty = function (id) {
@@ -165,7 +173,7 @@
     G.run = S.run;
     const run = G.run;
     const st = stageOf(run.stage);
-    if (run.waiting) return JK.UI.showComingSoon(run.waiting);
+    if (run.waiting || run.ended) return JK.UI.toTitle();
     G.state = 'play';
     setupWorld(st, true);
     setTimeout(showCurrent, 500);
@@ -495,7 +503,8 @@
         if (r === 'diff') broken = true;
         else same++;
       }
-    const total = (era.trueEnding || {}).totalEvents || counted;
+    // 판 = 왕 하나: 전체는 이 왕의 셈에 넣는 사건 수(생명 사건·변형판·사관 빼고)
+    const total = era.data.cards.filter((c) => c.kind === 'history' && !c.variant_of && c.stages.includes(run.stage) && c.event_type !== 'life').length || counted;
     return { same, counted, total, broken, left: Math.max(0, total - counted) };
   }
   G.routeSummary = () => routeSummary(G.run);
@@ -795,7 +804,9 @@
       S.saveMeta();
       run.stats.fallsRun = (run.stats.fallsRun || 0) + 1;
       run.stageStats.falls++;
-      save();
+      // 판 = 왕 하나: 실각하면 판이 끝난다(「같은 왕 다시」로 새 판). 이어 하기에 남기지 않는다
+      run.ended = true;
+      S.saveRun(null);
     }
     const st = stageOf(run.stage);
     const D = G.diff();
@@ -806,7 +817,7 @@
     const eul = (w) => w + ((w.charCodeAt(w.length - 1) - 0xac00) % 28 ? '을' : '를');
     if (D.hint === 'full') hint = `사관의 귀띔: ${g.name} 게이지를 지켜 보세요. ${g.name}에 점이 빛나는 카드에서 ${eul(g.name)} ${at === 0 ? '아끼는' : '덜 올리는'} 쪽을 골라 보면 어떨까요?`;
     else if (D.hint === 'gauge') hint = `사관의 귀띔: ${g.name} 게이지를 지켜 보세요.`;
-    const again = D.afterFall === 'run' ? '판 전체를 처음부터 다시!' : '이 왕의 처음부터 다시!';
+    const again = '이 왕의 처음부터 다시!';
     const t0 = performance.now();
     const iv = setInterval(() => {
       const el = performance.now() - t0;
@@ -884,18 +895,13 @@
     const got = [];
     if (run.stageStats.edge) got.push('edgeClear');
     if (!run.stageStats.falls) got.push('noFallStage');
-    const lastStage = !era.stages[stageIndex(st.id) + 1];
-    if (lastStage && (run.stats.held || 0) >= 5) got.push('held5');
-    if (lastStage && !(run.stats.alt || 0)) got.push('allReal');
-    // 엔딩(10-11-3·6): 마지막 왕까지 마치면 진엔딩(난이도별 칭호) 또는 다른 조선의 한양
+    // 판 = 왕 하나(담임 결정 2026-10-21): 왕을 마치면 판이 끝난다
+    if ((run.stats.held || 0) >= 5) got.push('held5');
+    if (!(run.stats.alt || 0)) got.push('allReal');
+    // 왕별 진엔딩(10-11, 담임 결정): 이 왕의 사건을 모두 실제대로 지나 클리어 — 난이도별로 기록
     const route = routeSummary(run);
-    let ending = null;
-    if (lastStage && !route.broken) {
-      ending = 'true';
-      got.push('true:' + (run.easiest || G.diffId()));
-    } else if (lastStage && (run.stats.alt || 0) >= ((era.trueEnding || {}).otherEndingAlts || 5)) ending = 'other';
-    if (lastStage && (run.stats.alt || 0) >= 10) got.push('alt10');
-    if (lastStage && route.counted && Math.abs(route.same / route.counted - 0.5) <= 0.05) got.push('half');
+    const dId = run.easiest || G.diffId();
+    const kingTrue = !route.broken;
     W.setTOD(Math.min(1, st.tod[1] + 0.06));
     const qs = pickQuiz(st.id, run.stageSeed);
     // 나의 역사 vs 실제 역사(10-10-5): 퀴즈 바로 앞. 기록관에도 남긴다
@@ -911,46 +917,34 @@
       S.meta.quiz.asked += res.length;
       S.meta.quiz.right += right;
       if (res.length && right === res.length) got.push('quizPerfect');
-      const newTitles = awardTitles(got);
-      // 다음 왕 시작 게이지: 끝 게이지를 난이도만큼 이어받고(보통 1/2), 맞힌 문항마다 50에서 가장 먼 게이지를 당긴다
-      const next = {};
-      for (const k in run.vals) next[k] = Math.round(50 + (run.vals[k] - 50) * D.carry);
-      for (let i = 0; i < right; i++) {
-        let far = null;
-        for (const k in next) if (!far || Math.abs(next[k] - 50) > Math.abs(next[far] - 50)) far = k;
-        if (far && next[far] !== 50) next[far] += next[far] > 50 ? -Math.min(D.quizBonus, next[far] - 50) : Math.min(D.quizBonus, 50 - next[far]);
-      }
-      S.saveMeta();
-      const si = stageIndex(st.id);
-      const nst = era.stages[si + 1];
-      // 이 왕에서 지은 것과 그 모습(상태)은 판 기록으로 남는다(엔딩 "나의 한양"·기록관용)
-      run.history = run.history || [];
-      run.history.push({ stage: st.id, vals: Object.assign({}, run.vals), built: run.built.filter((k) => !run.builtBefore.includes(k)).map((k) => [k, run.states[k] || 'smooth']) });
-      // 합류(10-10-2): 다른 길로 생긴 장식은 치우고, 서지 않은 실제 건물은 다음 왕 시작 때 서 있다
-      const isAltKey = (k) => (era.map.buildings[k.split(':')[0]] || {}).alt;
-      run.builtBefore = [...new Set(run.built.filter((k) => !isAltKey(k)).concat(run.altSkipped || []))];
-      run.statesBefore = {};
-      run.flagsBefore = Object.assign({}, run.flags || {});
-      run.flagsRunBefore = Object.assign({}, run.flagsRun || {});
-      run.grownBefore = run.grown || 0;
-      if (ending) {
+      // 왕별 기록: 클리어 수 · 퀴즈 별(맞힌 수, 가장 좋은 것) · 진엔딩(난이도별 날짜). 별·이름 규칙은 설계서가 정한다(자리)
+      const kings = (S.meta.kings = S.meta.kings || {});
+      const k = (kings[st.id] = kings[st.id] || { clears: 0, stars: 0, trueEnd: {} });
+      k.clears++;
+      k.stars = Math.max(k.stars || 0, right);
+      k.asked = Math.max(k.asked || 0, res.length);
+      if (kingTrue) k.trueEnd[dId] = k.trueEnd[dId] || new Date().toISOString().slice(0, 10);
+      // 다섯 왕 모두 그 난이도 진엔딩을 모으면 최종 진엔딩 칭호(지금은 태조만 있어 아직 못 받음)
+      const all = era.stages.every((x) => ((kings[x.id] || {}).trueEnd || {})[dId]);
+      if (all) {
+        got.push('true:' + dId);
         S.meta.endings = S.meta.endings || {};
-        (S.meta.endings[ending] = S.meta.endings[ending] || {})[run.easiest || G.diffId()] = new Date().toISOString().slice(0, 10);
-        S.saveMeta();
-        JK.UI.showEnding(ending, { diff: run.easiest || G.diffId(), route, titles: newTitles });
+        (S.meta.endings.true = S.meta.endings.true || {})[dId] = new Date().toISOString().slice(0, 10);
       }
-      if (nst && nst.ready) {
-        G.startStage(nst.id, next);
-        return;
-      }
-      if (firstClear && nst && nst.ready) setTimeout(() => Cards.toast('🔓 모든 난이도가 열렸어요!', 3200), 1500);
-      run.waiting = { from: st.id, next: nst ? nst.id : null, start: next, right, asked: res.length, titles: newTitles, unlockedAll: firstClear, vals: Object.assign({}, run.vals), built: run.history[run.history.length - 1].built };
-      G.state = 'waiting';
-      save();
+      const newTitles = awardTitles(got);
+      // 이 왕에서 지은 것과 그 모습(상태)
+      const built = run.built.map((x) => [x, run.states[x] || 'smooth']);
+      const end = { from: st.id, right, asked: res.length, titles: newTitles, unlockedAll: firstClear, vals: Object.assign({}, run.vals), built, kingTrue, diff: dId, route, allTrue: all };
+      run.ended = true;
+      G.state = 'ended';
+      G.lastEnd = end;
+      S.saveRun(null);
+      S.saveMeta();
       W.setOrbit(true);
       W.camTo({ dist: 31, el: 0.42, fov: 30 }, 3);
       if (JK.Audio) JK.Audio.chime();
-      setTimeout(() => JK.UI.showComingSoon(run.waiting), 1200);
+      if (all) JK.UI.showEnding('true', { diff: dId, route, titles: newTitles });
+      setTimeout(() => JK.UI.showKingEnd(end), 1200);
     });
   }
   function pickQuiz(stageId, seed) {

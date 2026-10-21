@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>조선의 왕</title>
 <!-- 배포할 때마다 ?v= 숫자를 올린다(캐시) -->
-<link rel="stylesheet" href="engine/engine.css?v=27">
+<link rel="stylesheet" href="engine/engine.css?v=30">
 </head>
 <body>
 <div id="app">
@@ -93,12 +93,16 @@
       <p id="fallMsg"></p>
       <p id="fallReal"></p>
       <p id="fallHint"></p>
-      <div class="btns"><button id="btnRetry">다시 도전</button><button id="btnFallHome" class="ghost">첫 화면</button></div>
+      <div class="btns"><button id="btnRetry">같은 왕 다시</button><button id="btnFallKings">다른 왕 고르기</button><button id="btnFallHome" class="ghost">첫 화면</button></div>
     </div>
   </div>
 
+  <div id="kingPick" class="modal hide">
+    <div class="m-box kp-box"><h3>어느 왕으로 할까요?</h3><div id="kpList"></div><button data-close="kingPick" class="close">닫기</button></div>
+  </div>
+
   <div id="diffPick" class="modal hide">
-    <div class="m-box dp-box"><h3>난이도를 골라요</h3><div id="dpList"></div><button data-close="diffPick" class="close">닫기</button></div>
+    <div class="m-box dp-box"><h3 id="dpHead">난이도를 골라요</h3><div id="dpList"></div><button data-close="diffPick" class="close">닫기</button></div>
   </div>
 
   <div id="warnFirst" class="modal hide" role="alertdialog">
@@ -136,11 +140,12 @@
       <div class="e-small" id="soonHead"></div>
       <h2>사관 기록</h2>
       <div id="soonQuiz"></div>
+      <div id="soonTrue"></div>
       <div id="soonTitles" class="e-title"></div>
       <div id="soonVals"></div>
       <div id="soonBuilt"></div>
       <p id="soonNext"></p>
-      <div class="btns"><button id="btnSoonRecords" class="ghost">나의 기록</button><button id="btnSoonHome">첫 화면</button></div>
+      <div class="btns"><button id="btnAgain">같은 왕 다시</button><button id="btnOtherKing">다른 왕 고르기</button><button id="btnSoonHome" class="ghost">첫 화면</button><button id="btnSoonRecords" class="ghost">나의 기록</button></div>
     </div>
   </div>
 
@@ -188,30 +193,30 @@
   <div id="lost" class="hide"><p>그래픽을 다시 불러오는 중…</p></div>
   <div id="loading"><p>섬을 띄우는 중…</p></div>
 </div>
-<script src="engine/lib/three.min.js?v=27"></script>
-<script src="engine/toy.js?v=27"></script>
-<script src="engine/props.js?v=27"></script>
-<script src="eras/joseon/map.js?v=27"></script>
-<script src="eras/joseon/models.js?v=27"></script>
-<script src="eras/joseon/models-taejo.js?v=27"></script>
-<script src="eras/joseon/era.js?v=27"></script>
+<script src="engine/lib/three.min.js?v=30"></script>
+<script src="engine/toy.js?v=30"></script>
+<script src="engine/props.js?v=30"></script>
+<script src="eras/joseon/map.js?v=30"></script>
+<script src="eras/joseon/models.js?v=30"></script>
+<script src="eras/joseon/models-taejo.js?v=30"></script>
+<script src="eras/joseon/era.js?v=30"></script>
 <!-- 데이터: 공통 + 왕별 (왕이 늘면 그 왕 폴더의 두 줄을 더한다) -->
-<script src="eras/joseon/data/common/roles.js?v=27"></script>
-<script src="eras/joseon/data/common/records.js?v=27"></script>
-<script src="eras/joseon/data/common/daily.js?v=27"></script>
-<script src="eras/joseon/data/taejo/cards.js?v=27"></script>
-<script src="eras/joseon/data/taejo/quizzes.js?v=27"></script>
-<script src="eras/joseon/data/taejo/more.js?v=27"></script>
-<script src="eras/joseon/data/taejo/quizzes-more.js?v=27"></script>
-<script src="engine/save.js?v=27"></script>
-<script src="engine/world.js?v=27"></script>
-<script src="engine/audio.js?v=27"></script>
-<script src="engine/cards.js?v=27"></script>
-<script src="engine/quiz.js?v=27"></script>
-<script src="engine/cond.js?v=27"></script>
-<script src="engine/crisis.js?v=27"></script>
-<script src="engine/game.js?v=27"></script>
-<script src="engine/ui.js?v=27"></script>
-<script src="engine/main.js?v=27"></script>
+<script src="eras/joseon/data/common/roles.js?v=30"></script>
+<script src="eras/joseon/data/common/records.js?v=30"></script>
+<script src="eras/joseon/data/common/daily.js?v=30"></script>
+<script src="eras/joseon/data/taejo/cards.js?v=30"></script>
+<script src="eras/joseon/data/taejo/quizzes.js?v=30"></script>
+<script src="eras/joseon/data/taejo/more.js?v=30"></script>
+<script src="eras/joseon/data/taejo/quizzes-more.js?v=30"></script>
+<script src="engine/save.js?v=30"></script>
+<script src="engine/world.js?v=30"></script>
+<script src="engine/audio.js?v=30"></script>
+<script src="engine/cards.js?v=30"></script>
+<script src="engine/quiz.js?v=30"></script>
+<script src="engine/cond.js?v=30"></script>
+<script src="engine/crisis.js?v=30"></script>
+<script src="engine/game.js?v=30"></script>
+<script src="engine/ui.js?v=30"></script>
+<script src="engine/main.js?v=30"></script>
 </body>
 </html>

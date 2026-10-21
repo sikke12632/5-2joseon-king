@@ -29,7 +29,11 @@ export default async function (t) {
   console.log('② 두 번째 판(아직 클리어 없음)');
   await go();
   await t.eval("document.querySelector('#btnNew').click()");
-  await t.sleep(500);
+  await t.sleep(400);
+  ok('왕 고르기 화면(태조만 열림, 나머지 준비 중)', await t.eval(`!document.querySelector('#kingPick').classList.contains('hide') && [...document.querySelectorAll('.kp-card')].filter(b=>b.disabled && /준비 중/.test(b.textContent)).length===4`));
+  await t.shot(`${OUT}/diff-2a-kings.png`);
+  await t.eval(`document.querySelector('.kp-card:not(.locked)').click()`);
+  await t.sleep(400);
   const p2 = await pickState();
   ok('고르기 화면', p2.open, p2.cards.join(' | '));
   ok('새싹만 열림, 나머지 🔒 "왕 하나를 클리어하면 열려요"', p2.cards.filter((c) => c.includes('(잠김)') && c.includes('왕 하나를 클리어하면 열려요')).length === 3);
@@ -52,12 +56,14 @@ export default async function (t) {
     await t.sleep(300);
   }
   await t.waitFor(`!document.querySelector('#soon').classList.contains('hide')`, 12000);
-  const soon = await t.eval(`document.querySelector('#soonTitles').textContent`);
+  const soon = await t.eval(`document.querySelector('#soonTitles').textContent + ' / ' + document.querySelector('#soonQuiz').textContent`);
   ok('"모든 난이도가 열렸어요!" 알림', /모든 난이도가 열렸어요/.test(soon), soon);
   await t.shot(`${OUT}/diff-3-unlocked.png`);
   await go();
   await t.eval("document.querySelector('#btnNew').click()");
-  await t.sleep(500);
+  await t.sleep(400);
+  await t.eval(`document.querySelector('.kp-card:not(.locked)').click()`);
+  await t.sleep(400);
   const p3 = await pickState();
   ok('다음 판: 네 난이도 모두 열림', p3.open && p3.cards.length === 4 && !p3.cards.some((c) => c.includes('(잠김)')), p3.cards.join(' | '));
   await t.shot(`${OUT}/diff-4-pick-open.png`);
@@ -70,7 +76,9 @@ export default async function (t) {
   await t.eval('localStorage.clear()');
   await go('&debug=1');
   await t.eval("document.querySelector('#btnNew').click()");
-  await t.sleep(500);
+  await t.sleep(400);
+  await t.eval(`document.querySelector('.kp-card:not(.locked)').click()`);
+  await t.sleep(400);
   const p4 = await pickState();
   ok('점검 모드: 고르기 화면, 모두 열림', p4.open && !p4.cards.some((c) => c.includes('(잠김)')), p4.cards.join(' | '));
 }

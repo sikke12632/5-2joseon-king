@@ -31,7 +31,8 @@ export default async function (t) {
     await t.eval(`(()=>{const w=document.querySelector('#warnFirst');if(w&&!w.classList.contains('hide')){console.log('처음 위기 알림: '+document.querySelector('#wfText').textContent);w.click();}})()`);
     let dir = (PAT[i++] || 'R') === 'R' ? 1 : -1;
     if (await t.eval(`JK.Cards.isLocked(${dir})`)) dir = -dir; // 잠긴 쪽이면 반대쪽
-    await swipe(dir);
+    if (await t.eval(`JK.Cards.isLocked(${dir})`)) await t.eval('__jk.G.commit(2)'); // 둘 다 잠기면 다른 길
+    else await swipe(dir);
     console.log(n, dir > 0 ? 'R' : 'L', info);
     await t.sleep(400);
     // 중간에 새로 고침해서 이어하기 시험 (한 번)
@@ -54,6 +55,8 @@ export default async function (t) {
     console.log('실각 글:', await t.eval("document.querySelector('#fallName').textContent+' / '+document.querySelector('#fallReal').textContent"));
     if (OUT) await t.shot(OUT + '/p0-4-실각.png');
     await t.eval("document.querySelector('#btnRetry').click()");
+  await t.sleep(300); // 실각 뒤 「같은 왕 다시」 → 난이도 고르기 → 지금 난이도
+  await t.eval("document.querySelector('.dp-card.cur:not(.locked)') ? document.querySelector('.dp-card.cur:not(.locked)').click() : document.querySelector('.dp-card:not(.locked)').click()");
     await t.sleep(2500);
     console.log('다시 도전 뒤:', await t.eval("__jk.G.state+' pos '+__jk.G.run.pos+' vals '+JSON.stringify(__jk.G.run.vals)+' built '+__jk.G.run.built.join(',')+' ink '+__jk.W.state.ink+' 실각기록 '+JSON.stringify(__jk.S.meta.falls)"));
     return;
@@ -76,7 +79,7 @@ export default async function (t) {
   await t.waitFor("!document.querySelector('#soon').classList.contains('hide')", 9000);
   await t.sleep(2500);
   if (OUT) await t.shot(OUT + '/p0-3-준비중.png');
-  console.log('준비 중:', await t.eval("[...document.querySelectorAll('#soon .m-box > *')].map(e=>e.textContent).filter(Boolean).join(' | ')"));
+  console.log('왕을 마친 뒤:', await t.eval("[...document.querySelectorAll('#soon .m-box > *')].map(e=>e.textContent).filter(Boolean).join(' | ')"));
   console.log('영구 기록', await t.eval("JSON.stringify({seen:Object.keys(__jk.S.meta.seen).length, clears:__jk.S.meta.clears, titles:Object.keys(__jk.S.meta.titles), quiz:__jk.S.meta.quiz, plays:__jk.S.meta.plays})"));
   // 기록 코드: 내보내기 → 지우기 → 불러오기
   const code = await t.eval('__jk.S.exportCode()');
@@ -88,5 +91,6 @@ export default async function (t) {
   console.log('글자 하나 틀린 코드', await t.eval(`__jk.S.importCode(${JSON.stringify(bad)}).then(r=>r.msg)`));
   await t.goto(BASE + '?idle=0&pick=' + (process.env.PICK || 'normal'));
   await t.waitFor('window.__jk && __jk.W.stats.frames > 20');
-  console.log('다시 연 뒤 이어하기:', await t.eval("document.querySelector('#btnContinue').textContent"));
+  // 판 = 왕 하나: 왕을 마치면 이어 하던 판이 남지 않는다
+  console.log('다시 연 뒤 이어하기 버튼 숨김:', await t.eval("document.querySelector('#btnContinue').classList.contains('hide')"));
 }

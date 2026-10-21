@@ -105,6 +105,8 @@ export default async function (t) {
   ok('실각 기록 띠', await t.eval(`JSON.stringify(JK.Save.meta.fallCrisis)`) !== '{}', await t.eval(`JSON.stringify(JK.Save.meta.fallCrisis)`));
   if (OUT) await t.shot(`${OUT}/crisis-fall.png`);
   await t.eval("document.querySelector('#btnRetry').click()");
+  await t.sleep(300); // 실각 뒤 「같은 왕 다시」 → 난이도 고르기 → 지금 난이도
+  await t.eval("document.querySelector('.dp-card.cur:not(.locked)') ? document.querySelector('.dp-card.cur:not(.locked)').click() : document.querySelector('.dp-card:not(.locked)').click()");
   await t.waitFor('JK.Cards.isReady()', 15000);
   ok('다시 도전: 위기 상태·손상 초기화', await t.eval(`(()=>{const r=__jk.G.run;return !r.followups.length && !Object.keys(r.cooldown).length && !Object.keys(r.damaged).length;})()`));
 
@@ -113,6 +115,8 @@ export default async function (t) {
   await t.waitFor(`!document.querySelector('#fall').classList.contains('hide')`, 12000);
   console.log('  ', await t.eval(`document.querySelector('#fallCrisis').textContent + ' / ' + document.querySelector('#fallMsg').textContent`));
   await t.eval("document.querySelector('#btnRetry').click()");
+  await t.sleep(300); // 실각 뒤 「같은 왕 다시」 → 난이도 고르기 → 지금 난이도
+  await t.eval("document.querySelector('.dp-card.cur:not(.locked)') ? document.querySelector('.dp-card.cur:not(.locked)').click() : document.querySelector('.dp-card:not(.locked)').click()");
   await t.waitFor('JK.Cards.isReady()', 15000);
 
   console.log('8) 가장 무거운 위기 장면 예산(모두 짓고 + 위기 사건 장면 + 손상)');

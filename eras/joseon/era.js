@@ -172,7 +172,8 @@
     //  mult 게이지 변화 배율 · safe 안전 구간(이 값 아래/100−값 위에서 실각 쪽 변화에 k를 곱함)
     //  warn 위험 경고(이 값 이하·100−값 이상에서 깜빡임) · preview 미리보기 · carry 다음 왕이 이어받는 몫
     //  quizOptions 보기 수 · quizRetry 틀리면 한 번 더 · quizBonus 정답 하나당 50 쪽으로 당김
-    //  afterFall 실각 뒤(reset50 시작 게이지 50 + 처음 3장 큰 미리보기 / same 그대로 / run 판 전체 처음부터)
+    //  afterFall 실각 뒤(reset50 처음 3장 큰 미리보기 / same 그대로). 판 = 왕 하나라 모두 그 왕 처음부터(담임 결정 2026-10-21)
+    //  carry·quizBonus: 왕끼리 이어지지 않게 되어(담임 결정 2026-10-21) 엔진이 쓰지 않는다 — 퀴즈는 그 왕의 별로 남는다
     //  hint 사관의 귀띔(full / gauge / none) · stage 왕별 장치 숫자(P1~P4에서 씀) · unlock 열리는 때
     //  desc 난이도 고르기 화면의 한 줄 설명
     //  담임 결정(2026-10-21): 생애 첫 판은 무조건 새싹, 왕 하나라도 클리어하면 모든 난이도가 열림(unlock.rule 'clearAny')
@@ -202,7 +203,7 @@ unlock: { rule: 'clearAny', text: '왕 하나를 클리어하면 열려요' },
       annals: {
         name: '실록 도전', icon: '📜', desc: '미리보기·경고 없음. 실각하면 판 전체를 처음부터',
         mult: 1.5, safe: null, warn: 0, preview: 'none', carry: 0.75,
-        quizOptions: 4, quizRetry: false, quizBonus: 3, afterFall: 'run', hint: 'none', rareMult: 1.5, scoreMult: 1.6, crisisMult: 1.5,
+        quizOptions: 4, quizRetry: false, quizBonus: 3, afterFall: 'same', hint: 'none', rareMult: 1.5, scoreMult: 1.6, crisisMult: 1.5,
         stage: { warCost: -2, food: 5, starvePeople: -8, scaleFall: 4, shipThreat: -20, sejongTriggers: [2, 4, 6] },
 unlock: { rule: 'clearAny', text: '왕 하나를 클리어하면 열려요' },
       },

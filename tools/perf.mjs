@@ -24,7 +24,7 @@ export default async function (t) {
   for (const q of ['high', 'normal', 'low']) {
     for (const cpu of [1, 6]) {
       await t.cpu(1);
-      await t.goto(`${BASE}?q=${q}&idle=0`);
+      await t.goto(`${BASE}?q=${q}&idle=0&pick=normal`);
       await t.waitFor('window.__jk && __jk.W.stats.frames > 20');
       await t.eval("localStorage.clear(); document.querySelector('#btnNew').click()");
       await t.sleep(3000);
