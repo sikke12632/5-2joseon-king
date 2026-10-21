@@ -133,7 +133,7 @@ for (const c of D.cards) {
       if (!a.this_run) err(id, `다른 길 ${a.label}: 「이번 판에서」 없음`);
       for (const k in a.effects || {}) if (!gaugeKeys.includes(k)) err(id, `다른 길 효과에 없는 게이지: ${k}`);
       for (const b of a.build || []) if (!era.map.buildings[b]) err(id, `다른 길 build에 없는 건물: ${b}`);
-      for (const k in a.crisis_mult || {}) if (!/^(people|nobles|treasury|army):(low|high)$/.test(k)) err(id, `crisis_mult 키 이상: ${k}`);
+      for (const k in a.crisis_mult || {}) if (!/^(people|nobles|treasury|army|faction):(low|high)$/.test(k)) err(id, `crisis_mult 키 이상: ${k}`);
       for (const [from, to] of Object.entries(a.variants || {})) if (!D.cards.some((x) => x.id === to)) warn(id, `다른 길 변형판 ${to}(${from} 대신) 아직 없음 — 원래 카드가 나온다`);
     }
     if ((c.paths.alt || []).length > 3) err(id, '다른 길은 사건 하나에 최대 3개(10-14)');

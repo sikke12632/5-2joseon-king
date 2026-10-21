@@ -479,6 +479,8 @@
       }
     }
     if (!run.seenRun.includes(c.id)) run.seenRun.push(c.id);
+    // 변형판(다른 길이 바꾼 역사 카드)도 그 사건을 지난 것으로 센다 — seen(Y09)·seen(S08) 같은 뒤 조건이 이어지게
+    if (c.variant_of && !run.seenRun.includes(c.variant_of)) run.seenRun.push(c.variant_of);
     // 한 판에 두 왕(설계서 2-3): 그 카드가 뜨는 순간 왕 인형·이름이 바뀐다(선조 → 인조)
     if (st.kingSwap && (c.variant_of || c.id) === st.kingSwap.at && run.kingName !== st.kingSwap.name) {
       run.kingName = st.kingSwap.name;
@@ -1207,6 +1209,8 @@
     if (alt.set_flag) run.flagsRun[alt.set_flag] = true;
     Object.assign(run.variants, alt.variants || {});
     for (const k in alt.crisis_mult || {}) run.crisisMult[k] = (run.crisisMult[k] || 1) * alt.crisis_mult[k];
+    // 다른 길이 왕별 장치를 움직임(영조·정조 「끝까지 한쪽만 쓴다」 → 붕당 저울)
+    if (alt.device) applyDevice(run, alt.device);
     if (alt.skip && alt.skip.length) run.deck = run.deck.slice(0, run.pos + 1).concat(run.deck.slice(run.pos + 1).filter((id) => !alt.skip.includes(id)));
     // 실제 경로라면 섰을 건물: 이번 왕 동안은 서지 않고, 다음 왕 시작 때 합류
     for (const k of (c.choices.right.build || []).concat(c.choices.left.build || [])) if (!run.altSkipped.includes(k) && !(alt.build || []).includes(k)) run.altSkipped.push(k);
