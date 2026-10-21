@@ -9,7 +9,7 @@ export default async function (t) {
   // 1) 첫 내려받기 + 첫 화면까지 시간 (캐시 없음)
   await t.send('Network.setCacheDisabled', { cacheDisabled: true });
   const t0 = Date.now();
-  await t.goto(BASE + '?idle=0');
+  await t.goto(BASE + '?idle=0&pick=' + (process.env.PICK || 'normal'));
   await t.waitFor("document.querySelector('#loading').classList.contains('gone')");
   const firstScreen = Date.now() - t0;
   await t.sleep(1500);

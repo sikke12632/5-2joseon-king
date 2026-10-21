@@ -869,6 +869,8 @@
     const D = G.diff();
     G.state = 'quiz';
     Cards.hide();
+    // 처음으로 왕 하나를 마치면 모든 난이도가 열린다(담임 결정 2026-10-21) — 그 순간 알림
+    const firstClear = !Object.values(S.meta.clears || {}).some((n) => n > 0);
     S.meta.clears[st.id] = (S.meta.clears[st.id] || 0) + 1;
     const got = [];
     if (run.stageStats.edge) got.push('edgeClear');
@@ -932,7 +934,8 @@
         G.startStage(nst.id, next);
         return;
       }
-      run.waiting = { from: st.id, next: nst ? nst.id : null, start: next, right, asked: res.length, titles: newTitles, vals: Object.assign({}, run.vals), built: run.history[run.history.length - 1].built };
+      if (firstClear && nst && nst.ready) setTimeout(() => Cards.toast('🔓 모든 난이도가 열렸어요!', 3200), 1500);
+      run.waiting = { from: st.id, next: nst ? nst.id : null, start: next, right, asked: res.length, titles: newTitles, unlockedAll: firstClear, vals: Object.assign({}, run.vals), built: run.history[run.history.length - 1].built };
       G.state = 'waiting';
       save();
       W.setOrbit(true);

@@ -11,10 +11,10 @@ export default async function (t) {
     await t.send('Input.dispatchKeyEvent', { type: 'keyDown', key: code[0], code: code[0], windowsVirtualKeyCode: code[1] });
     await t.send('Input.dispatchKeyEvent', { type: 'keyUp', key: code[0], code: code[0], windowsVirtualKeyCode: code[1] });
   };
-  await t.goto(BASE + '?idle=0');
+  await t.goto(BASE + '?idle=0&pick=' + (process.env.PICK || 'normal'));
   await t.waitFor('window.__jk && __jk.W.stats.frames > 20');
   await t.eval('localStorage.clear()');
-  await t.goto(BASE + '?idle=0' + (process.env.Q ? '&q=' + process.env.Q : ''));
+  await t.goto(BASE + '?idle=0&pick=' + (process.env.PICK || 'normal') + (process.env.Q ? '&q=' + process.env.Q : ''));
   await t.waitFor('window.__jk && __jk.W.stats.frames > 20');
   if (SHOTS.includes('title') && OUT) await t.shot(`${OUT}/title.png`);
   await t.eval("document.querySelector('#btnNew').click()");

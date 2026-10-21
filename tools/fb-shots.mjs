@@ -5,7 +5,7 @@ const OUT = process.env.OUT || '.';
 export default async function (t) {
   const ok = (name, cond, extra) => console.log(cond ? '  ✔' : '  ✘', name, extra !== undefined ? extra : '');
   const fresh = async () => {
-    await t.goto('http://127.0.0.1:8643/index.html?idle=0');
+    await t.goto('http://127.0.0.1:8643/index.html?idle=0&pick=normal');
     await t.waitFor('window.__jk && __jk.W.stats.frames > 20');
   };
   const ready = () => t.waitFor('JK.Cards.isReady()', 12000);

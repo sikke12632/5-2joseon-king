@@ -12,10 +12,10 @@ export default async function (t) {
     for (let k = 1; k <= 10; k++) { await mouse('mouseMoved', r.x + dir * k * 16, r.y + k); await t.sleep(20); }
     await mouse('mouseReleased', r.x + dir * 160, r.y + 10);
   }
-  await t.goto(BASE + '?idle=0');
+  await t.goto(BASE + '?idle=0&pick=' + (process.env.PICK || 'normal'));
   await t.waitFor('window.__jk && __jk.W.stats.frames > 20');
   await t.eval('localStorage.clear()');
-  await t.goto(BASE + '?idle=0');
+  await t.goto(BASE + '?idle=0&pick=' + (process.env.PICK || 'normal'));
   await t.waitFor('window.__jk && __jk.W.stats.frames > 20');
   await t.eval("document.querySelector('#btnNew').click()");
   await t.sleep(2500);
@@ -38,7 +38,7 @@ export default async function (t) {
     if (n === 5) {
       const before = await t.eval("JSON.stringify({pos:__jk.G.run.pos, vals:__jk.G.run.vals, built:__jk.G.run.built})");
       await t.sleep(2500);
-      await t.goto(BASE + '?idle=0');
+      await t.goto(BASE + '?idle=0&pick=' + (process.env.PICK || 'normal'));
       await t.waitFor('window.__jk && __jk.W.stats.frames > 20');
       console.log('이어하기 버튼:', await t.eval("document.querySelector('#btnContinue').textContent"));
       await t.eval("document.querySelector('#btnContinue').click()");
@@ -86,7 +86,7 @@ export default async function (t) {
   console.log('불러오기', await t.eval(`__jk.S.importCode(${JSON.stringify(code)}).then(r=>r.msg)`), await t.eval('Object.keys(__jk.S.meta.seen).length'));
   const bad = code.slice(0, 12) + (code[12] === 'A' ? 'B' : 'A') + code.slice(13);
   console.log('글자 하나 틀린 코드', await t.eval(`__jk.S.importCode(${JSON.stringify(bad)}).then(r=>r.msg)`));
-  await t.goto(BASE + '?idle=0');
+  await t.goto(BASE + '?idle=0&pick=' + (process.env.PICK || 'normal'));
   await t.waitFor('window.__jk && __jk.W.stats.frames > 20');
   console.log('다시 연 뒤 이어하기:', await t.eval("document.querySelector('#btnContinue').textContent"));
 }

@@ -172,30 +172,37 @@
     //  quizOptions 보기 수 · quizRetry 틀리면 한 번 더 · quizBonus 정답 하나당 50 쪽으로 당김
     //  afterFall 실각 뒤(reset50 시작 게이지 50 + 처음 3장 큰 미리보기 / same 그대로 / run 판 전체 처음부터)
     //  hint 사관의 귀띔(full / gauge / none) · stage 왕별 장치 숫자(P1~P4에서 씀) · unlock 열리는 때
+    //  desc 난이도 고르기 화면의 한 줄 설명
+    //  담임 결정(2026-10-21): 생애 첫 판은 무조건 새싹, 왕 하나라도 클리어하면 모든 난이도가 열림(unlock.rule 'clearAny')
     //  scoreMult 오늘의 덱 점수 배율 — 담임 결정(9-3 #3)으로 "나중 후보". 엔진은 쓰지 않는다(서버·점수 경쟁 없음, 기기 저장 + 기록 코드만)
     difficultyDefault: 'normal',
     difficulty: {
       sprout: {
-        name: '새싹', icon: '🌱', mult: 0.6, safe: { below: 20, k: 0.5 }, warn: 25, preview: 'arrows', carry: 0.25,
+        name: '새싹', icon: '🌱', desc: '게이지가 천천히 움직이고, 어느 쪽이 얼마나 움직일지 화살표로 미리 보여요',
+        mult: 0.6, safe: { below: 20, k: 0.5 }, warn: 25, preview: 'arrows', carry: 0.25,
         quizOptions: 3, quizRetry: true, quizBonus: 8, afterFall: 'reset50', hint: 'full', rareMult: 1.0, scoreMult: 0.7, crisisMult: 0.5,
         stage: { warCost: 0, food: 8, starvePeople: -3, scaleFall: 6, shipThreat: -10, sejongTriggers: [1, 2, 4] },
       },
       normal: {
-        name: '보통', icon: '🙂', mult: 1.0, safe: { below: 10, k: 0.75 }, warn: 15, preview: 'dots', carry: 0.5,
+        name: '보통', icon: '🙂', desc: '기본 난이도. 움직일 게이지를 점 크기로 미리 보여요',
+        mult: 1.0, safe: { below: 10, k: 0.75 }, warn: 15, preview: 'dots', carry: 0.5,
         quizOptions: 3, quizRetry: false, quizBonus: 5, afterFall: 'same', hint: 'gauge', rareMult: 1.0, scoreMult: 1.0, crisisMult: 1.0,
         stage: { warCost: -1, food: 6, starvePeople: -5, scaleFall: 5, shipThreat: -15, sejongTriggers: [2, 3, 5] },
+        unlock: { rule: 'clearAny', text: '왕 하나를 클리어하면 열려요' },
       },
       sage: {
-        name: '성군', icon: '👑', mult: 1.3, safe: null, warn: 10, preview: 'flat', carry: 0.75,
+        name: '성군', icon: '👑', desc: '게이지가 크게 움직이고, 미리보기는 크기 없는 점만',
+        mult: 1.3, safe: null, warn: 10, preview: 'flat', carry: 0.75,
         quizOptions: 4, quizRetry: false, quizBonus: 5, afterFall: 'same', hint: 'none', rareMult: 1.2, scoreMult: 1.3, crisisMult: 1.3,
         stage: { warCost: -2, food: 5, starvePeople: -8, scaleFall: 4, shipThreat: -20, sejongTriggers: [2, 4, 6] },
-        unlock: { rule: 'fullRunNormal', text: '보통으로 한 판 끝내면 열려요' },
+unlock: { rule: 'clearAny', text: '왕 하나를 클리어하면 열려요' },
       },
       annals: {
-        name: '실록 도전', icon: '📜', mult: 1.5, safe: null, warn: 0, preview: 'none', carry: 0.75,
+        name: '실록 도전', icon: '📜', desc: '미리보기·경고 없음. 실각하면 판 전체를 처음부터',
+        mult: 1.5, safe: null, warn: 0, preview: 'none', carry: 0.75,
         quizOptions: 4, quizRetry: false, quizBonus: 3, afterFall: 'run', hint: 'none', rareMult: 1.5, scoreMult: 1.6, crisisMult: 1.5,
         stage: { warCost: -2, food: 5, starvePeople: -8, scaleFall: 4, shipThreat: -20, sejongTriggers: [2, 4, 6] },
-        unlock: { rule: 'archive30', text: '기록관 30권이 쌓이면 열려요' },
+unlock: { rule: 'clearAny', text: '왕 하나를 클리어하면 열려요' },
       },
     },
   };

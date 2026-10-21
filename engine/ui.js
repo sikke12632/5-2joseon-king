@@ -21,10 +21,14 @@
       UI.leaveTitle();
       JK.Game.continueRun();
     };
+    // 새 판(담임 결정 2026-10-21): 생애 첫 판은 고르지 않고 새싹으로, 두 번째 판부터는 난이도 고르기 화면
     $('#btnNew').onclick = () => {
       if (JK.Game.hasRun() && !confirm('이어 하던 판이 지워지고 처음부터 시작해요. 괜찮나요?')) return;
-      UI.leaveTitle();
-      JK.Game.newRun();
+      // 시험 도구용: ?pick=normal 이면 고르기 화면 없이 그 난이도로
+      const pick = new URLSearchParams(location.search).get('pick');
+      if (pick && era.difficulty[pick]) return startWith(pick);
+      if (UI.firstEver()) return startWith('sprout', '첫 판은 🌱 새싹으로 시작해요');
+      showDiffPick();
     };
     $('#btnRecords').onclick = () => UI.showRecords();
     // 오른쪽 위 버튼
@@ -116,6 +120,31 @@
     paintTitle();
   };
 
+  // 기록이 전혀 없는 기기의 첫 판(이미 한 판이라도 한 기기는 아님)
+  UI.firstEver = () => !S.meta.plays && !Object.keys(S.meta.seen || {}).length && !JK.Game.hasRun() && new URLSearchParams(location.search).get('debug') !== '1';
+  function startWith(id, note) {
+    close('#diffPick');
+    S.setSetting('difficulty', id);
+    UI.leaveTitle();
+    JK.Game.newRun();
+    if (note) setTimeout(() => JK.Cards.toast(note, 3200), 1400);
+  }
+  function showDiffPick() {
+    const box = $('#dpList');
+    box.innerHTML = '';
+    for (const id in era.difficulty) {
+      const d = era.difficulty[id];
+      const lock = !UI.diffOpen(id);
+      const b = document.createElement('button');
+      b.className = 'dp-card' + (lock ? ' locked' : '') + (id === (S.settings.difficulty || era.difficultyDefault) && !lock ? ' cur' : '');
+      b.disabled = lock;
+      b.innerHTML = `<span class="dp-icon">${d.icon}</span><b>${esc(d.name)}</b><small>${lock ? '🔒 ' + esc((d.unlock && d.unlock.text) || '') : esc(d.desc || '')}</small>`;
+      if (!lock) b.onclick = () => startWith(id);
+      box.appendChild(b);
+    }
+    open('#diffPick');
+  }
+  UI.showDiffPick = showDiffPick;
   function paintSound() {
     const on = JK.Audio.on;
     $('#btnSound').classList.toggle('off', !on);
@@ -128,6 +157,12 @@
     document.querySelectorAll('input[name="tier"]').forEach((r) => (r.checked = r.value === v));
     $('#tierNow').textContent = `지금: ${W.TIERS[W.getTier()].name}`;
     $('#optShort').checked = !!S.settings.short;
+    for (const o of $('#optDiff').options) {
+      const d = era.difficulty[o.value];
+      const locked = !UI.diffOpen(o.value);
+      o.disabled = locked;
+      o.textContent = `${d.icon} ${d.name}${locked ? ' 🔒 ' + d.unlock.text : ''}`;
+    }
     $('#optDiff').value = JK.Game.diffId();
     const dd = era.difficulty[JK.Game.diffId()];
     $('#diffNote').textContent = `게이지 변화 ×${dd.mult} · 다음 왕 시작 게이지 ${dd.carry === 0.5 ? '절반' : dd.carry === 0.25 ? '1/4' : '3/4'} 이어받기 · 퀴즈 보기 ${dd.quizOptions}개${dd.quizRetry ? '(틀리면 한 번 더)' : ''}. 역사는 어느 단계든 같아요.`;
@@ -146,11 +181,14 @@
     $('#btnNew').textContent = has ? '처음부터' : '시작하기';
   }
 
+  // 왕 하나라도 마친 기록이 있는지(그러면 모든 난이도가 열림)
+  UI.anyClear = () => Object.values(S.meta.clears || {}).some((n) => n > 0);
   // 난이도 단계가 열렸는지(설계서 10-7)
   UI.diffOpen = function (id) {
     const d = era.difficulty[id];
     if (!d.unlock) return true;
     if (new URLSearchParams(location.search).get('debug') === '1') return true;
+    if (d.unlock.rule === 'clearAny') return UI.anyClear();
     if (d.unlock.rule === 'fullRunNormal') return !!(S.meta.fullRuns && S.meta.fullRuns.normal);
     if (d.unlock.rule === 'archive30') return (S.meta.archive || 0) >= 30;
     return false;
@@ -328,7 +366,7 @@
     const next = w.next && era.stages.find((s) => s.id === w.next);
     $('#soonHead').textContent = `${from.king}의 기록을 마쳤습니다`;
     $('#soonQuiz').textContent = w.asked ? `사관의 질문 ${w.asked}개 가운데 ${w.right}개를 맞혔습니다.` : '';
-    $('#soonTitles').textContent = w.titles && w.titles.length ? `새 칭호: ${w.titles.map((t) => `「${t.name}」`).join(' ')}` : '';
+    $('#soonTitles').textContent = (w.titles && w.titles.length ? `새 칭호: ${w.titles.map((t) => `「${t.name}」`).join(' ')}` : '') + (w.unlockedAll ? `${w.titles && w.titles.length ? ' · ' : ''}🔓 모든 난이도가 열렸어요!` : '');
     $('#soonNext').textContent = next ? `다음 왕 「${next.king}」은 아직 준비 중이에요. 곧 이어집니다!` : '마지막 왕까지 마쳤습니다.';
     $('#soonVals').textContent = era.gauges.map((g) => `${g.name} ${w.vals[g.key]}`).join(' · ');
     // 이 왕에서 세운 것과 그 모습(순조롭게·억지로·늦게)
