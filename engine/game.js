@@ -858,9 +858,9 @@
     if (run.bigPreview > 0) run.bigPreview--;
     // 결 기록(연속 규칙) · 씨앗 → 열매 예약 · 안정 구간이 이어진 장수
     if (c.grain) run.grainHist.push(c.grain);
-    if (c.seed && c.seed.fruit_id && side && (!c.seed.side || c.seed.side === sideKey) && cardsById[c.seed.fruit_id]) run.reserve.push({ card: c.seed.fruit_id, at: run.pos + 1 + (c.seed.after_n || 5), from: c.id });
+    if (c.seed && c.seed.fruit_id && side && (!c.seed.side || c.seed.side === sideKey) && cardsById[c.seed.fruit_id]) run.reserve.push({ card: c.seed.fruit_id, at: run.pos + 1 + (c.seed.after_n ?? 5), from: c.id });
     // 사건 사슬(10-2 ⑤): 다음 카드를 n장 뒤에 예약(무작위 칸을 대신 쓰는 셈)
-    if (c.chain_next && cardsById[c.chain_next.card]) run.reserve.push({ card: c.chain_next.card, at: run.pos + 1 + (c.chain_next.after_n || 3), from: c.id });
+    if (c.chain_next && cardsById[c.chain_next.card]) run.reserve.push({ card: c.chain_next.card, at: run.pos + 1 + (c.chain_next.after_n ?? 3), from: c.id });
     // 앞 카드의 선택이 부르는 사슬(설계서 3-7 "…를 고르면 n장 뒤"): 불려 오는 카드 쪽에 trigger { card, side, after_n }
     if (!isAlt)
       for (const t of triggersOf(c.variant_of || c.id))

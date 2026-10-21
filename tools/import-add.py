@@ -2,6 +2,7 @@
 """집필 세션의 추가 카드 파일(add_<왕>.py)을 시대팩 데이터로 옮긴다 — 설계서에 아직 합쳐지지 않은 카드용.
 
   python tools/import-add.py 작업/1A-카드데이터/add_T.py taejo
+  python tools/import-add.py 작업/1A-카드데이터/add_S.py sejong
 
 - add_T.py는 읽기만 한다(runpy로 데이터만 꺼냄, 점검 코드는 돌리지 않음).
 - 결과: eras/joseon/data/<왕>/more.js(카드) · quizzes-more.js(사관 퀴즈)
@@ -15,6 +16,10 @@ HERE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SRC, STAGE = sys.argv[1], (sys.argv[2] if len(sys.argv) > 2 else 'taejo')
 OUT = os.path.join(HERE, 'eras', 'joseon', 'data', STAGE)
 G = runpy.run_path(SRC if os.path.isabs(SRC) else os.path.join(HERE, SRC), run_name='add_data')
+# 왕 글자: 원본 파일의 이름표(D_T·M_T… / D_S·M_S…)가 이 글자로 끝난다
+LETTER = {'taejo': 'T', 'sejong': 'S', 'seonjo': 'J', 'yeongjo': 'Y', 'gojong': 'G'}[STAGE]
+def part(name):
+    return G.get(f'{name}_{LETTER}') or ([] if name != 'LAB' else {})
 
 GAUGE = {'백': 'people', '반': 'nobles', '고': 'treasury', '방': 'army'}
 GRAIN = {'저울': 'balance', '복합': 'complex', '선물': 'gift', '수렁': 'mire', '씨앗': 'seed', '도박': 'gamble'}
@@ -181,9 +186,19 @@ def base_card(c, kind, labels):
         o['caution'] = c['caution']
     if c.get('note'):
         o['note'] = c['note']
-    if c.get('dev'):
-        for sk in ('right', 'left'):
-            pass
+    # 왕별 장치(세종 발명 진행도): dev = {'R': '발+1'} → choices.right.device = {invention: 1}
+    for k, sk in (('R', 'right'), ('L', 'left')):
+        dv = {}
+        for g, sign, n in re.findall(r'([발저개])\s*([+\-−])\s*(\d+)', (c.get('dev') or {}).get(k, '')):
+            dv[{'발': 'invention', '저': 'scale', '개': 'open'}[g]] = int(n) * (-1 if sign in '-−' else 1)
+        if dv:
+            o['choices'][sk]['device'] = dv
+    # 앞 카드의 선택이 부르는 사슬(엔진 trigger 칸): (카드, 'R'|'L'|None, n장 뒤)
+    if c.get('trigger'):
+        tc, ts, tn = c['trigger']
+        o['trigger'] = {'card': tc, 'after_n': tn}
+        if ts:
+            o['trigger']['side'] = SIDE[ts]
     return o
 
 
@@ -202,23 +217,23 @@ def existing_ids():
 have = existing_ids()
 cards, skipped = [], []
 # 일상(DT…)
-for c in G['D_T']:
-    o = base_card(c, 'daily', G['LAB_T'][c['id']])
+for c in part('D'):
+    o = base_card(c, 'daily', part('LAB')[c['id']])
     if c.get('star'):
         o['required_in'] = STAGE
     cards.append(o)
 # 사슬·희귀·전설
 KIND = {'사슬': 'chain', '희귀': 'rare', '전설': 'legend'}
-for c in G['M_T']:
+for c in part('M'):
     o = base_card(c, KIND[c['kind']], (c['Rl'], c['Ll']))
     if c['kind'] == '사슬':
         o['chain'] = c.get('chain', '')
     # 꼭 나와야 하는 사슬 시작('반드시', '바로 앞')은 조건이 맞는 순간 다음 자리에 끼운다
-    if re.search(r'반드시|바로 앞', c.get('trig', '')):
+    if re.search(r'반드시|바로 앞', c.get('trig', '')) and not c.get('trigger'):
         o['force'] = True
     cards.append(o)
 # 다른 길: 변형판(원래 역사 카드 대신) · 전용 카드(조건이 맞으면 끼어듦) · 열매
-for c in G['A_T']:
+for c in part('A'):
     if c['kind'] == '변형판':
         o = base_card(c, 'history', (c['Rl'], c['Ll']))
         o['variant_of'] = c['base']
@@ -233,7 +248,7 @@ for c in G['A_T']:
     o['alt_only'] = True
     cards.append(o)
 # 위기 카드(K_T)는 설계서 10-8-5에서 이미 가져온다 — id가 없을 때만
-for c in G['K_T']:
+for c in part('K'):
     if c['id'] not in have:
         skipped.append(c['id'] + '(위기: 설계서에 없음 — 넣지 않음)')
 
@@ -246,14 +261,14 @@ for o in cards:
 # 변형판의 순서·사건 이름은 원래 카드를 따른다
 base_cards = {}
 p = os.path.join(OUT, 'cards.js')
-for m in re.finditer(r'\{\s*"id": "(T\d\d)",\s*"kind": "history".*?"order": (\d+)', open(p, encoding='utf-8').read(), re.S):
+for m in re.finditer(r'\{\s*"id": "(' + LETTER + r'\d\d)",\s*"kind": "history".*?"order": (\d+)', open(p, encoding='utf-8').read(), re.S):
     base_cards[m.group(1)] = int(m.group(2))
 for o in out:
     if o.get('variant_of'):
         o['order'] = base_cards.get(o['variant_of'], 0)
 
 qq = []
-for q in G['Q_T']:
+for q in part('Q'):
     qid, question, ans, w1, w2, src, outside = q
     if qid in have:
         skipped.append(qid)

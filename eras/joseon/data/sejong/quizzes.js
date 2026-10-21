@@ -346,6 +346,354 @@
   "about": [
    "S03"
   ]
+ },
+ {
+  "id": "QS15",
+  "stage": "sejong",
+  "question": "《향약집성방》은 어떤 내용을 정리한 책일까요?",
+  "answer": "우리나라에서 나는 약초로 병을 고치는 법",
+  "wrong": [
+   "우리 땅에 맞는 농사짓는 법",
+   "효자와 충신의 이야기"
+  ],
+  "sources": [
+   {
+    "type": "guide",
+    "page": "263",
+    "tb": "89"
+   }
+  ],
+  "sources_text": "지도서 263(교과서 89)",
+  "out_of_textbook": false,
+  "checked_against_review_site": false,
+  "about": [
+   "S02",
+   "S09"
+  ]
+ },
+ {
+  "id": "QS16",
+  "stage": "sejong",
+  "question": "《농사직설》은 무엇을 바탕으로 엮었을까요?",
+  "answer": "농민들의 경험",
+  "wrong": [
+   "중국 황제의 명령",
+   "바다 건너 상인들의 이야기"
+  ],
+  "sources": [
+   {
+    "type": "guide",
+    "page": "263",
+    "tb": "89"
+   }
+  ],
+  "sources_text": "지도서 263(교과서 89)",
+  "out_of_textbook": false,
+  "checked_against_review_site": false,
+  "about": [
+   "S02",
+   "S09"
+  ]
+ },
+ {
+  "id": "QS17",
+  "stage": "sejong",
+  "question": "조선 전기 양반들이 매화·난초·국화·대나무를 그려 나타내려 한 것은?",
+  "answer": "자신의 마음가짐",
+  "wrong": [
+   "집안의 재산",
+   "사냥 솜씨"
+  ],
+  "sources": [
+   {
+    "type": "guide",
+    "page": "263",
+    "tb": "89"
+   }
+  ],
+  "sources_text": "지도서 263(교과서 89)",
+  "out_of_textbook": false,
+  "checked_against_review_site": false,
+  "about": [
+   "S02",
+   "S09"
+  ]
+ },
+ {
+  "id": "QS18",
+  "stage": "sejong",
+  "question": "훈민정음이라는 이름에 담긴 뜻은?",
+  "answer": "백성을 가르치는 바른 소리",
+  "wrong": [
+   "임금이 쓰는 귀한 글자",
+   "중국 글자를 쉽게 읽는 법"
+  ],
+  "sources": [
+   {
+    "type": "guide",
+    "page": "262",
+    "tb": "88"
+   }
+  ],
+  "sources_text": "지도서 262(교과서 88)",
+  "out_of_textbook": false,
+  "checked_against_review_site": false,
+  "about": [
+   "S09"
+  ]
+ },
+ {
+  "id": "QS19",
+  "stage": "sejong",
+  "question": "앙부일구 안에 그림을 그려 넣은 까닭은 무엇일까요?",
+  "answer": "글자를 모르는 백성도 시각을 알 수 있게 하려고",
+  "wrong": [
+   "해시계를 더 비싸게 팔려고",
+   "비의 양을 함께 재려고"
+  ],
+  "sources": [
+   {
+    "type": "guide",
+    "page": "263"
+   }
+  ],
+  "sources_text": "지도서 263 자료 해설(교과서 90)",
+  "out_of_textbook": false,
+  "checked_against_review_site": false,
+  "about": [
+   "S02",
+   "S09"
+  ]
+ },
+ {
+  "id": "QS20",
+  "stage": "sejong",
+  "question": "세종 때 측우기를 한양 말고 어디에도 보내 쓰게 했을까요?",
+  "answer": "여러 지방",
+  "wrong": [
+   "명나라",
+   "바다 건너 일본"
+  ],
+  "sources": [
+   {
+    "type": "guide",
+    "page": "264",
+    "tb": "90"
+   }
+  ],
+  "sources_text": "지도서 264(교과서 90)",
+  "out_of_textbook": false,
+  "checked_against_review_site": false,
+  "about": [
+   "S06"
+  ]
+ },
+ {
+  "id": "QS21",
+  "stage": "sejong",
+  "question": "세종 때 책을 많이 펴낼 수 있었던 까닭으로 알맞은 것은?",
+  "answer": "종이를 만드는 기술과 인쇄술이 발전해서",
+  "wrong": [
+   "모든 백성이 한자를 잘 알아서",
+   "책을 모두 손으로 베껴 써서"
+  ],
+  "sources": [
+   {
+    "type": "guide",
+    "page": "263",
+    "tb": "89"
+   }
+  ],
+  "sources_text": "지도서 263(교과서 89)",
+  "out_of_textbook": false,
+  "checked_against_review_site": false,
+  "about": [
+   "S02",
+   "S09"
+  ]
+ },
+ {
+  "id": "QS22",
+  "stage": "sejong",
+  "question": "조선 시대 신분 가운데 대체로 풍족하게 살며 교육받을 기회를 가장 많이 누린 신분은?",
+  "answer": "양반",
+  "wrong": [
+   "상민",
+   "천민"
+  ],
+  "sources": [
+   {
+    "type": "guide",
+    "page": "255",
+    "tb": "84~85"
+   }
+  ],
+  "sources_text": "지도서 255(교과서 84~85)",
+  "out_of_textbook": false,
+  "checked_against_review_site": false
+ },
+ {
+  "id": "QS23",
+  "stage": "sejong",
+  "question": "조선 시대 중인이 주로 한 일은 무엇일까요?",
+  "answer": "의학·법률에 관한 일이나 통역",
+  "wrong": [
+   "농사짓기와 장사",
+   "주인집의 허드렛일"
+  ],
+  "sources": [
+   {
+    "type": "guide",
+    "page": "255",
+    "tb": "85"
+   }
+  ],
+  "sources_text": "지도서 255(교과서 85)",
+  "out_of_textbook": false,
+  "checked_against_review_site": false
+ },
+ {
+  "id": "QS24",
+  "stage": "sejong",
+  "question": "조선 시대 상민은 대부분 어떤 일을 했을까요?",
+  "answer": "농사를 지었다",
+  "wrong": [
+   "외국 말을 통역했다",
+   "나라의 법을 만들었다"
+  ],
+  "sources": [
+   {
+    "type": "guide",
+    "page": "255",
+    "tb": "85"
+   }
+  ],
+  "sources_text": "지도서 255(교과서 85)",
+  "out_of_textbook": false,
+  "checked_against_review_site": false
+ },
+ {
+  "id": "QS25",
+  "stage": "sejong",
+  "question": "양반이 나랏일에 참여하면서 면제받은 ‘국역’은 무엇일까요?",
+  "answer": "나라의 큰 공사에 동원되거나 군대에 가는 일",
+  "wrong": [
+   "해마다 과거 시험을 보는 일",
+   "서당에서 아이들을 가르치는 일"
+  ],
+  "sources": [
+   {
+    "type": "guide",
+    "page": "255",
+    "tb": "85"
+   }
+  ],
+  "sources_text": "지도서 255(교과서 85 용어 풀이)",
+  "out_of_textbook": false,
+  "checked_against_review_site": false
+ },
+ {
+  "id": "QS26",
+  "stage": "sejong",
+  "question": "승경도놀이에서 굴려서 나온 수만큼 말을 옮기는 숫자 방망이는?",
+  "answer": "윤목",
+  "wrong": [
+   "투호",
+   "고누"
+  ],
+  "sources": [
+   {
+    "type": "guide",
+    "page": "257",
+    "tb": "87"
+   }
+  ],
+  "sources_text": "지도서 257(교과서 87)",
+  "out_of_textbook": false,
+  "checked_against_review_site": false
+ },
+ {
+  "id": "QS27",
+  "stage": "sejong",
+  "question": "조선 시대 학생들이 어릴 때 주로 공부한 곳은?",
+  "answer": "가정이나 서당",
+  "wrong": [
+   "성균관",
+   "향교의 명륜당"
+  ],
+  "sources": [
+   {
+    "type": "guide",
+    "page": "245",
+    "tb": "81"
+   }
+  ],
+  "sources_text": "지도서 245(교과서 81)",
+  "out_of_textbook": false,
+  "checked_against_review_site": false
+ },
+ {
+  "id": "QS28",
+  "stage": "sejong",
+  "question": "《삼강행실도》에 그림을 함께 실은 까닭은 무엇일까요?",
+  "answer": "글을 모르는 백성도 쉽게 이해하게 하려고",
+  "wrong": [
+   "책을 더 두껍게 만들려고",
+   "중국에 선물로 보내려고"
+  ],
+  "sources": [
+   {
+    "type": "guide",
+    "page": "246",
+    "tb": "82"
+   }
+  ],
+  "sources_text": "지도서 246(교과서 82)",
+  "out_of_textbook": false,
+  "checked_against_review_site": false,
+  "about": [
+   "S05"
+  ]
+ },
+ {
+  "id": "QS29",
+  "stage": "sejong",
+  "question": "세종이 집현전 학자들에게 휴가를 주어 책만 읽게 한 제도는?",
+  "answer": "사가독서",
+  "wrong": [
+   "과거 시험",
+   "경연"
+  ],
+  "sources": [
+   {
+    "type": "web",
+    "title": "한국민족문화대백과사전 '사가독서'",
+    "url": "https://encykorea.aks.ac.kr/Article/E0025343"
+   }
+  ],
+  "sources_text": "한국민족문화대백과사전 '사가독서' https://encykorea.aks.ac.kr/Article/E0025343",
+  "out_of_textbook": true,
+  "checked_against_review_site": false
+ },
+ {
+  "id": "QS30",
+  "stage": "sejong",
+  "question": "세종 때 왜인들이 머물며 장사할 수 있게 연 남쪽 바닷가 세 포구를 무엇이라 할까요?",
+  "answer": "삼포",
+  "wrong": [
+   "4군 6진",
+   "삼전도"
+  ],
+  "sources": [
+   {
+    "type": "web",
+    "title": "한국민족문화대백과사전 '삼포'",
+    "url": "https://encykorea.aks.ac.kr/Article/E0026914"
+   }
+  ],
+  "sources_text": "한국민족문화대백과사전 '삼포' https://encykorea.aks.ac.kr/Article/E0026914",
+  "out_of_textbook": true,
+  "checked_against_review_site": false
  }
 ]);
 })();
