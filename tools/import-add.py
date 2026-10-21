@@ -191,6 +191,13 @@ def base_card(c, kind, labels):
         dv = {}
         for g, sign, n in re.findall(r'([발저개])\s*([+\-−])\s*(\d+)', (c.get('dev') or {}).get(k, '')):
             dv[{'발': 'invention', '저': 'scale', '개': 'open'}[g]] = int(n) * (-1 if sign in '-−' else 1)
+        # 붕당 저울: "저0쪽N" 가운데로 N칸 · "저기운쪽+N" 기운 쪽으로 N칸
+        mm = re.search(r'저0쪽(\d+)', (c.get('dev') or {}).get(k, ''))
+        if mm:
+            dv['scaleToward'] = int(mm.group(1))
+        mm = re.search(r'저기운쪽\+(\d+)', (c.get('dev') or {}).get(k, ''))
+        if mm:
+            dv['scaleAway'] = int(mm.group(1))
         if dv:
             o['choices'][sk]['device'] = dv
     # 앞 카드의 선택이 부르는 사슬(엔진 trigger 칸): (카드, 'R'|'L'|None, n장 뒤)
