@@ -8,7 +8,7 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const ROOT = dirname(dirname(fileURLToPath(import.meta.url)));
-const ALL = ['event-test', 'route-test', 'king-test', 'diff-test', 'crisis-test', 'text-test', 'branch-test', 'true-test', 'more-test', 'grain-test', 't01-test', 'intro-shots', 'tris-max', 'event-sim'];
+const ALL = ['event-test', 'route-test', 'king-test', 'diff-test', 'crisis-test', 'text-test', 'branch-test', 'true-test', 'more-test', 'grain-test', 't01-test', 'intro-shots', 'tris-max', 'event-sim', 'sejong-test', 'sejong-route-test'];
 const pick = process.argv.slice(2);
 const list = pick.length ? pick : ALL;
 const env = (name) => {

@@ -107,8 +107,44 @@
       if (i < slots.length) deck.push(...slots[i]);
     });
     if (!hist.length) for (const s of slots) deck.push(...s);
+    fixRequiredGrain(deck, new Set(required.map((c) => c.id)), rnd);
     return deck;
   };
+  // ★필수 카드는 무작위 칸이 아니라 정해진 자리에 놓여 결 연속 규칙(10-9-3)을 보지 않았다(grain-test가 가끔 1~3곳 어김).
+  // 덱을 만든 뒤, 붙어 있는 고정 카드끼리 규칙을 어기면 그 필수 카드를 어기지 않는 다른 자리(첫 사건 카드 뒤)로 옮긴다.
+  function fixRequiredGrain(deck, movable, rnd) {
+    const gr = (id) => (id !== '*' && cardsById[id] && cardsById[id].grain) || null;
+    const bad = (d, i) => {
+      if (d[i] === '*' || !gr(d[i])) return false;
+      let s = i;
+      while (s > 0 && d[s - 1] !== '*' && gr(d[s - 1])) s--;
+      const seq = [];
+      for (let k = s; k <= i; k++) seq.push(gr(d[k]));
+      return grainBreaks(seq);
+    };
+    const firstBad = (d) => d.findIndex((_, k) => bad(d, k));
+    for (let tries = 0; tries < 20; tries++) {
+      const i = firstBad(deck);
+      if (i < 0) return;
+      const j = [i, i - 1, i - 2].find((k) => k >= 1 && movable.has(deck[k]));
+      if (j === undefined) return;
+      const id = deck.splice(j, 1)[0];
+      const spots = shuffle(Array.from({ length: deck.length - 1 }, (_, k) => k + 1), rnd);
+      let placed = false;
+      for (const p of spots) {
+        deck.splice(p, 0, id);
+        if (firstBad(deck) < 0 || firstBad(deck) > i) {
+          placed = true;
+          break;
+        }
+        deck.splice(p, 1);
+      }
+      if (!placed) {
+        deck.splice(j, 0, id);
+        return;
+      }
+    }
+  }
 
   /* ---------- 판 시작·이어하기 ---------- */
   const fifty = () => {
@@ -297,33 +333,40 @@
   }
   G.grainState = () => grainState(G.run);
   // 이 결의 카드를 지금 자리에 내도 연속 규칙(10-9-3)을 어기지 않는가 — 돌발 뽑기(engine/events.js)도 쓴다
+  // 돌발 뽑기(engine/events.js)는 바로 뒤 고정 카드 하나만 본다 — 담임이 돌발을 한 생 2번쯤으로 늘렸으므로(2026-10-21) 덜 막는다.
+  //  보통 무작위 칸(drawRandom)은 뒤에 이어지는 고정 카드 전부를 본다(breaksWithAhead)
   G.grainFits = function (run, grain) {
     if (!grain) return true;
-    const seq = run.grainHist.concat(grain);
-    if (grainBreaks(seq)) return false;
+    return !breaksWithAhead(run.grainHist.concat(grain), aheadGrains(run).slice(0, 1));
+  };
+  // 지금 자리 다음부터 무작위 칸('*') 전까지 이어지는 고정 카드들의 결
+  function aheadGrains(run) {
+    const out = [];
     for (let i = run.pos + 1; i < run.deck.length; i++) {
       if (run.deck[i] === '*') break;
       const nc = cardsById[run.deck[i]];
-      if (nc && nc.grain) return !grainBreaks(seq.concat(nc.grain));
+      if (nc && nc.grain) out.push(nc.grain);
     }
-    return true;
-  };
+    return out;
+  }
+  // seq(지금 카드까지)에 뒤 고정 카드들을 하나씩 붙여 가며 어느 자리에서든 규칙을 어기는가
+  function breaksWithAhead(seq, ahead) {
+    if (grainBreaks(seq)) return true;
+    let s = seq;
+    for (const g of ahead) {
+      s = s.concat(g);
+      if (grainBreaks(s)) return true;
+    }
+    return false;
+  }
   // 무작위 칸 하나 뽑기: 조건(cond.js) → 결 가중치(상태 × 난이도) → 앞뒤 연속 규칙
   function drawRandom(run) {
     const ctx = { run, meta: S.meta };
     const fr = fruitIds();
     const row = grainState(run);
     const dm = (grainCfg().diff || {})[G.diffId()] || {};
-    // 바로 뒤 고정 카드의 결(연속 규칙은 앞뒤 모두 본다)
-    let nextGrain = null;
-    for (let i = run.pos + 1; i < run.deck.length; i++) {
-      const nc = cardsById[run.deck[i]];
-      if (run.deck[i] === '*') break;
-      if (nc && nc.grain) {
-        nextGrain = nc.grain;
-        break;
-      }
-    }
+    // 바로 뒤에 이어지는 고정 카드들의 결(다음 무작위 칸 전까지 모두 — 연속 규칙은 앞뒤를 함께 본다)
+    const nextGrains = aheadGrains(run);
     const cands = [];
     for (const id of run.pool) {
       const c = cardsById[id];
@@ -331,7 +374,7 @@
       const g = c.grain || 'balance';
       let w = deckWeight(c) * ((row && row.mult && row.mult[g]) || 1) * (dm[g] || 1);
       const seq = run.grainHist.concat(g);
-      const bad = grainBreaks(seq) || (nextGrain && grainBreaks(seq.concat(nextGrain)));
+      const bad = breaksWithAhead(seq, nextGrains);
       cands.push({ id, w, bad });
     }
     let list = cands.filter((x) => !x.bad);
