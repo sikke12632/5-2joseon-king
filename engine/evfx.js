@@ -652,6 +652,49 @@
       h.em.push(emit(5, () => ({ p: [x, H(x, z) + 0.68, z], v: [0, 0.02, 0, 0], life: 1.6, size: 1.3, kind: 0, color: col('#ffcf7a') })));
     },
   };
+  // 세종 돌발(events_S.py) — 모두 점 입자(삼각형 0)
+  Object.assign(SCENES, {
+    // 별똥별 비(ES09·ES11): 밤하늘에 흰 줄이 비스듬히 그어지고, 가끔 반짝 터진다
+    meteor(h) {
+      weather('night');
+      W.state.lightsHold = 0;
+      W.state.lightsTarget = 0.4;
+      // 카메라에 보이는 높이(섬 위 4~7)에서 비스듬히 떨어지고, 끝에서 반짝
+      h.em.push(emit(10, () => {
+        const [x, z] = around(-2, -3, 8);
+        return { p: [x, 4.5 + R() * 2.5, z], v: [3.2 + R(), -2.6 - R(), 1.6, 0], life: 0.8, size: 2.2 + R(), kind: 1, color: col(R() < 0.7 ? '#ffffff' : '#d6e6ff') };
+      }));
+      h.em.push(emit(2, () => {
+        const [x, z] = around(0, -1, 7);
+        sparkleAt(x, 3 + R() * 2, z, 10, '#eef4ff', 0.8, 0.3);
+        return null;
+      }));
+    },
+    // 금빛 잉어(ES12): 궁궐 서쪽 뜰 물가에서 금빛 반짝임이 수면을 따라 미끄러진다
+    carp(h) {
+      weather('spring');
+      const s = W.buildingPos('gyeongbok') || [0, -3.1];
+      const x0 = s[0] - 1.86,
+        z0 = s[1] - 0.6;
+      h.em.push(emit(40, () => {
+        const a = R() * 6.283;
+        const x = x0 + Math.cos(a) * 0.45,
+          z = z0 + Math.sin(a) * 0.45;
+        return { p: [x, H(x, z) + 0.08, z], v: [-Math.sin(a) * 0.5, 0.12, Math.cos(a) * 0.5, 0], life: 1.6, size: 0.3 + R() * 0.12, kind: 4, color: col(R() < 0.7 ? '#ffc23a' : '#fff1b0') };
+      }));
+      h.em.push(emit(3, () => ({ p: [x0, H(x0, z0) + 0.1, z0], v: [0, 0.05, 0, 0], life: 2.2, size: 1.6, kind: 0, color: col('#ffd56a') })));
+      setTimeout(() => sparkleAt(x0, H(x0, z0) + 0.2, z0, 36, '#ffd060', 0.6, 1.2), 400);
+    },
+    // 연꽃 핀 연못(ES17): 분홍 꽃잎이 물가에서 천천히 떠오르고, 하늘은 봄빛
+    lotus(h) {
+      weather('spring');
+      const s = W.buildingPos('gyeongbok') || W.buildingPos('altPalace') || [0, -3.1];
+      h.em.push(emit(34, () => {
+        const [x, z] = around(s[0] - 1.6, s[1] - 0.6, 1.3);
+        return { p: [x, H(x, z) + 0.05, z], v: [0.12, 0.5 + R() * 0.3, 0.06, 0], life: 4.5, size: 0.42 + R() * 0.14, kind: 2, color: col(R() < 0.6 ? '#f28bb0' : '#fbe1ea') };
+      }));
+    },
+  });
   // 갈래 카드(10-14-3)
   Object.assign(SCENES, {
     // 두 대감의 논쟁(AT05): 궁궐 마루에 붉은 관복과 푸른 관복이 마주 앉고 가운데 두루마리. 갈래 엔딩 ①에서는 성균관 마당
@@ -856,7 +899,8 @@
       e.acc += e.rate * dt;
       while (e.acc >= 1) {
         e.acc -= 1;
-        spawn(e.make());
+        const o = e.make();
+        if (o) spawn(o); // make()가 null이면 그 자리에서 다른 일을 한 것(예: 반짝 터짐)
       }
     }
     for (let i = things.length - 1; i >= 0; i--) {

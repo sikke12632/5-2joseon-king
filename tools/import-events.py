@@ -31,8 +31,8 @@ SCENE = {'ET01': 'drought', 'ET02': 'locust', 'ET03': 'hungry', 'ET06': 'flood',
          'ET13': 'jar', 'ET14': 'chest', 'ET15': 'map', 'ET16': 'plum', 'ET17': 'night',
          # 세종: 지금 있는 장면을 다시 쓴다(새 장면은 따로 — 별똥별·금빛 잉어는 밤·봄 하늘 장면으로)
          'ES01': 'drought', 'ES02': 'flood', 'ES03': 'flood', 'ES04': 'harvest', 'ES05': 'night', 'ES06': 'flood', 'ES07': 'hungry', 'ES08': 'fire',
-         'ES09': 'night', 'ES10': 'rain', 'ES11': 'night', 'ES12': 'plum', 'ES13': 'envoy', 'ES14': 'chest', 'ES15': 'jar', 'ES16': 'map',
-         'ES17': 'plum', 'ES18': 'night'}
+         'ES09': 'meteor', 'ES10': 'rain', 'ES11': 'meteor', 'ES12': 'carp', 'ES13': 'envoy', 'ES14': 'chest', 'ES15': 'jar', 'ES16': 'map',
+         'ES17': 'lotus', 'ES18': 'night'}
 # 설계서 표에 적힌 '대사만 바꿈'(ET06: 개경에 머문 판은 개경 앞 개울)
 LINE_IF = {'ET06': [{'when': 'flag(F_개경)', 'who': '개경 관리', 'line': '장맛비에 개경 앞 개울이 넘쳐 나루 마을이 잠겼사옵니다.'}]}
 COND = {'ET06': 'seen(T04) && !flag(F_계룡)'}  # 개경 판은 대사만 바꾸고(LINE_IF), 계룡산 판에는 한강이 없으니 뺀다
