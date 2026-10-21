@@ -148,14 +148,14 @@
   "name": "문을 연 임금",
   "hint": "밤을 밝혀라",
   "cond": "고종 개화 진행도 5 이상",
-  "rule": "later"
+  "rule": "open5"
  },
  {
   "id": "title11",
   "name": "문을 지킨 임금",
   "hint": "끝까지 버텨 본 왕",
   "cond": "G03 \"척화비를 세운다\" + G04 \"버틴다\" + 고종을 실각 없이 클리어",
-  "rule": "later"
+  "rule": "keepClosed"
  },
  {
   "id": "title12",

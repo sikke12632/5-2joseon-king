@@ -144,7 +144,32 @@
         // 붕당 저울(설계서 2-4): −5(붉은 붕당 쪽) ~ +5(푸른 붕당 쪽), 시작 0. |3| 경고 · |4| 위험 · |5| 끝 — 위기는 가상 게이지(50+10×저울)로 crisis.js가 굴린다
         device: { key: 'scale', name: '붕당 저울', signed: true, min: -5, max: 5, start: { scale: 0 }, sides: { low: '붉은', high: '푸른' }, steadyTitle: 'scaleSteady', hint: '한쪽 붕당 편을 들면 기울어요. 3칸부터 위험! 고루 뽑는 탕평으로 가운데로' },
       },
-      { id: 'gojong', king: '고종', seal: '高宗', title: '개항 압력', years: '1863~1899', ready: false },
+      {
+        id: 'gojong',
+        king: '고종',
+        seal: '高宗',
+        title: '개항 압력',
+        years: '1863~1899',
+        // 완성·시험 전까지 왕 고르기에 보이지 않게(2026-10-22 야간 — N4에서 true)
+        ready: false,
+        // 설계서 2-5 하늘: 저녁 → 밤(전등·전차 불빛)
+        sky: SKY_DAWN_TO_DUSK,
+        tod: [0.3, 1.0],
+        // 시작 한양(1863): 경복궁은 아직 터(G02에서 다시 지음), 종묘·도성·성균관
+        prebuilt: { choga: 24, giwa: 22, gyeongbokRuin: 1, jongmyo: 1, sajik: 1, wall: 1, heungin: 1, donui: 1, sungnye: 1, sukjeong: 1, seonggyun: 1, seodang: 1, hyanggyo: 1, seowon: 1 },
+        kingRole: 'gojong',
+        randomSlots: [6, 9],
+        // G05(우정총국) 뒤 G06 앞은 병원·학교·전등 장치 카드 창 — 무작위 칸을 두어 세 장이 붙어 나오지 않게
+        slotsBefore: { G06: 3 },
+        realEnd: '실제로 고종은 1863년부터 1907년까지 왕위(1897년부터 황제)에 있었다.',
+        scene: [],
+        // 개항 압력(G04 앞, 0~10, 카드마다 +1, 10이면 군함 위협) → G04(강화도 조약)부터 개화 진행도(0~6). 장치 카드 GX1~GX4는 진행도 문턱(난이도표 gojongTriggers), GX5·GX6은 마지막 고정
+        device: {
+          key: 'open', name: '개화 진행도', max: 6, start: { open: 0, pressure: 0 }, triggers: 'gojongTriggers', triggersDefault: [1, 2, 3, 4],
+          title: 'open5', titleAt: 5, keepTitle: 'keepClosed', hint: '새 문물을 받아들이면 올라요. 병원·학교·전등·전화가 일찍 나와요',
+          pressure: { key: 'pressure', name: '개항 압력', max: 10, perCard: 1, until: 'G04', hit: -15, reset: 5, hint: '카드마다 1씩 올라요. 10이 되면 낯선 군함이 위협해요(국방 −15)' },
+        },
+      },
     ],
     data: D,
     // 위기 엔진이 게이지처럼 다루는 왕별 장치(crisis.js 가상 게이지) — 영조·정조 붕당 저울
@@ -350,27 +375,27 @@
         name: '새싹', icon: '🌱', desc: '게이지가 천천히 움직이고, 어느 쪽이 얼마나 움직일지 화살표로 미리 보여요',
         mult: 0.6, safe: { below: 20, k: 0.5 }, warn: 25, preview: 'arrows', carry: 0.25,
         quizOptions: 3, quizRetry: true, quizBonus: 8, afterFall: 'reset50', hint: 'full', rareMult: 1.0, scoreMult: 0.7, crisisMult: 0.5,
-        stage: { warCost: 0, food: 8, starvePeople: -3, scaleFall: 6, shipThreat: -10, sejongTriggers: [1, 2, 4] },
+        stage: { warCost: 0, food: 8, starvePeople: -3, scaleFall: 6, shipThreat: -10, sejongTriggers: [1, 2, 4], gojongTriggers: [1, 1, 2, 3] },
       },
       normal: {
         name: '보통', icon: '🙂', desc: '기본 난이도. 움직일 게이지를 점 크기로 미리 보여요',
         mult: 1.0, safe: { below: 10, k: 0.75 }, warn: 15, preview: 'dots', carry: 0.5,
         quizOptions: 3, quizRetry: false, quizBonus: 5, afterFall: 'same', hint: 'gauge', rareMult: 1.0, scoreMult: 1.0, crisisMult: 1.0,
-        stage: { warCost: -1, food: 6, starvePeople: -5, scaleFall: 5, shipThreat: -15, sejongTriggers: [2, 3, 5] },
+        stage: { warCost: -1, food: 6, starvePeople: -5, scaleFall: 5, shipThreat: -15, sejongTriggers: [2, 3, 5], gojongTriggers: [1, 2, 3, 4] },
         unlock: { rule: 'clearAny', text: '왕 하나를 클리어하면 열려요' },
       },
       sage: {
         name: '성군', icon: '👑', desc: '게이지가 크게 움직이고, 미리보기는 크기 없는 점만',
         mult: 1.3, safe: null, warn: 10, preview: 'flat', carry: 0.75,
         quizOptions: 4, quizRetry: false, quizBonus: 5, afterFall: 'same', hint: 'none', rareMult: 1.2, scoreMult: 1.3, crisisMult: 1.3,
-        stage: { warCost: -2, food: 5, starvePeople: -8, scaleFall: 4, shipThreat: -20, sejongTriggers: [2, 4, 6] },
+        stage: { warCost: -2, food: 5, starvePeople: -8, scaleFall: 4, shipThreat: -20, sejongTriggers: [2, 4, 6], gojongTriggers: [2, 3, 4, 5] },
 unlock: { rule: 'clearAny', text: '왕 하나를 클리어하면 열려요' },
       },
       annals: {
         name: '실록 도전', icon: '📜', desc: '미리보기·경고 없음. 실각하면 생 전체를 처음부터',
         mult: 1.5, safe: null, warn: 0, preview: 'none', carry: 0.75,
         quizOptions: 4, quizRetry: false, quizBonus: 3, afterFall: 'same', hint: 'none', rareMult: 1.5, scoreMult: 1.6, crisisMult: 1.5,
-        stage: { warCost: -2, food: 5, starvePeople: -8, scaleFall: 4, shipThreat: -20, sejongTriggers: [2, 4, 6] },
+        stage: { warCost: -2, food: 5, starvePeople: -8, scaleFall: 4, shipThreat: -20, sejongTriggers: [2, 4, 6], gojongTriggers: [2, 3, 4, 5] },
 unlock: { rule: 'clearAny', text: '왕 하나를 클리어하면 열려요' },
       },
     },

@@ -94,6 +94,11 @@
       sechaek: { x: 2.9, z: 2.4, hw: 0.26, hd: 0.18, h: 0.02 },
       talnori: { x: 2.3, z: 4.9, hw: 0.45, hd: 0.45, h: 0.01 },
       brickHouse: { x: 5.75, z: 2.25, hw: 0.25, hd: 0.18, h: 0.02 },
+      // 고종 건물 자리(마을 집이 덮지 않게)
+      ujeong: { x: -1.45, z: 2.45, hw: 0.32, hd: 0.2, h: 0.02 },
+      hospital: { x: 4.6, z: 3.0, hw: 0.3, hd: 0.2, h: 0.02 },
+      school: { x: -3.95, z: 1.75, hw: 0.4, hd: 0.25, h: 0.02 },
+      hwangudan: { x: 0.95, z: 3.35, hw: 0.45, hd: 0.45, h: 0.02 },
     },
     // 게이지 위기 때 사람이 모이고 연기가 오르는 자리(이름 없음)
     crisis: {
@@ -195,6 +200,18 @@
       sechaek: { kind: 'single', name: '세책점', model: 'sechaek', at: { site: 'sechaek' }, label: 0.45, shadowR: [0.2, 0.12] },
       talnori: { kind: 'single', name: '탈놀이 마당', model: 'talnori', at: { site: 'talnori' }, label: 0.4, shadowR: [0, 0] },
       brickHouse: { kind: 'single', name: '벽돌집', model: 'brickHouse', at: { site: 'brickHouse' }, rot: -0.3, label: 0.4, shadowR: [0.2, 0.12] },
+      // 고종(설계서 2-5): 척화비는 길목 셋 · 개항장 부두는 강가 · 독립문은 돈의문 밖 · 전등은 경복궁 연못가 · 전봇대는 궁궐에서 관청 쪽 · 전차는 종로 끝 흥인지문 쪽 · 경인선은 도성 밖 남서쪽 들판
+      cheokhwa: { kind: 'spots', name: '척화비', model: 'cheokhwa', points: [[-2.05, 3.7], [3.85, 0.85], [-5.7, 1.05]], label: 0.4 },
+      port: { kind: 'single', name: '개항장', model: 'port', at: { riverPhi: 2.45 }, label: 0.5, shadowR: [0.2, 0.2], y: 0.0 },
+      ujeong: { kind: 'single', name: '우정총국', model: 'ujeong', at: { site: 'ujeong' }, label: 0.6, shadowR: [0.4, 0.25] },
+      dongnipmun: { kind: 'single', name: '독립문', model: 'dongnipmun', at: { x: -8.05, z: -0.45 }, rot: Math.PI / 2, label: 0.7, shadowR: [0.3, 0.12] },
+      hwangudan: { kind: 'single', name: '환구단', model: 'hwangudan', at: { site: 'hwangudan' }, label: 0.6, shadowR: [0.4, 0.4] },
+      hospital: { kind: 'single', name: '병원', model: 'hospital', at: { site: 'hospital' }, label: 0.6, shadowR: [0.35, 0.22] },
+      school: { kind: 'single', name: '학교', model: 'school', at: { site: 'school' }, label: 0.7, shadowR: [0.4, 0.2] },
+      lamps: { kind: 'single', name: '전등', model: 'lamps', at: { x: -1.55, z: -3.45 }, label: 0.5, shadowR: [0, 0] },
+      telepole: { kind: 'single', name: '전화', model: 'telepole', at: { x: 1.3, z: -0.95 }, label: 0.5, shadowR: [0, 0] },
+      tram: { kind: 'single', name: '전차', model: 'tram', at: { x: 5.4, z: 1.02 }, rot: -0.05, label: 0.4, shadowR: [0.2, 0.1] },
+      railway: { kind: 'single', name: '경인선', model: 'railway', at: { x: -3.3, z: 6.45 }, rot: -0.45, label: 0.5, shadowR: [0.3, 0.1] },
       // 초가 마을은 이름 없는 장식 무리(연출표 7-1): 처음 몇 채에서 카드마다 조금씩 늘어난다
       choga: { kind: 'village', name: '', grow: 2, model: 'choga', max: 40, focus: [-1.5, 2.6], extra: [[-4.6, 7.0], [-5.6, 6.2], [-1.2, 7.4], [0.6, 7.3], [-7.8, 1.4], [-7.6, 0.3]] },
       giwa: { kind: 'village', name: '기와집 마을', model: 'giwa', max: 30, focus: [1.0, 0.8] },

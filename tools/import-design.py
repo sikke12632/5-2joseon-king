@@ -89,6 +89,20 @@ STAGE_FX = {
     'Y08': {'build': ['hwaseong', 'geojunggi']},
     'Y09': {'build': ['baedari']},
     'Y10': {'fx': {'scene': 'ship'}},
+    # 고종(설계서 2-5·3-5 연출): G02 경복궁 다시(터를 치움) · G03 척화비 · G04 개항장 부두 · G05 우정총국 · G09 독립문 · G10 환구단
+    #  GX1 병원 · GX2 학교 · GX3 전등 · GX4 전봇대 · GX5 전차 · GX6 경인선
+    'G02': {'build': ['gyeongbok'], 'fx': {'remove': ['gyeongbokRuin']}},
+    'G03': {'build': ['cheokhwa'], 'fx': {'scene': 'ship'}},
+    'G04': {'build': ['port']},
+    'G05': {'build': ['ujeong']},
+    'G09': {'build': ['dongnipmun']},
+    'G10': {'build': ['hwangudan']},
+    'GX1': {'build': ['hospital']},
+    'GX2': {'build': ['school']},
+    'GX3': {'build': ['lamps']},
+    'GX4': {'build': ['telepole']},
+    'GX5': {'build': ['tram']},
+    'GX6': {'build': ['railway']},
     'D051': {'build': ['jangsi']},
     'D057': {'build': ['brickHouse']},
     'D061': {'build': ['sechaek']},
@@ -308,7 +322,7 @@ def records():
             falls.append({'id': gmap[m.group(1)] + str(at), 'gauge': gmap[m.group(1)], 'at': at, 'side': 'low' if at == 0 else 'high', 'name': r[1], 'text': r[2]})
         elif r[0].startswith('붕당'):
             falls.append({'id': 'faction', 'gauge': 'faction', 'at': 0, 'name': r[1], 'text': r[2], 'stages': ['yeongjo']})
-    rules = {'과학 임금의 벗': 'invention6', '흔들림 없는 저울': 'scaleSteady', '아슬아슬 줄타기': 'edgeClear','위기를 넘긴 임금': 'held5', '벼랑 끝의 임금': 'heldAtEnd', '같은 위기는 두 번 없다': 'cancel3'}
+    rules = {'과학 임금의 벗': 'invention6', '흔들림 없는 저울': 'scaleSteady', '문을 연 임금': 'open5', '문을 지킨 임금': 'keepClosed', '아슬아슬 줄타기': 'edgeClear','위기를 넘긴 임금': 'held5', '벼랑 끝의 임금': 'heldAtEnd', '같은 위기는 두 번 없다': 'cancel3'}
     titles = []
     for r in table_after('### 4-2. 엔딩 칭호'):
         if not r[0].isdigit():
@@ -471,6 +485,10 @@ def to105(c):
     o['stages'] = [c['stage']] if 'stage' in c else c['daily']['kings']
     if 'order' in c:
         o['order'] = c['order']
+    # 고종 GX5 전차·GX6 경인선은 마지막 두 장면으로 고정(설계서 2-5): 역사 카드처럼 덱에 차례대로 — G11(11) 뒤 12·13
+    if o.get('device_card') and o['id'] in ('GX5', 'GX6'):
+        o['device_card']['fixed'] = True
+        o['order'] = 12 if o['id'] == 'GX5' else 13
     if c.get('daily', {}).get('required'):
         o['required_in'] = c['daily']['required']
     if c.get('daily', {}).get('cond'):

@@ -305,7 +305,7 @@
       }
       return;
     }
-    const trig = cfg.key === 'invention' ? JK.Game.deviceTriggers() : [];
+    const trig = cfg.triggers ? JK.Game.deviceTriggers() : [];
     if (el.dataset.key !== cfg.key + cfg.max) {
       el.dataset.key = cfg.key + cfg.max;
       $('#devName').textContent = cfg.name;

@@ -7,6 +7,7 @@ const KEYS = (process.env.KEYS || 'jiphyeon,jagyeok,honcheon,angbu:0,cheugu:0,ji
 export default async function (t) {
   await t.goto('http://127.0.0.1:8643/index.html?idle=0&pick=normal&debug=1');
   await t.waitFor('window.__jk && __jk.W.stats.frames > 20', 60000);
+  if (process.env.PRE0) await t.eval(process.env.PRE0); // 새 생을 열기 전에(예: 아직 ready가 아닌 왕을 이 시험 안에서만 열기)
   await t.eval(`(()=>{for(const m of document.querySelectorAll('.modal')) m.classList.add('hide'); JK.Game.newRun('${STAGE}','normal');})()`);
   await t.waitFor('JK.Cards.isReady()', 20000);
   await t.eval('__jk.G.debugBuildAll()');

@@ -25,7 +25,8 @@
   G.card = (id) => cardsById[id];
   const stageOf = (id) => era.stages.find((s) => s.id === id);
   const stageIndex = (id) => era.stages.findIndex((s) => s.id === id);
-  const isFixed = (c) => c.kind === 'history' || c.kind === 'sagwan';
+  // 고정 카드: 역사·사관 + 마지막 장면으로 고정한 장치 카드(고종 GX5·GX6)
+  const isFixed = (c) => c.kind === 'history' || c.kind === 'sagwan' || !!(c.kind === 'device' && c.device_card && c.device_card.fixed);
 
   /* ---------- 난이도 (설계서 10-7) ---------- */
   G.diffId = () => (G.run && G.run.diff) || S.settings.difficulty || era.difficultyDefault || 'normal';
@@ -1006,6 +1007,17 @@
     const D = G.diff().stage || {};
     const fx = {};
     if (inSpan(run, st.war) && D[st.war.cost]) fx.treasury = D[st.war.cost];
+    // 고종 개항 압력(설계서 2-5): 카드마다 +1, 끝(10)에 닿으면 군함 위협(국방 −15) 뒤 5로
+    if (inPressure(run)) {
+      const pc = st.device.pressure;
+      run.device[pc.key] = Math.min(pc.max, (run.device[pc.key] || 0) + (pc.perCard || 1));
+      if (run.device[pc.key] >= pc.max) {
+        fx.army = (fx.army || 0) + (pc.hit || -15);
+        run.device[pc.key] = pc.reset || 5;
+        setTimeout(() => Cards.toast(pc.hitText || '⚓ 낯선 군함이 바다에서 위협했다!', 2800), 900);
+        if (JK.EvFx) setTimeout(() => JK.EvFx.play('ship', {}), 700);
+      }
+    }
     if (inSpan(run, st.siege)) {
       if (run.food > 0) run.food--;
       else if (D[st.siege.starve]) fx.people = D[st.siege.starve];
@@ -1020,9 +1032,13 @@
     refreshMeters();
   }
   // 왼쪽 위 장치 막대: 발명 진행도(세종) · 전쟁 중(국고 비용) · 산성 식량 눈금
-  function refreshMeters(instant) {
+  function refreshMeters(instant, delta) {
     const run = G.run;
     const st = stageOf(run.stage);
+    if (st.device && inPressure(run)) {
+      const pc = st.device.pressure;
+      return JK.UI.setDevice({ key: pc.key, name: pc.name, max: pc.max, hint: pc.hint }, run.device || {}, instant, delta);
+    }
     if (st.device) return JK.UI.setDevice(st.device, run.device || {}, instant);
     if (st.siege && (inSpan(run, st.siege) || run.seenRun.includes(st.siege.to)))
       return JK.UI.setDevice({ key: 'food', name: st.siege.name, max: G.diff().stage[st.siege.food] || 6, hint: st.siege.hint }, { food: run.food }, instant);
@@ -1032,9 +1048,23 @@
     }
     JK.UI.setDevice(null);
   }
+  // 고종(설계서 2-5): G04(강화도 조약) 앞에서는 장치 효과가 개항 압력으로, 뒤에서는 개화 진행도로 간다
+  const inPressure = (run) => {
+    const cfg = devCfg(run);
+    return !!(cfg && cfg.pressure && !run.seenRun.includes(cfg.pressure.until));
+  };
   function applyDevice(run, dv) {
     const cfg = devCfg(run);
     if (!cfg) return;
+    if (inPressure(run)) {
+      const pc = cfg.pressure;
+      const v = dv[cfg.key] || 0;
+      if (!v) return;
+      const b = run.device[pc.key] || 0;
+      run.device[pc.key] = JK.clamp(b + v, 0, pc.max);
+      if (run.device[pc.key] !== b) setTimeout(() => refreshMeters(false, run.device[pc.key] - b), 500);
+      return;
+    }
     const before = run.device[cfg.key] || 0;
     let v = dv[cfg.key] || 0;
     // 붕당 저울(설계서 2-4): scaleToward 가운데로 N칸 · scaleAway 지금 기운 쪽으로 N칸 더(가운데면 그대로)
@@ -1044,7 +1074,7 @@
     run.device[cfg.key] = JK.clamp(before + v, cfg.min || 0, cfg.max);
     if (run.device[cfg.key] === before) return;
     setTimeout(() => JK.UI.setDevice(cfg, run.device, false, run.device[cfg.key] - before), 500);
-    if (cfg.title && run.device[cfg.key] >= cfg.max) titleNow([cfg.title]);
+    if (cfg.title && run.device[cfg.key] >= (cfg.titleAt || cfg.max)) titleNow([cfg.title]);
   }
   // 시험용: 장치 효과를 바로 넣고 새 값을 돌려준다(yeongjo-test)
   G.debugDevice = function (dv) {
@@ -1278,6 +1308,8 @@
     if (brDone.length >= 2) got.push('branch:two');
     // 붕당 저울을 ±2 안으로 지켜 끝냄(설계서 2-4) → 「흔들림 없는 저울」
     if (st.device && st.device.steadyTitle && Math.abs((run.device || {})[st.device.key] || 0) <= 2) got.push(st.device.steadyTitle);
+    // 고종(설계서 4-2 #11): G03 "척화비를 세운다" + G04 "버틴다" + 실각 없이 → 「문을 지킨 임금」
+    if (st.device && st.device.keepTitle && run.choices && run.choices.G03 === 'right' && run.choices.G04 === 'left' && !run.stageStats.falls) got.push(st.device.keepTitle);
     W.setTOD(Math.min(1, st.tod[1] + 0.06));
     const qs = pickQuiz(st.id, run.stageSeed);
     // 나의 역사 vs 실제 역사(10-10-5): 퀴즈 바로 앞. 기록관에도 남긴다

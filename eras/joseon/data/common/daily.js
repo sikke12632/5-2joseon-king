@@ -3697,6 +3697,646 @@
   }
  },
  {
+  "id": "D090",
+  "kind": "daily",
+  "stages": [
+   "gojong"
+  ],
+  "required_in": "gojong",
+  "conditions_text": "G06 앞",
+  "rarity": "common",
+  "who": {
+   "name": "고을 수령",
+   "doll": "official_red"
+  },
+  "line": "‘모든 사람은 하늘 같다’는 동학이 고을마다 퍼지고 있사옵니다.",
+  "choice_type": "free",
+  "choices": {
+   "right": {
+    "label": "모임을 둔다",
+    "effects": {
+     "people": 10,
+     "nobles": -15
+    },
+    "this_run": "마을마다 모임이 열렸다."
+   },
+   "left": {
+    "label": "모임을 막는다",
+    "effects": {
+     "nobles": 10,
+     "people": -10,
+     "army": -5
+    },
+    "this_run": "전하는 동학 모임을 막으라 했다."
+   }
+  },
+  "grain": "complex",
+  "out_of_textbook": false,
+  "sources": [
+   {
+    "type": "guide",
+    "page": "285",
+    "tb": "97"
+   }
+  ],
+  "sources_text": "지도서 285(교과서 97) 동학: 모든 사람은 하늘 같은 존재, 전국으로 퍼짐",
+  "learn": "동학",
+  "fx": {
+   "note": "마을 사랑방에 사람 인형이 모인다."
+  }
+ },
+ {
+  "id": "D091",
+  "kind": "daily",
+  "stages": [
+   "gojong"
+  ],
+  "required_in": "gojong",
+  "conditions_text": "G04 뒤",
+  "rarity": "common",
+  "who": {
+   "name": "양반 대표",
+   "doll": "yangban"
+  },
+  "line": "장옷 대신 양산을 쓰고 다니는 여인이 늘었사옵니다. 막을까요?",
+  "choice_type": "free",
+  "choices": {
+   "right": {
+    "label": "양산을 막는다",
+    "effects": {
+     "nobles": 10,
+     "people": -10
+    },
+    "this_run": "양산은 장롱 속으로 들어갔다."
+   },
+   "left": {
+    "label": "양산을 둔다",
+    "effects": {
+     "people": 10,
+     "nobles": -5
+    },
+    "this_run": "양산 아래로 웃는 얼굴이 보였다."
+   }
+  },
+  "grain": "balance",
+  "out_of_textbook": false,
+  "sources": [
+   {
+    "type": "guide",
+    "page": "311",
+    "tb": "107"
+   },
+   {
+    "type": "guide",
+    "page": "293"
+   }
+  ],
+  "sources_text": "지도서 311(교과서 107) 장옷 대신 양산 · 293 장옷",
+  "learn": "의생활의 변화",
+  "fx": {
+   "note": "거리의 여인 인형이 장옷 대신 양산을 편다."
+  }
+ },
+ {
+  "id": "D092",
+  "kind": "daily",
+  "stages": [
+   "gojong"
+  ],
+  "conditions_text": "G07 뒤",
+  "rarity": "common",
+  "who": {
+   "name": "외부 관리",
+   "doll": "official_blue"
+  },
+  "line": "관리들도 양복을 입게 할까요?",
+  "choice_type": "free",
+  "choices": {
+   "right": {
+    "label": "양복을 입힌다",
+    "effects": {
+     "people": 5,
+     "nobles": -10
+    },
+    "this_run": "양복 입은 관리가 거리를 지나갔다."
+   },
+   "left": {
+    "label": "관복을 지킨다",
+    "effects": {
+     "nobles": 5,
+     "people": -5
+    },
+    "this_run": "관리들은 관복을 그대로 입었다."
+   }
+  },
+  "grain": "balance",
+  "out_of_textbook": false,
+  "sources": [
+   {
+    "type": "guide",
+    "page": "311",
+    "tb": "107"
+   }
+  ],
+  "sources_text": "지도서 311(교과서 107) 양복·양장을 입는 사람들",
+  "learn": "의생활의 변화",
+  "fx": {
+   "note": "관리 인형의 옷이 양복과 모자로 바뀐다."
+  }
+ },
+ {
+  "id": "D093",
+  "kind": "daily",
+  "stages": [
+   "gojong"
+  ],
+  "required_in": "gojong",
+  "conditions_text": "G04 뒤",
+  "rarity": "common",
+  "who": {
+   "name": "궁궐 관리",
+   "doll": "official_red"
+  },
+  "line": "서양에서 온 쓴 차 커피와 청나라 음식점이 한성에 생겼사옵니다. 맛보시겠사옵니까?",
+  "choice_type": "free",
+  "choices": {
+   "right": {
+    "label": "맛을 본다",
+    "effects": {
+     "people": 5,
+     "treasury": -5,
+     "nobles": -5
+    },
+    "this_run": "쓴맛에 놀랐지만, 향은 좋았다."
+   },
+   "left": {
+    "label": "숭늉을 찾는다",
+    "effects": {
+     "nobles": 5,
+     "people": -5
+    },
+    "this_run": "전하는 숭늉이 낫다 했다."
+   }
+  },
+  "grain": "complex",
+  "out_of_textbook": false,
+  "sources": [
+   {
+    "type": "guide",
+    "page": "311",
+    "tb": "107"
+   }
+  ],
+  "sources_text": "지도서 311(교과서 107) 커피·중국요리",
+  "learn": "식생활의 변화",
+  "fx": {
+   "note": "찻잔에서 김이 오르고, 거리 음식점에 등불."
+  }
+ },
+ {
+  "id": "D094",
+  "kind": "daily",
+  "stages": [
+   "gojong"
+  ],
+  "required_in": "gojong",
+  "conditions_text": "G04 뒤",
+  "rarity": "common",
+  "who": {
+   "name": "인천 개항장 관리",
+   "doll": "official_red"
+  },
+  "line": "인천에 서양식 호텔과 청나라 사람들 거리가 생겼사옵니다. 더 넓혀 줄까요?",
+  "choice_type": "free",
+  "choices": {
+   "right": {
+    "label": "개항장을 넓힌다",
+    "effects": {
+     "treasury": 10,
+     "army": -5,
+     "people": -5
+    },
+    "this_run": "벽돌 건물이 하나둘 늘었다."
+   },
+   "left": {
+    "label": "그대로 둔다",
+    "effects": {
+     "army": 5,
+     "treasury": -5
+    },
+    "this_run": "개항장은 그대로 두었다."
+   }
+  },
+  "grain": "complex",
+  "out_of_textbook": false,
+  "sources": [
+   {
+    "type": "guide",
+    "page": "311",
+    "tb": "107"
+   },
+   {
+    "type": "guide",
+    "page": "312",
+    "tb": "108"
+   }
+  ],
+  "sources_text": "지도서 311(교과서 107) 서양식 건축물 · 312(교과서 108) 인천 개항장, 최초의 서양식 호텔",
+  "learn": "주생활의 변화와 개항장",
+  "fx": {
+   "note": "항구에 2~3층 벽돌 호텔이 “뽕”."
+  }
+ },
+ {
+  "id": "D095",
+  "kind": "daily",
+  "stages": [
+   "gojong"
+  ],
+  "required_in": "gojong",
+  "conditions_text": "GX5 뒤",
+  "rarity": "common",
+  "who": {
+   "name": "인력거꾼",
+   "doll": "official_red"
+  },
+  "line": "전차가 생겨 손님이 줄었사옵니다. 먹고살 길을 열어 주소서.",
+  "choice_type": "free",
+  "choices": {
+   "right": {
+    "label": "일감을 준다",
+    "effects": {
+     "people": 10,
+     "treasury": -10
+    },
+    "this_run": "전하는 전차가 없는 길에 일감을 마련했다."
+   },
+   "left": {
+    "label": "스스로 찾게 한다",
+    "effects": {
+     "treasury": 5,
+     "people": -10
+    },
+    "this_run": "인력거꾼들은 골목을 돌며 손님을 찾았다."
+   }
+  },
+  "grain": "balance",
+  "out_of_textbook": false,
+  "sources": [
+   {
+    "type": "guide",
+    "page": "311",
+    "tb": "107"
+   }
+  ],
+  "sources_text": "지도서 311(교과서 107 그림: 전차가 다니지 않는 곳에서 손님을 찾는 사람)",
+  "learn": "근대 문물의 그늘",
+  "fx": {
+   "note": "골목에 인력거 한 대가 멈춰 있다."
+  }
+ },
+ {
+  "id": "D096",
+  "kind": "daily",
+  "stages": [
+   "gojong"
+  ],
+  "conditions_text": "GX2 뒤",
+  "rarity": "common",
+  "who": {
+   "name": "선교사",
+   "doll": "official_red"
+  },
+  "line": "여자아이들도 공부하는 학교에 더 많은 학생을 받고 싶습니다.",
+  "choice_type": "free",
+  "choices": {
+   "right": {
+    "label": "학생을 늘린다",
+    "effects": {
+     "people": 10,
+     "nobles": -10
+    },
+    "this_run": "교실이 여학생으로 가득 찼다."
+   },
+   "left": {
+    "label": "작게 유지한다",
+    "effects": {
+     "nobles": 5,
+     "people": -5
+    },
+    "this_run": "학교는 작게 유지했다."
+   }
+  },
+  "grain": "balance",
+  "out_of_textbook": false,
+  "sources": [
+   {
+    "type": "guide",
+    "page": "310",
+    "tb": "106"
+   }
+  ],
+  "sources_text": "지도서 310(교과서 106) 여자도 공부할 수 있는 학교",
+  "learn": "근대 교육",
+  "fx": {
+   "note": "학교 마당에 치마저고리 학생 인형들."
+  }
+ },
+ {
+  "id": "D097",
+  "kind": "daily",
+  "stages": [
+   "gojong"
+  ],
+  "conditions_text": "G04 뒤",
+  "rarity": "common",
+  "who": {
+   "name": "학부 관리",
+   "doll": "official_red"
+  },
+  "line": "학생들을 외국에 유학 보내 새 기술을 배우게 하소서.",
+  "choice_type": "free",
+  "choices": {
+   "right": {
+    "label": "유학을 보낸다",
+    "effects": {
+     "army": 5,
+     "treasury": -10
+    },
+    "device": {
+     "open": 1
+    },
+    "this_run": "학생들이 배에 올랐다."
+   },
+   "left": {
+    "label": "다음으로 미룬다",
+    "effects": {
+     "treasury": 5,
+     "army": -5
+    },
+    "this_run": "유학은 다음으로 미뤘다."
+   }
+  },
+  "grain": "balance",
+  "out_of_textbook": false,
+  "sources": [
+   {
+    "type": "guide",
+    "page": "303",
+    "tb": "105"
+   }
+  ],
+  "sources_text": "지도서 303(교과서 105) 학생들을 외국으로 유학 보냄",
+  "learn": "근대 개혁",
+  "fx": {
+   "note": "항구에서 배가 떠난다."
+  }
+ },
+ {
+  "id": "D098",
+  "kind": "daily",
+  "stages": [
+   "gojong"
+  ],
+  "conditions_text": "G10 뒤",
+  "rarity": "common",
+  "who": {
+   "name": "상인",
+   "doll": "merchant"
+  },
+  "line": "은행을 세워 돈을 맡기고 빌릴 수 있게 하소서.",
+  "choice_type": "free",
+  "choices": {
+   "right": {
+    "label": "은행을 세운다",
+    "effects": {
+     "treasury": -10,
+     "people": 5,
+     "nobles": 5
+    },
+    "device": {
+     "open": 1
+    },
+    "this_run": "돌로 지은 은행 건물이 섰다."
+   },
+   "left": {
+    "label": "항아리에 둔다",
+    "effects": {
+     "treasury": 5,
+     "people": -5
+    },
+    "this_run": "상인들은 돈을 항아리에 묻었다."
+   }
+  },
+  "grain": "complex",
+  "out_of_textbook": false,
+  "sources": [
+   {
+    "type": "guide",
+    "page": "303",
+    "tb": "105"
+   }
+  ],
+  "sources_text": "지도서 303(교과서 105) 은행 등 근대 시설",
+  "learn": "근대 개혁",
+  "fx": {
+   "note": "석조 은행 건물이 “뽕”."
+  }
+ },
+ {
+  "id": "D099",
+  "kind": "daily",
+  "stages": [
+   "gojong"
+  ],
+  "conditions_text": "G10 뒤",
+  "rarity": "common",
+  "who": {
+   "name": "회사를 세우려는 상인",
+   "doll": "merchant"
+  },
+  "line": "회사를 세우려 하옵니다. 나라에서 도와주소서.",
+  "choice_type": "free",
+  "choices": {
+   "right": {
+    "label": "회사를 돕는다",
+    "effects": {
+     "treasury": -10,
+     "people": 10
+    },
+    "device": {
+     "open": 1
+    },
+    "this_run": "굴뚝 달린 공장이 섰다."
+   },
+   "left": {
+    "label": "혼자 하게 둔다",
+    "effects": {
+     "treasury": 5,
+     "people": -5
+    },
+    "this_run": "상인들은 혼자 힘으로 해 보기로 했다."
+   }
+  },
+  "grain": "balance",
+  "out_of_textbook": false,
+  "sources": [
+   {
+    "type": "guide",
+    "page": "303",
+    "tb": "105"
+   }
+  ],
+  "sources_text": "지도서 303(교과서 105) 공장과 회사 설립 지원",
+  "learn": "근대 개혁",
+  "fx": {
+   "note": "굴뚝 공장이 “뽕”, 연기가 오른다."
+  }
+ },
+ {
+  "id": "D100",
+  "kind": "daily",
+  "stages": [
+   "gojong"
+  ],
+  "conditions_text": "G10 뒤",
+  "rarity": "common",
+  "who": {
+   "name": "외부 관리",
+   "doll": "official_blue"
+  },
+  "line": "외국을 오가는 사람이 많아 외국어를 가르치는 학교가 필요하옵니다.",
+  "choice_type": "free",
+  "choices": {
+   "right": {
+    "label": "학교를 세운다",
+    "effects": {
+     "army": 5,
+     "nobles": -5,
+     "treasury": -5
+    },
+    "device": {
+     "open": 1
+    },
+    "this_run": "영어·일본어·중국어 수업이 열렸다."
+   },
+   "left": {
+    "label": "역관에게 맡긴다",
+    "effects": {
+     "nobles": 5,
+     "army": -5
+    },
+    "this_run": "통역은 역관에게 맡기기로 했다."
+   }
+  },
+  "grain": "complex",
+  "out_of_textbook": true,
+  "sources": [
+   {
+    "type": "guide",
+    "page": "305"
+   }
+  ],
+  "sources_text": "[교과서 밖] 지도서 305 참고 자료(대한 제국의 외국어 학교)",
+  "learn": "근대 교육",
+  "fx": {
+   "note": "학교 칠판에 낯선 글자들."
+  }
+ },
+ {
+  "id": "D101",
+  "kind": "daily",
+  "stages": [
+   "gojong"
+  ],
+  "conditions_text": "G09 뒤",
+  "rarity": "common",
+  "who": {
+   "name": "신문팔이 소년",
+   "doll": "official_red"
+  },
+  "line": "“신문이요, 신문이요!” 궁궐 앞에서도 팔아도 되나요?",
+  "choice_type": "free",
+  "choices": {
+   "right": {
+    "label": "궁 앞도 허락한다",
+    "effects": {
+     "people": 5,
+     "nobles": -5
+    },
+    "this_run": "궁궐 앞에서도 신문이 팔렸다."
+   },
+   "left": {
+    "label": "장터로 보낸다",
+    "effects": {
+     "nobles": 5,
+     "people": -5
+    },
+    "this_run": "소년은 장터로 돌아갔다."
+   }
+  },
+  "grain": "balance",
+  "out_of_textbook": false,
+  "sources": [
+   {
+    "type": "guide",
+    "page": "305"
+   }
+  ],
+  "sources_text": "지도서 305 참고 자료(《독립신문》과 신문 파는 사람의 등장)",
+  "learn": "신문의 발간",
+  "fx": {
+   "note": "종이 다발을 든 소년 인형이 뛰어간다."
+  }
+ },
+ {
+  "id": "D102",
+  "kind": "daily",
+  "stages": [
+   "gojong"
+  ],
+  "conditions_text": "G07 뒤",
+  "rarity": "common",
+  "who": {
+   "name": "백정 출신 사람",
+   "doll": "official_red"
+  },
+  "line": "신분 차별이 없어졌으니, 저희도 갓을 쓰게 해 주소서.",
+  "choice_type": "free",
+  "choices": {
+   "right": {
+    "label": "갓을 허락한다",
+    "effects": {
+     "people": 10,
+     "nobles": -10
+    },
+    "this_run": "그해부터 누구나 갓을 쓸 수 있게 되었다."
+   },
+   "left": {
+    "label": "아직 이르다",
+    "effects": {
+     "nobles": 5,
+     "people": -10
+    },
+    "this_run": "전하는 아직 이르다 했다."
+   }
+  },
+  "grain": "balance",
+  "out_of_textbook": true,
+  "sources": [
+   {
+    "type": "web",
+    "title": "한국민족문화대백과사전 '패랭이'(1895년 천민에게도 갓을 허락)",
+    "url": "https://encykorea.aks.ac.kr/Article/E0059795"
+   }
+  ],
+  "sources_text": "[교과서 밖] 한국민족문화대백과사전 '패랭이'(1895년 천민에게도 갓을 허락) https://encykorea.aks.ac.kr/Article/E0059795",
+  "learn": "신분제 폐지 이후",
+  "fx": {
+   "note": "패랭이를 벗고 갓을 쓰는 인형."
+  }
+ },
+ {
   "id": "D103",
   "kind": "daily",
   "stages": [
@@ -3744,6 +4384,255 @@
   "learn": "관리의 횡포와 백성",
   "fx": {
    "note": "관아 앞에 백성들이 모인다."
+  }
+ },
+ {
+  "id": "D104",
+  "kind": "daily",
+  "stages": [
+   "gojong"
+  ],
+  "conditions_text": "G04 앞",
+  "rarity": "common",
+  "who": {
+   "name": "바닷가 고을 수령",
+   "doll": "official_red"
+  },
+  "line": "바닷가에 모양이 낯선 배가 또 나타났사옵니다.",
+  "choice_type": "free",
+  "choices": {
+   "right": {
+    "label": "경고를 쏜다",
+    "effects": {
+     "army": 5,
+     "nobles": 5,
+     "treasury": -10
+    },
+    "device": {
+     "open": 1
+    },
+    "this_run": "포대에서 경고 신호를 쏘았다."
+   },
+   "left": {
+    "label": "물을 준다",
+    "effects": {
+     "people": 5,
+     "nobles": -5
+    },
+    "device": {
+     "open": -1
+    },
+    "this_run": "물과 땔감을 주어 돌려보냈다."
+   }
+  },
+  "grain": "complex",
+  "out_of_textbook": false,
+  "sources": [
+   {
+    "type": "guide",
+    "page": "229"
+   },
+   {
+    "type": "guide",
+    "page": "300"
+   }
+  ],
+  "sources_text": "지도서 229(교과서 그림: 이양선) · 300 서양 여러 나라의 통상 요구",
+  "learn": "개항 전 상황",
+  "fx": {
+   "note": "수평선에 검은 연기를 뿜는 배."
+  }
+ },
+ {
+  "id": "D105",
+  "kind": "daily",
+  "stages": [
+   "gojong"
+  ],
+  "conditions_text": "G04 앞",
+  "rarity": "common",
+  "who": {
+   "name": "흥선 대원군",
+   "doll": "official_blue"
+  },
+  "line": "한 사람을 모시는 서원이 너무 많사옵니다. 47곳만 남기고 정리하겠소.",
+  "choice_type": "free",
+  "choices": {
+   "right": {
+    "label": "서원을 줄인다",
+    "effects": {
+     "treasury": 10,
+     "people": 5,
+     "nobles": -20
+    },
+    "this_run": "선비들이 궁궐 앞에 엎드려 반대했다."
+   },
+   "left": {
+    "label": "서원을 둔다",
+    "effects": {
+     "nobles": 10,
+     "treasury": -5
+    },
+    "this_run": "서원은 그대로 남았다."
+   }
+  },
+  "grain": "complex",
+  "out_of_textbook": true,
+  "sources": [
+   {
+    "type": "web",
+    "title": "한국민족문화대백과사전 '서원'(1871년 47곳만 남김)",
+    "url": "https://encykorea.aks.ac.kr/Article/E0028091"
+   }
+  ],
+  "sources_text": "[교과서 밖] 한국민족문화대백과사전 '서원'(1871년 47곳만 남김) https://encykorea.aks.ac.kr/Article/E0028091",
+  "learn": "흥선 대원군의 정치",
+  "fx": {
+   "note": "고을의 서원 지붕 몇 개가 사라지고, 남은 곳에 깃발이 선다."
+  }
+ },
+ {
+  "id": "D106",
+  "kind": "daily",
+  "stages": [
+   "gojong"
+  ],
+  "conditions_text": "G04 뒤, G05 앞",
+  "rarity": "common",
+  "who": {
+   "name": "사절단으로 다녀온 관리",
+   "doll": "official_red"
+  },
+  "line": "일본과 청을 둘러보니 기계와 군대가 크게 달라졌사옵니다. 더 많은 사람을 보내 배우게 하소서.",
+  "choice_type": "free",
+  "choices": {
+   "right": {
+    "label": "더 보낸다",
+    "effects": {
+     "army": 5,
+     "treasury": -10
+    },
+    "device": {
+     "open": 1
+    },
+    "this_run": "젊은 관리들이 배에 올랐다."
+   },
+   "left": {
+    "label": "우리 것 먼저",
+    "effects": {
+     "treasury": 5,
+     "nobles": 5,
+     "army": -5
+    },
+    "this_run": "전하는 우리 것부터 지키자 했다."
+   }
+  },
+  "grain": "complex",
+  "out_of_textbook": true,
+  "sources": [
+   {
+    "type": "guide",
+    "page": "304"
+   }
+  ],
+  "sources_text": "[교과서 밖] 지도서 304 참고 자료(수신사·조사 시찰단 파견)",
+  "learn": "개화 정책",
+  "fx": {
+   "note": "항구에서 사절단 배가 떠난다."
+  }
+ },
+ {
+  "id": "D107",
+  "kind": "daily",
+  "stages": [
+   "gojong"
+  ],
+  "conditions_text": "GX2 뒤",
+  "rarity": "common",
+  "who": {
+   "name": "새 학교 학생",
+   "doll": "official_green"
+  },
+  "line": "학교에서 공을 차는 놀이를 배웠사옵니다. 궁궐 마당에서도 해 봐도 되나요?",
+  "choice_type": "free",
+  "choices": {
+   "right": {
+    "label": "마당을 내준다",
+    "effects": {
+     "people": 5,
+     "treasury": -5
+    },
+    "this_run": "공 차는 소리에 궁녀들이 웃었다."
+   },
+   "left": {
+    "label": "체통을 지킨다",
+    "effects": {
+     "nobles": 5,
+     "people": -5
+    },
+    "this_run": "체통이 없다는 꾸중을 들었다."
+   }
+  },
+  "grain": "balance",
+  "out_of_textbook": false,
+  "sources": [
+   {
+    "type": "guide",
+    "page": "317"
+   }
+  ],
+  "sources_text": "지도서 317(배재 학당에서 정구·야구·축구 등 운동을 중시)",
+  "learn": "근대 교육",
+  "fx": {
+   "note": "궁궐 마당에 공 하나가 통통 튄다."
+  }
+ },
+ {
+  "id": "D108",
+  "kind": "daily",
+  "stages": [
+   "gojong"
+  ],
+  "conditions_text": "G04 뒤, G05 앞",
+  "rarity": "common",
+  "who": {
+   "name": "태극기를 든 관리",
+   "doll": "official_blue"
+  },
+  "line": "나라를 나타내는 깃발을 정해, 배와 관청에 달게 하소서.",
+  "choice_type": "free",
+  "choices": {
+   "right": {
+    "label": "깃발을 정한다",
+    "effects": {
+     "army": 5,
+     "nobles": 5,
+     "treasury": -5
+    },
+    "this_run": "항구의 배마다 새 깃발이 걸렸다."
+   },
+   "left": {
+    "label": "다음에 정한다",
+    "effects": {
+     "treasury": 5,
+     "army": -5
+    },
+    "this_run": "깃발은 다음에 정하기로 했다."
+   }
+  },
+  "grain": "complex",
+  "out_of_textbook": true,
+  "sources": [
+   {
+    "type": "web",
+    "title": "한국민족문화대백과사전 '태극기'(1882 첫 사용, 1883 국기로 정함",
+    "url": "https://encykorea.aks.ac.kr/Article/E0058892"
+   }
+  ],
+  "sources_text": "[교과서 밖] 한국민족문화대백과사전 '태극기'(1882 첫 사용, 1883 국기로 정함) https://encykorea.aks.ac.kr/Article/E0058892",
+  "learn": "개항 이후 나라의 상징",
+  "fx": {
+   "note": "섬의 관청 지붕마다 태극기가 오른다."
   }
  },
  {
@@ -4627,6 +5516,53 @@
   }
  },
  {
+  "id": "D128",
+  "kind": "daily",
+  "stages": [
+   "gojong"
+  ],
+  "conditions_text": "GX5 직전",
+  "rarity": "common",
+  "who": {
+   "name": "도성 문지기",
+   "doll": "official_green"
+  },
+  "line": "전차 길을 내려면 성벽 일부를 헐어야 한다 하옵니다.",
+  "choice_type": "free",
+  "choices": {
+   "right": {
+    "label": "성벽을 헌다",
+    "effects": {
+     "treasury": 5,
+     "people": 5,
+     "army": -10
+    },
+    "this_run": "흥인지문 옆 성벽이 헐렸다."
+   },
+   "left": {
+    "label": "돌아가게 한다",
+    "effects": {
+     "army": 5,
+     "people": -5
+    },
+    "this_run": "전차 길은 돌아가게 했다."
+   }
+  },
+  "grain": "complex",
+  "out_of_textbook": false,
+  "sources": [
+   {
+    "type": "guide",
+    "page": "238"
+   }
+  ],
+  "sources_text": "지도서 238 1899년 전차 개통으로 동대문·남대문·서대문 주변 성곽 일부가 헐림",
+  "learn": "근대 문물과 옛 도성",
+  "fx": {
+   "note": "태조 때 세운 성벽 한 칸이 사라진다."
+  }
+ },
+ {
   "id": "D130",
   "kind": "daily",
   "stages": [
@@ -4864,6 +5800,153 @@
   "learn": "새로운 문물",
   "fx": {
    "note": "자명종 바늘이 빙글 돌고 “땡”."
+  }
+ },
+ {
+  "id": "D135",
+  "kind": "daily",
+  "stages": [
+   "gojong"
+  ],
+  "conditions_text": "G09 뒤",
+  "rarity": "common",
+  "who": {
+   "name": "독립신문 기자",
+   "doll": "official_green"
+  },
+  "line": "지방에도 신문을 보내 주소서. 한성 소식을 하루 만에 알 수 있사옵니다.",
+  "choice_type": "free",
+  "choices": {
+   "right": {
+    "label": "지방에 보낸다",
+    "effects": {
+     "people": 10,
+     "treasury": -10
+    },
+    "device": {
+     "open": 1
+    },
+    "this_run": "시골 장터에서도 신문 읽는 소리가 났다."
+   },
+   "left": {
+    "label": "한성에만 둔다",
+    "effects": {
+     "treasury": 5,
+     "people": -5
+    },
+    "this_run": "신문은 한성 안에서만 돌았다."
+   }
+  },
+  "grain": "balance",
+  "out_of_textbook": true,
+  "sources": [
+   {
+    "type": "guide",
+    "page": "305"
+   }
+  ],
+  "sources_text": "[교과서 밖] 지도서 305 참고 자료(《독립신문》이 지방에도 배달됨)",
+  "learn": "신문과 사람들의 생각",
+  "fx": {
+   "note": "신문 다발을 실은 수레가 섬 바깥 길로 나간다."
+  }
+ },
+ {
+  "id": "D136",
+  "kind": "daily",
+  "stages": [
+   "gojong"
+  ],
+  "conditions_text": "G10 뒤",
+  "rarity": "common",
+  "who": {
+   "name": "학부 관리",
+   "doll": "official_red"
+  },
+  "line": "고을마다 소학교를 세워 아이들을 가르치소서.",
+  "choice_type": "free",
+  "choices": {
+   "right": {
+    "label": "소학교를 세운다",
+    "effects": {
+     "people": 10,
+     "treasury": -10
+    },
+    "device": {
+     "open": 1
+    },
+    "this_run": "시골 마을에도 종소리 울리는 학교가 생겼다."
+   },
+   "left": {
+    "label": "서당에 맡긴다",
+    "effects": {
+     "treasury": 5,
+     "people": -5
+    },
+    "this_run": "아이들은 서당으로 갔다."
+   }
+  },
+  "grain": "balance",
+  "out_of_textbook": true,
+  "sources": [
+   {
+    "type": "guide",
+    "page": "305"
+   }
+  ],
+  "sources_text": "[교과서 밖] 지도서 305 참고 자료(대한 제국이 지방마다 소학교를 세움)",
+  "learn": "근대 교육",
+  "fx": {
+   "note": "마을 언덕에 작은 학교가 “뽕”."
+  }
+ },
+ {
+  "id": "D137",
+  "kind": "daily",
+  "stages": [
+   "gojong"
+  ],
+  "conditions_text": "G10 뒤",
+  "rarity": "common",
+  "who": {
+   "name": "양지아문 관리",
+   "doll": "official_red"
+  },
+  "line": "땅 크기를 다시 재고 땅 주인을 적은 문서를 만들어야 세금이 바로 서옵니다.",
+  "choice_type": "free",
+  "choices": {
+   "right": {
+    "label": "땅을 다시 잰다",
+    "effects": {
+     "treasury": 10,
+     "nobles": -10
+    },
+    "device": {
+     "open": 1
+    },
+    "this_run": "측량꾼들이 줄자를 들고 논두렁을 걸었다."
+   },
+   "left": {
+    "label": "옛 장부를 쓴다",
+    "effects": {
+     "nobles": 5,
+     "treasury": -5
+    },
+    "this_run": "오래된 장부를 그대로 썼다."
+   }
+  },
+  "grain": "balance",
+  "out_of_textbook": true,
+  "sources": [
+   {
+    "type": "guide",
+    "page": "305"
+   }
+  ],
+  "sources_text": "[교과서 밖] 지도서 305 참고 자료(대한 제국의 양전·지계)",
+  "learn": "대한 제국의 개혁",
+  "fx": {
+   "note": "논밭 위에 측량 줄이 격자로 펼쳐진다."
   }
  }
 ]);
