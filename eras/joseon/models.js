@@ -47,8 +47,10 @@
       L = o.lift || 0,
       O = o.out || 0,
       p = o.pow || 3;
-    const nu = o.nu || 8,
-      nv = o.nv || 5;
+    // 그림자용 낮은 모형(JK.shadowLod): 기와 골 칸을 줄인다. 모양(처마 선)은 같아 그림자 모양은 거의 같다
+    const lod = JK.shadowLod ? 0.4 : 1;
+    const nu = Math.max(2, Math.round((o.nu || 8) * lod)),
+      nv = Math.max(1, Math.round((o.nv || 5) * lod));
     const type = o.type || 'hip';
     const r = type === 'gable' ? W : o.r !== undefined ? o.r : Math.max(0.04, W - D);
     const prof = o.convex ? (v) => 1 - Math.pow(1 - v, 1.9) : (v) => Math.pow(v, o.prof || 1.65);

@@ -750,10 +750,31 @@
   function ensureMesh(k) {
     if (meshes[k]) return meshes[k];
     const d = BUILD_DEFS[k];
-    const m = new T.Mesh(EM[d.model](), JK.MAT);
+    const geo = EM[d.model]();
+    const m = new T.Mesh(geo, JK.MAT);
     m.position.set(d.x, d.y !== undefined ? d.y : height(d.x, d.z) - 0.01, d.z);
     m.rotation.y = d.rot;
     m.castShadow = true;
+    // 그림자는 낮은 모형으로(삼각형 예산 — 그림자를 다시 굽는 프레임이 가장 무겁다). 본 모형이 무거울 때만.
+    //  자식으로 붙여 위치·크기·보임을 따라가게 하고, 그림자 카메라만 보는 층(1)에 둔다
+    const n = (geo.index ? geo.index.count : geo.attributes.position.count) / 3;
+    if (n > 600) {
+      JK.shadowLod = true;
+      let low;
+      try {
+        low = EM[d.model]();
+      } finally {
+        JK.shadowLod = false;
+      }
+      const ln = (low.index ? low.index.count : low.attributes.position.count) / 3;
+      if (ln < n * 0.85) {
+        const sm = new T.Mesh(low, JK.MAT);
+        sm.castShadow = true;
+        sm.layers.set(1);
+        m.add(sm);
+        m.castShadow = false;
+      } else low.dispose();
+    }
     m.receiveShadow = true;
     m.visible = false;
     m.userData.baseY = m.position.y;
@@ -766,6 +787,7 @@
     if (!m || !BUILD_DEFS[k]) return;
     W.island.remove(m);
     m.geometry.dispose();
+    for (const ch of m.children) if (ch.geometry) ch.geometry.dispose();
     delete meshes[k];
     delete built[k];
   };
