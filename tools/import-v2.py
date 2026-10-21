@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """설계서 v2 때 쓴 사건 사슬·희귀 카드(작업/1A-카드데이터/cards_more.py의 M)를 시대팩 데이터로 옮긴다.
 
-    python tools/import-v2.py taejo sejong
+    python tools/import-v2.py taejo sejong seonjo
 
 - 결과: eras/joseon/data/<왕>/v2.js (카드). cards_more.py는 읽기만 한다.
 - 이 카드들은 설계서 3-7·3-8에 있지만 import-design.py가 읽지 않아 그동안 게임에 들어가지 않았다(2026-10-21 발견).
@@ -17,16 +17,27 @@ HERE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 CARD_DIR = os.path.join(HERE, '작업', '1A-카드데이터')
 sys.path.insert(0, CARD_DIR)
 M = runpy.run_path(os.path.join(CARD_DIR, 'cards_more.py'), run_name='v2_data')['M']
-STAGES = sys.argv[1:] or ['taejo', 'sejong']
+STAGES = sys.argv[1:] or ['taejo', 'sejong', 'seonjo']
 
 RULE = {
     'taejo': {
         'C01a': {'trigger': ('T07', 'left', 3)},          # T07 '농한기에 쌓는다' → 3장 뒤
         'R01': {'when': 'seen(T04)'},                      # T04 뒤 아무 때나
         # R02는 여러 왕 카드(원본 st='TSJY'). id가 하나라 태조 파일에 두 왕을 함께 적는다 — 세종 판은 성균관이 이미 서 있다
-        'R02': {'when': 'stage(sejong) || seen(T08)', 'stages': ['taejo', 'sejong']},
+        'R02': {'when': 'stage(sejong) || stage(seonjo) || seen(T08)', 'stages': ['taejo', 'sejong', 'seonjo']},
         'R13': {'when': 'seen(T07)'},
         'R14': {'when': 'seen(T06) && !seen(T09)'},
+    },
+    'seonjo': {
+        # 왕을 건너는 사슬(세종 → 선조·인조)은 왕끼리 잇지 않기로 해서(2026-10-21) J00 사관 두루마리(1450~1567) 뒤 이 생 안의 카드로 둔다
+        'C03a': {'when': 'seen(J00) && !seen(J02)'},
+        'C14a': {'when': 'seen(J00) && !seen(J02)'},
+        'C04a': {'trigger': ('J04', 'right', 3)},                                 # J04 '의병을 돕는다' → 3장 뒤
+        'C05a': {'when': 'seen(J05) && !seen(J07)', 'force': True},               # 한양을 되찾은 뒤(임진왜란 중) 반드시 한 번
+        'R03': {'when': 'seen(J02) && !seen(J03)'},
+        'R06': {'when': 'seen(J08) && !seen(J09)'},
+        # R04(1619 광해군의 파병)는 그때 왕이 광해군인데 이 생은 J08까지 '선조'로 보여 빼 둠(광해군 인형·이름 바뀜이 생기면 넣는다)
+        # R05(1645 소현 세자 귀국)는 J11이 이 생 마지막 카드라 나올 자리가 없어 빼 둠
     },
     'sejong': {
         'C02a': {'when': 'device(invention) >= 1 && !seen(S06)', 'force': True},   # 진행도 1 이상이 되면 바로 다음(S06보다 앞)
@@ -40,7 +51,7 @@ GAUGE = {'백': 'people', '반': 'nobles', '고': 'treasury', '방': 'army'}
 DEVICE = {'발': 'invention', '저': 'scale', '개': 'open'}
 RAR = {'보통': 'common', '드묾': 'uncommon', '희귀': 'rare', '전설': 'legend'}
 KIND = {'사슬': 'chain', '희귀': 'rare', '전설': 'legend'}
-DOLL = [('하륜', 'haryun'), ('조준', 'jojun'), ('장영실', 'jangyeongsil'), ('군관', 'general'), ('문지기', 'general'), ('장수', 'general')]
+DOLL = [('하륜', 'haryun'), ('조준', 'jojun'), ('장영실', 'jangyeongsil'), ('곽재우', 'gwakjaewoo'), ('이순신', 'yisunsin'), ('유성룡', 'yuseongryong'), ('후금', 'qing'), ('군관', 'general'), ('문지기', 'general'), ('장수', 'general')]
 
 
 def effects(s):

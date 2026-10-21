@@ -121,12 +121,13 @@
   "kind": "rare",
   "stages": [
    "taejo",
-   "sejong"
+   "sejong",
+   "seonjo"
   ],
   "rarity": "uncommon",
   "year": "조선 시대",
   "conditions": [
-   "stage(sejong) || seen(T08)"
+   "stage(sejong) || stage(seonjo) || seen(T08)"
   ],
   "conditions_text": "성균관(T08)이 선 뒤 아무 때나",
   "who": {

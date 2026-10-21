@@ -103,8 +103,10 @@
         prebuilt: { choga: 22, giwa: 18, gyeongbok: 1, jongmyo: 1, sajik: 1, wall: 1, heungin: 1, donui: 1, sungnye: 1, sukjeong: 1, seonggyun: 1, seodang: 1, hyanggyo: 1 },
         kingRole: 'seonjo',
         randomSlots: [6, 9],
-        // 남한산성(J09~J11)이 두세 장으로 끝나면 식량 눈금이 의미가 없다 — 사이에 무작위 칸을 꼭 둔다(보통 식량 6이면 J11에서 바닥)
-        slotsBefore: { J10: 2, J11: 2 },
+        // 남한산성(J09~J11)이 두세 장으로 끝나면 식량 눈금이 의미가 없다 — 사이에 무작위 칸을 꼭 둔다.
+        //  J09 바로 뒤에는 사슬 CJ04a·b(강화도 → 남한산성)가 반드시 두 장 붙으므로 J10 앞은 한 칸: 보통 식량 6이면 J11 즈음 바닥
+        //  J02 앞 한 칸: 전쟁 전 평화로운 한양 카드(DJ101~108)가 나올 자리
+        slotsBefore: { J02: 1, J10: 1, J11: 2 },
         realEnd: '실제로 선조는 1608년까지, 인조는 1649년까지 왕위에 있었다.',
         scene: [],
         // 전쟁 버티기(설계서 2-3): 숫자는 난이도표 stage 칸(warCost·food·starvePeople)
