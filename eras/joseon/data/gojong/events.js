@@ -16,7 +16,7 @@
   ],
   "rarity": "common",
   "conditions": [
-   "seen(G04)"
+   "seen(G04) && !flag(F_문닫음)"
   ],
   "conditions_text": "G04 뒤(개항 뒤)",
   "who": {
@@ -649,7 +649,7 @@
   ],
   "rarity": "common",
   "conditions": [
-   "seen(G04)"
+   "seen(G04) && !flag(F_문닫음)"
   ],
   "conditions_text": "G04 뒤(개항 뒤)",
   "who": {
@@ -700,7 +700,7 @@
   ],
   "rarity": "common",
   "conditions": [
-   "seen(G04)"
+   "seen(G04) && !flag(F_문닫음)"
   ],
   "conditions_text": "G04 뒤(개항 뒤)",
   "who": {
@@ -808,7 +808,7 @@
   ],
   "rarity": "common",
   "conditions": [
-   "seen(G04)"
+   "seen(G04) && !flag(F_문닫음)"
   ],
   "conditions_text": "G04 뒤(개항 뒤)",
   "who": {

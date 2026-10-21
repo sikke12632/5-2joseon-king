@@ -276,9 +276,9 @@
   ],
   "rarity": "common",
   "conditions": [
-   "seen(G04)"
+   "seen(G04) && !flag(F_문닫음)"
   ],
-  "conditions_text": "G04 뒤(개항 뒤)",
+  "conditions_text": "G04 뒤(개항 뒤 — 문을 끝내 닫은 생은 빼고)",
   "who": {
    "name": "바닷가 고을 수령",
    "doll": "official_red"
@@ -325,9 +325,9 @@
   ],
   "rarity": "common",
   "conditions": [
-   "seen(G04)"
+   "seen(G04) && !flag(F_문닫음)"
   ],
-  "conditions_text": "G04 뒤(개항 뒤)",
+  "conditions_text": "G04 뒤(개항 뒤 — 문을 끝내 닫은 생은 빼고)",
   "who": {
    "name": "개항장 관리",
    "doll": "official_red"
@@ -374,9 +374,9 @@
   ],
   "rarity": "common",
   "conditions": [
-   "seen(G04)"
+   "seen(G04) && !flag(F_문닫음)"
   ],
-  "conditions_text": "G04 뒤(개항 뒤)",
+  "conditions_text": "G04 뒤(개항 뒤 — 문을 끝내 닫은 생은 빼고)",
   "who": {
    "name": "개항장 관리",
    "doll": "official_red"
@@ -424,9 +424,9 @@
   ],
   "rarity": "common",
   "conditions": [
-   "seen(G04)"
+   "seen(G04) && !flag(F_문닫음)"
   ],
-  "conditions_text": "G04 뒤(개항 뒤)",
+  "conditions_text": "G04 뒤(개항 뒤 — 문을 끝내 닫은 생은 빼고)",
   "who": {
    "name": "고을 수령",
    "doll": "official_red"
@@ -475,9 +475,9 @@
   ],
   "rarity": "common",
   "conditions": [
-   "seen(G04)"
+   "seen(G04) && !flag(F_문닫음)"
   ],
-  "conditions_text": "G04 뒤(개항 뒤)",
+  "conditions_text": "G04 뒤(개항 뒤 — 문을 끝내 닫은 생은 빼고)",
   "who": {
    "name": "역관",
    "doll": "jungin"
@@ -529,9 +529,9 @@
   ],
   "rarity": "common",
   "conditions": [
-   "seen(G04)"
+   "seen(G04) && !flag(F_문닫음)"
   ],
-  "conditions_text": "G04 뒤(개항 뒤)",
+  "conditions_text": "G04 뒤(개항 뒤 — 문을 끝내 닫은 생은 빼고)",
   "who": {
    "name": "베 짜는 아낙",
    "doll": "courtlady"
@@ -1037,9 +1037,9 @@
   ],
   "rarity": "common",
   "conditions": [
-   "seen(G07)"
+   "seen(G07) && !flag(F_개혁없음)"
   ],
-  "conditions_text": "G07 뒤(갑오개혁 뒤)",
+  "conditions_text": "G07 뒤(갑오개혁 뒤 — 옛 제도를 지킨 생은 빼고)",
   "who": {
    "name": "시골 선비",
    "doll": "yangban"
@@ -1091,9 +1091,9 @@
   ],
   "rarity": "common",
   "conditions": [
-   "seen(G07)"
+   "seen(G07) && !flag(F_개혁없음)"
   ],
-  "conditions_text": "G07 뒤(갑오개혁 뒤)",
+  "conditions_text": "G07 뒤(갑오개혁 뒤 — 옛 제도를 지킨 생은 빼고)",
   "who": {
    "name": "고을 수령",
    "doll": "official_red"
@@ -1145,9 +1145,9 @@
   ],
   "rarity": "common",
   "conditions": [
-   "seen(G07)"
+   "seen(G07) && !flag(F_개혁없음)"
   ],
-  "conditions_text": "G07 뒤(갑오개혁 뒤)",
+  "conditions_text": "G07 뒤(갑오개혁 뒤 — 옛 제도를 지킨 생은 빼고)",
   "who": {
    "name": "고을 수령",
    "doll": "official_red"
@@ -1245,9 +1245,9 @@
   ],
   "rarity": "common",
   "conditions": [
-   "seen(G07)"
+   "seen(G07) && !flag(F_개혁없음)"
   ],
-  "conditions_text": "G07 뒤(갑오개혁 뒤)",
+  "conditions_text": "G07 뒤(갑오개혁 뒤 — 옛 제도를 지킨 생은 빼고)",
   "who": {
    "name": "천민이었던 사람",
    "doll": "farmer"
@@ -1735,7 +1735,7 @@
   "rarity": "uncommon",
   "year": "1880년대",
   "conditions": [
-   "seen(G04)"
+   "seen(G04) && !flag(F_문닫음)"
   ],
   "conditions_text": "G04 뒤",
   "who": {

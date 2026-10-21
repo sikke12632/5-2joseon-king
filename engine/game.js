@@ -1102,6 +1102,8 @@
     for (const c of cards) {
       const dc = c.device_card;
       if (run.seenRun.includes(c.id) || run.deck.slice(run.pos).includes(c.id)) continue;
+      // 갈래가 장치 카드를 멈춤(고종 「문을 끝내 닫은 조선」 — 병원·학교·전등·전화가 들어오지 않음). 마지막 고정 장면은 그대로
+      if (cfg.pauseFlag && run.flagsRun && run.flagsRun[cfg.pauseFlag] && !dc.fixed) continue;
       if (dc.after && !run.seenRun.includes(dc.after)) continue;
       const atEnd = !!dc.before && nextBase === dc.before;
       if (atEnd || val >= (trig[dc.step] !== undefined ? trig[dc.step] : Infinity)) return c.id;

@@ -166,7 +166,7 @@
         // 개항 압력(G04 앞, 0~10, 카드마다 +1, 10이면 군함 위협) → G04(강화도 조약)부터 개화 진행도(0~6). 장치 카드 GX1~GX4는 진행도 문턱(난이도표 gojongTriggers), GX5·GX6은 마지막 고정
         device: {
           key: 'open', name: '개화 진행도', max: 6, start: { open: 0, pressure: 0 }, triggers: 'gojongTriggers', triggersDefault: [1, 2, 3, 4],
-          title: 'open5', titleAt: 5, keepTitle: 'keepClosed', hint: '새 문물을 받아들이면 올라요. 병원·학교·전등·전화가 일찍 나와요',
+          title: 'open5', titleAt: 5, keepTitle: 'keepClosed', pauseFlag: 'F_문닫음', hint: '새 문물을 받아들이면 올라요. 병원·학교·전등·전화가 일찍 나와요',
           pressure: { key: 'pressure', name: '개항 압력', max: 10, perCard: 1, until: 'G04', hit: -15, reset: 5, hint: '카드마다 1씩 올라요. 10이 되면 낯선 군함이 위협해요(국방 −15)' },
         },
       },
