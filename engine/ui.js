@@ -144,7 +144,8 @@
       b.disabled = !st.ready;
       const stars = k.asked ? '⭐'.repeat(k.stars || 0) + '☆'.repeat(Math.max(0, k.asked - (k.stars || 0))) : '';
       const gold = Object.keys(k.trueEnd || {}).map((d) => (era.difficulty[d] || {}).icon || '').join('');
-      b.innerHTML = `<span class="kp-seal">${esc(st.seal)}</span><b>${esc(st.king)}</b><small>${esc(st.title)} · ${esc(st.years)}</small>` +
+      const lv = ((era.data.stageInfo || {})[st.id] || {}).level || {};
+      b.innerHTML = `<span class="kp-seal">${esc(st.seal)}</span><b>${esc(st.king)}</b><small>${esc(st.title)} · ${esc(st.years)}</small>${lv.stars ? `<small class="kp-lv">${esc(lv.label)} ${lv.stars}</small>` : ''}` +
         (st.ready ? `<small class="kp-rec">${k.clears ? `클리어 ${k.clears}번 ${stars}${gold ? ' · 진엔딩 ' + gold : ''}` : '아직 안 해 봤어요'}</small>` : '<small class="kp-rec">준비 중</small>');
       if (st.ready) b.onclick = () => showDiffPick(st.id);
       box.appendChild(b);
@@ -234,7 +235,7 @@
   UI.toTitle = function () {
     JK.Game.state = 'title';
     JK.Cards.hide();
-    ['#fall', '#soon', '#quiz', '#records', '#kingPick', '#diffPick', '#compare', '#ending'].forEach(close);
+    ['#fall', '#soon', '#quiz', '#records', '#kingPick', '#diffPick', '#compare', '#ending', '#intro'].forEach(close);
     document.body.classList.remove('playing', 'over');
     W.state.inkTarget = 0;
     W.state.ink = 0;
@@ -387,6 +388,41 @@
     W.setOrbit(true);
     open('#ending');
   };
+
+  /* ---------- 왕별 소개 화면(설계서 10-12 ③) ----------
+   * 사관 두루마리에 2~3문장, 그 왕의 쉬움·어려움과 시작 게이지. 누르면 첫 카드
+   */
+  UI.showIntro = function (st, info, done) {
+    const it = info.intro || {};
+    $('#inSeal').textContent = st.seal;
+    $('#inKing').textContent = `${st.king} · ${st.years}`;
+    $('#inTitle').textContent = st.title;
+    $('#inText').textContent = it.text || '';
+    $('#inSrc').innerHTML = it.sources_text ? `근거: ${esc(JK.Quiz.sourceLine(it.sources) || '')}${it.out_of_textbook ? ' · 일부 <span class="tag-out">교과서 밖</span>' : ''}` : '';
+    const lv = info.level || {};
+    $('#inLevel').textContent = lv.stars ? `${lv.label} ${lv.stars}` : '';
+    const sv = JK.Game.run ? JK.Game.run.start : null;
+    $('#inStart').innerHTML = sv ? era.gauges.map((g) => `<span><svg viewBox="0 0 24 24">${g.icon}</svg>${esc(g.name)} <b>${sv[g.key]}</b></span>`).join('') : '';
+    const box = $('#intro');
+    box.classList.remove('hide');
+    let closed = false;
+    const go = () => {
+      if (closed) return;
+      closed = true;
+      box.classList.add('hide');
+      done && done();
+    };
+    $('#inGo').onclick = go;
+    box.onkeydown = null;
+    UI._introGo = go;
+  };
+  window.addEventListener('keydown', (e) => {
+    const b = document.getElementById('intro');
+    if (b && !b.classList.contains('hide') && ['Enter', ' '].includes(e.key) && UI._introGo) {
+      e.preventDefault();
+      UI._introGo();
+    }
+  });
 
   /* ---------- 다음 왕 준비 중 ---------- */
   // 왕을 마친 뒤 화면(판 = 왕 하나): 퀴즈 별 · 칭호 · 그 왕의 진엔딩 · 다시/다른 왕/첫 화면

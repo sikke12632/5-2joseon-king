@@ -48,6 +48,7 @@ def grain_of(c):
 # 설계서 7장(연출표)·7-4(건물 상태)를 따라 카드마다 세우는 것과 연출
 STAGE_FX = {
     'T00': {'fx': {'prebuilt': True}},
+    'T01': {'fx': {'remove': ['goryeoFlag']}},
     'T02': {'fx': {'flag': True}},
     'T03': {'fx': {'skyText': '조선'}},
     'T04': {'build': ['giwa'], 'fx': {'boats': True}},
@@ -707,6 +708,56 @@ for c in cards:
         old[c['id']] = to105(c)
 daily = [old[k] for k in sorted(old)]
 open(daily_path, 'w', encoding='utf-8', newline='\n').write(js(f"D.cards.push(...{json.dumps(daily, ensure_ascii=False, indent=1)});"))
+# 10-12 왕별 시작 배경: 시작 게이지·장치, 기본 보정, 소개 글·시작 장면 → data/common/stages.js (D.stageInfo)
+def stage_info():
+    out = {}
+    if '### 10-12.' not in src:
+        return out
+    sec = src[src.index('### 10-12.'):]
+    sec = sec[:sec.index('\n### ', 5)]
+    def rows(title):
+        i = sec.index(title)
+        rs = []
+        for ln in sec[i:].split('\n')[1:]:
+            if ln.startswith('|') and not ln.startswith('|---'):
+                rs.append([x.strip() for x in ln.strip().strip('|').split('|')])
+            elif rs and not ln.strip():
+                break
+        return rs[1:]
+    for r in rows('**① 왕별 시작 게이지와 장치**'):
+        sid = KING.get(r[0])
+        if not sid:
+            continue
+        lv = re.match(r'(.*?)\s*([★☆]{3})', r[6])
+        out[sid] = {'start': {'people': int(r[1]), 'nobles': int(r[2]), 'treasury': int(r[3]), 'army': int(r[4])},
+                    'device': r[5], 'level': {'label': (lv.group(1) if lv else r[6]).strip(), 'stars': lv.group(2) if lv else ''}, 'why': r[7]}
+    for r in rows('**② 왕별 기본 보정**'):
+        sid = KING.get(r[0])
+        if sid not in out:
+            continue
+        m1 = re.search(r'×\s*([\d.]+)', r[1])
+        m2 = re.search(r'×\s*([\d.]+)', r[2])
+        o = out[sid]
+        o['crisisMult'] = float(m1.group(1)) if m1 else 1.0
+        o['mult'] = float(m2.group(1)) if m2 else 1.0
+        o['notes'] = r[3]
+        fm = re.search(r'예고 카드 상한\s*(\d+)', r[3])
+        if fm:
+            o['forewarnMax'] = int(fm.group(1))
+        mm = re.search(r'왕의 마음\s*(\d+)', r[3])
+        if mm:
+            o['mindStart'] = int(mm.group(1))
+    for r in rows('**③ 시작 화면 소개 글**'):
+        sid = KING.get(r[0])
+        if sid not in out:
+            continue
+        out[sid]['intro'] = {'text': r[1], 'sources_text': r[2].replace('`', ''), 'sources': src105(sources(r[2].replace('`', ''))), 'out_of_textbook': '[교과서 밖]' in r[2], 'scene': r[3]}
+    return out
+
+
+STAGE_INFO = stage_info()
+open(os.path.join(common, 'stages.js'), 'w', encoding='utf-8', newline='\n').write(js(
+    f"D.stageInfo = {json.dumps(STAGE_INFO, ensure_ascii=False, indent=1)};"))
 open(os.path.join(common, 'records.js'), 'w', encoding='utf-8', newline='\n').write(js(
     f"D.falls.push(...{json.dumps(falls, ensure_ascii=False, indent=1)});\n  D.titles.push(...{json.dumps(titles, ensure_ascii=False, indent=1)});\n  D.codex.push(...{json.dumps(codex, ensure_ascii=False, indent=1)});"))
 roles = sorted(set(c['who'] for c in cards))

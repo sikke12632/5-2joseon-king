@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>조선의 왕</title>
 <!-- 배포할 때마다 ?v= 숫자를 올린다(캐시) -->
-<link rel="stylesheet" href="engine/engine.css?v=30">
+<link rel="stylesheet" href="engine/engine.css?v=33">
 </head>
 <body>
 <div id="app">
@@ -94,6 +94,17 @@
       <p id="fallReal"></p>
       <p id="fallHint"></p>
       <div class="btns"><button id="btnRetry">같은 왕 다시</button><button id="btnFallKings">다른 왕 고르기</button><button id="btnFallHome" class="ghost">첫 화면</button></div>
+    </div>
+  </div>
+
+  <div id="intro" class="modal hide">
+    <div class="m-box in-box">
+      <div class="in-head"><span id="inSeal" class="in-seal"></span><div><div id="inKing"></div><h2 id="inTitle"></h2></div></div>
+      <p id="inText"></p>
+      <div id="inSrc"></div>
+      <div id="inLevel"></div>
+      <div id="inStart"></div>
+      <button id="inGo">나라를 다스리러 간다 →</button>
     </div>
   </div>
 
@@ -193,30 +204,31 @@
   <div id="lost" class="hide"><p>그래픽을 다시 불러오는 중…</p></div>
   <div id="loading"><p>섬을 띄우는 중…</p></div>
 </div>
-<script src="engine/lib/three.min.js?v=30"></script>
-<script src="engine/toy.js?v=30"></script>
-<script src="engine/props.js?v=30"></script>
-<script src="eras/joseon/map.js?v=30"></script>
-<script src="eras/joseon/models.js?v=30"></script>
-<script src="eras/joseon/models-taejo.js?v=30"></script>
-<script src="eras/joseon/era.js?v=30"></script>
+<script src="engine/lib/three.min.js?v=33"></script>
+<script src="engine/toy.js?v=33"></script>
+<script src="engine/props.js?v=33"></script>
+<script src="eras/joseon/map.js?v=33"></script>
+<script src="eras/joseon/models.js?v=33"></script>
+<script src="eras/joseon/models-taejo.js?v=33"></script>
+<script src="eras/joseon/era.js?v=33"></script>
 <!-- 데이터: 공통 + 왕별 (왕이 늘면 그 왕 폴더의 두 줄을 더한다) -->
-<script src="eras/joseon/data/common/roles.js?v=30"></script>
-<script src="eras/joseon/data/common/records.js?v=30"></script>
-<script src="eras/joseon/data/common/daily.js?v=30"></script>
-<script src="eras/joseon/data/taejo/cards.js?v=30"></script>
-<script src="eras/joseon/data/taejo/quizzes.js?v=30"></script>
-<script src="eras/joseon/data/taejo/more.js?v=30"></script>
-<script src="eras/joseon/data/taejo/quizzes-more.js?v=30"></script>
-<script src="engine/save.js?v=30"></script>
-<script src="engine/world.js?v=30"></script>
-<script src="engine/audio.js?v=30"></script>
-<script src="engine/cards.js?v=30"></script>
-<script src="engine/quiz.js?v=30"></script>
-<script src="engine/cond.js?v=30"></script>
-<script src="engine/crisis.js?v=30"></script>
-<script src="engine/game.js?v=30"></script>
-<script src="engine/ui.js?v=30"></script>
-<script src="engine/main.js?v=30"></script>
+<script src="eras/joseon/data/common/roles.js?v=33"></script>
+<script src="eras/joseon/data/common/records.js?v=33"></script>
+<script src="eras/joseon/data/common/stages.js?v=33"></script>
+<script src="eras/joseon/data/common/daily.js?v=33"></script>
+<script src="eras/joseon/data/taejo/cards.js?v=33"></script>
+<script src="eras/joseon/data/taejo/quizzes.js?v=33"></script>
+<script src="eras/joseon/data/taejo/more.js?v=33"></script>
+<script src="eras/joseon/data/taejo/quizzes-more.js?v=33"></script>
+<script src="engine/save.js?v=33"></script>
+<script src="engine/world.js?v=33"></script>
+<script src="engine/audio.js?v=33"></script>
+<script src="engine/cards.js?v=33"></script>
+<script src="engine/quiz.js?v=33"></script>
+<script src="engine/cond.js?v=33"></script>
+<script src="engine/crisis.js?v=33"></script>
+<script src="engine/game.js?v=33"></script>
+<script src="engine/ui.js?v=33"></script>
+<script src="engine/main.js?v=33"></script>
 </body>
 </html>

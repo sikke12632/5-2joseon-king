@@ -20,7 +20,7 @@ export default async function (t) {
   await t.eval("document.querySelector('#btnNew').click()");
   await t.sleep(400);
   ok('고르기 화면 없이 바로 시작', !(await pickState()).open);
-  await t.waitFor('JK.Cards.isReady()', 15000);
+  await (async () => { await t.waitFor(`JK.Cards.isReady() || !document.querySelector('#intro').classList.contains('hide')`, 15000); if (await t.eval(`!document.querySelector('#intro').classList.contains('hide')`)) { await t.eval(`document.querySelector('#inGo').click()`); await t.waitFor('JK.Cards.isReady()', 15000); } })();
   await t.sleep(1400);
   const r1 = JSON.parse(await t.eval(`JSON.stringify({diff:__jk.G.run.diff, toast:document.querySelector('#result').textContent})`));
   ok('새싹 + 안내', r1.diff === 'sprout' && /첫 판은 🌱 새싹/.test(r1.toast), JSON.stringify(r1));
@@ -40,7 +40,7 @@ export default async function (t) {
   ok('고르기 화면 글자 안 잘림', (await t.eval(`(()=>{const out=[];for(const e of document.querySelectorAll('#diffPick .m-box, .dp-card')){const r=e.getBoundingClientRect();if(e.scrollWidth>e.clientWidth+2||e.scrollHeight>e.clientHeight+2||r.bottom>innerHeight+1||r.top<-1)out.push(e.className);}return out.join(',');})()`)) === '');
   await t.shot(`${OUT}/diff-2-pick-locked.png`);
   await t.eval(`document.querySelector('.dp-card:not(.locked)').click()`);
-  await t.waitFor('JK.Cards.isReady()', 15000);
+  await (async () => { await t.waitFor(`JK.Cards.isReady() || !document.querySelector('#intro').classList.contains('hide')`, 15000); if (await t.eval(`!document.querySelector('#intro').classList.contains('hide')`)) { await t.eval(`document.querySelector('#inGo').click()`); await t.waitFor('JK.Cards.isReady()', 15000); } })();
   ok('고르면 바로 시작(새싹)', (await t.eval('__jk.G.run.diff')) === 'sprout');
 
   console.log('③ 왕 하나 클리어 → 모두 열림');
@@ -68,7 +68,7 @@ export default async function (t) {
   ok('다음 판: 네 난이도 모두 열림', p3.open && p3.cards.length === 4 && !p3.cards.some((c) => c.includes('(잠김)')), p3.cards.join(' | '));
   await t.shot(`${OUT}/diff-4-pick-open.png`);
   await t.eval(`[...document.querySelectorAll('.dp-card')][2].click()`);
-  await t.waitFor('JK.Cards.isReady()', 15000);
+  await (async () => { await t.waitFor(`JK.Cards.isReady() || !document.querySelector('#intro').classList.contains('hide')`, 15000); if (await t.eval(`!document.querySelector('#intro').classList.contains('hide')`)) { await t.eval(`document.querySelector('#inGo').click()`); await t.waitFor('JK.Cards.isReady()', 15000); } })();
   ok('성군으로 시작', (await t.eval('__jk.G.run.diff')) === 'sage');
   ok('설정의 난이도 칸도 모두 열림', (await t.eval(`[...document.querySelectorAll('#optDiff option')].filter(o=>o.disabled).length`)) === 0);
 

@@ -12,7 +12,8 @@ export default async function (t) {
     await t.waitFor('window.__jk && __jk.W.stats.frames > 20');
   };
   const vis = (sel) => t.eval(`!document.querySelector('${sel}').classList.contains('hide')`);
-  const ready = () => t.waitFor('JK.Cards.isReady()', 15000);
+  // 새 판이면 왕 소개 화면(10-12)을 넘긴다
+  const ready = () => (async () => { await t.waitFor(`JK.Cards.isReady() || !document.querySelector('#intro').classList.contains('hide')`, 15000); if (await t.eval(`!document.querySelector('#intro').classList.contains('hide')`)) { await t.eval(`document.querySelector('#inGo').click()`); await (async () => { await t.waitFor(`JK.Cards.isReady() || !document.querySelector('#intro').classList.contains('hide')`, 15000); if (await t.eval(`!document.querySelector('#intro').classList.contains('hide')`)) { await t.eval(`document.querySelector('#inGo').click()`); await t.waitFor('JK.Cards.isReady()', 15000); } })(); } })();
   await go();
   await t.eval('localStorage.clear()');
   await go();
@@ -49,7 +50,9 @@ export default async function (t) {
   await t.eval(`[...document.querySelectorAll('.dp-card')][1].click()`);
   await ready();
   const r2 = JSON.parse(await t.eval(`JSON.stringify({diff:__jk.G.run.diff, vals:__jk.G.run.vals, over:document.body.classList.contains('over')})`));
-  ok('보통으로, 게이지 50에서(앞 판을 이어받지 않음)', r2.diff === 'normal' && Object.values(r2.vals).every((v) => v === 50) && !r2.over, JSON.stringify(r2));
+  // 판 = 왕 하나: 앞 판을 이어받지 않고 그 왕의 시작 게이지(10-12)에서
+  const sv2 = await t.eval(`JSON.stringify(__jk.G.startVals('taejo','normal'))`);
+  ok('보통으로, 그 왕의 시작 게이지에서(앞 판을 이어받지 않음)', r2.diff === 'normal' && JSON.stringify(r2.vals) === sv2 && !r2.over, JSON.stringify(r2.vals) + ' = ' + sv2);
 
   console.log('3) 실각 → 실각 화면 버튼 → 다른 왕 고르기');
   await t.eval(`(()=>{JK.Crisis._fc=JK.Crisis.fallChance;JK.Crisis.fallChance=function(){const r=JK.Crisis._fc.apply(null,arguments);r.p=1;return r;};const r=__jk.G.run;r.vals.people=0;JK.Cards.setGauges(r.vals,true);JK.Crisis.apply(r,true);})()`);
@@ -71,7 +74,7 @@ export default async function (t) {
   await t.sleep(300);
   await t.eval(`[...document.querySelectorAll('.dp-card')][2].click()`);
   await ready();
-  ok('성군으로 새 판', (await t.eval(`__jk.G.run.diff + '/' + JSON.stringify(__jk.G.run.vals)`)) === 'sage/{"people":50,"nobles":50,"treasury":50,"army":50}');
+  ok('성군으로 새 판(시작 게이지 50·40·35·55)', (await t.eval(`__jk.G.run.diff + '/' + JSON.stringify(__jk.G.run.vals)`)) === 'sage/{"people":50,"nobles":40,"treasury":35,"army":55}');
 
   console.log('4) 판 중간에 새로 고침 → 이어 하기');
   for (let i = 0; i < 3; i++) {

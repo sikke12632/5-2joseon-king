@@ -45,6 +45,9 @@
         slotsBefore: { T01: 2 },
         realEnd: '실제로 태조는 1398년까지 왕위에 있었다.',
         tutorial: 3, // 처음 세 장은 손 모양 안내
+        // 시작 장면(설계서 10-12 ③): 빈 섬과 멀리 개경 쪽 산 그림자, 섬 둘레에 고려 깃발과 새 깃발 하나씩(이름 없는 장식)
+        //  고려 깃발은 T01에서 실제 경로를 고르면 천천히 내려간다(T01 연출). 시작 게이지·보정·소개 글은 data/common/stages.js(10-12)
+        scene: ['kaesongHills', 'goryeoFlag', 'newFlag'],
       },
       { id: 'sejong', king: '세종', seal: '世宗', title: '발명 진행도', years: '1418~1450', ready: false },
       { id: 'seonjo', king: '선조·인조', seal: '宣祖', title: '전쟁 버티기', years: '1567~1649', ready: false },

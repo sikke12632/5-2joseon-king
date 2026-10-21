@@ -28,9 +28,22 @@
   G.diffId = () => (G.run && G.run.diff) || S.settings.difficulty || era.difficultyDefault || 'normal';
   G.diff = (id) => era.difficulty[id || G.diffId()];
   // 카드 효과에 난이도 배율과 안전 구간을 적용한다(역사·카드 순서는 그대로)
+  // 왕별 시작 배경(설계서 10-12): 시작 게이지·기본 보정(위기 확률·변화 배율)은 data/common/stages.js. 난이도 배율과 곱한다
+  G.stageInfo = (id) => ((era.data.stageInfo || {})[id || (G.run && G.run.stage)] || {});
+  G.stageMult = (k) => (G.stageInfo()[k] !== undefined ? G.stageInfo()[k] : 1);
+  // 시작 게이지: 그 왕의 값. 🌱 새싹은 50 쪽으로 절반 당긴다
+  G.startVals = function (stageId, diffId) {
+    const s = G.stageInfo(stageId).start;
+    const v = {};
+    for (const g of era.gauges) {
+      const x = s && s[g.key] !== undefined ? s[g.key] : 50;
+      v[g.key] = diffId === 'sprout' ? Math.round(50 + (x - 50) / 2) : x;
+    }
+    return v;
+  };
   G.effect = function (k, base, vals) {
     const D = G.diff();
-    let v = base * D.mult;
+    let v = base * D.mult * G.stageMult('mult');
     const cur = vals[k];
     if (D.safe && ((v < 0 && cur < D.safe.below) || (v > 0 && cur > 100 - D.safe.below))) v *= D.safe.k;
     return Math.round(v);
@@ -102,7 +115,8 @@
     const seed = (Date.now() ^ (Math.random() * 1e9)) >>> 0;
     const diff = diffId || S.settings.difficulty || 'normal';
     const st = stageOf(stageId) && stageOf(stageId).ready ? stageId : era.stages[0].id;
-    G.run = { era: era.id, seed, diff, easiest: diff, stage: st, vals: fifty(), start: fifty(), used: [], stats: { fallsRun: 0, quiz: { asked: 0, right: 0 } } };
+    const sv = G.startVals(st, diff);
+    G.run = { era: era.id, seed, diff, easiest: diff, stage: st, vals: Object.assign({}, sv), start: sv, used: [], stats: { fallsRun: 0, quiz: { asked: 0, right: 0 } }, intro: true };
     if (opts.afterFall && era.difficulty[diff].afterFall === 'reset50') G.run.bigPreview = 3;
     G.startStage(st, G.run.start);
   };
@@ -167,7 +181,13 @@
     G.state = 'play';
     setupWorld(st, false);
     save();
-    setTimeout(showCurrent, 700);
+    // 새 판이면 그 왕의 소개 화면(10-12 ③) 뒤에 첫 카드
+    // (시험 도구: 주소에 pick=… 이 있으면 소개 화면을 건너뛴다)
+    if (run.intro && new URLSearchParams(location.search).get('pick')) run.intro = false;
+    if (run.intro) {
+      run.intro = false;
+      setTimeout(() => JK.UI.showIntro(st, G.stageInfo(st.id), () => setTimeout(showCurrent, 300)), 900);
+    } else setTimeout(showCurrent, 700);
   };
   G.continueRun = function () {
     G.run = S.run;
@@ -182,6 +202,8 @@
     W.reset();
     W.setSky(st.sky);
     W.state.title = false;
+    // 시작 장면(10-12 ③): 이번 판에서 치우지 않은 장식만(T01에서 내려간 고려 깃발 등은 G.run.unscene)
+    for (const k of st.scene || []) if (!(G.run.unscene || []).includes(k)) W.buildInstant(k);
     for (const k in st.prebuilt || {}) {
       const v = era.map.buildings[k];
       W.buildInstant(k, st.prebuilt[k]);
@@ -755,6 +777,12 @@
     return end;
   }
   function unbuild(k, delay) {
+    // 시작 장면 장식(stage.scene)은 run.built에 없으므로 따로 기록해 둔다
+    if ((stageOf(G.run.stage).scene || []).includes(k)) {
+      G.run.unscene = (G.run.unscene || []).concat(k);
+      setTimeout(() => W.unbuild(k, 2.6), delay || 0);
+      return;
+    }
     if (!G.run.built.includes(k)) return;
     G.run.built = G.run.built.filter((x) => x !== k);
     setTimeout(() => W.unbuild(k), delay || 0);

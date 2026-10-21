@@ -115,6 +115,9 @@
   "sources_text": "[교과서 밖] 한국민족문화대백과사전 '정몽주' https://encykorea.aks.ac.kr/Article/E0050190 · 우리역사넷 https://contents.history.go.kr/mobile/eh/view.do?levelId=eh_n0375_0010&code=",
   "learn": "건국 과정에는 고려를 지키려던 사람과의 갈등도 있었다",
   "fx": {
+   "remove": [
+    "goryeoFlag"
+   ],
    "note": "저녁 하늘. 섬 끝에 걸린 고려 깃발이 천천히 내려간다(사람·장면은 그리지 않음)."
   }
  },
@@ -946,7 +949,7 @@
   "learn": "건국 초 왕위를 둘러싼 갈등",
   "fx": {
    "dusk": true,
-   "note": "해 질 녘 붉은 하늘. 경복궁 처마 등불이 하나씩 꺼지고 두루마리가 말리며 다음 왕 화면으로 넘어간다."
+   "note": "해 질 녘 붉은 하늘. 경복궁 처마 등불이 하나씩 꺼지고 두루마리가 말리며 \"이 왕의 한양\" 엔딩으로 넘어간다."
   }
  },
  {

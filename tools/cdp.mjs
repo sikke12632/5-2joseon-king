@@ -2,7 +2,7 @@
 //   node tools/cdp.mjs <시나리오.mjs>
 // 시나리오는 export default async function (t) { ... } 이고 t 에 아래 도우미가 들어 있다.
 import { spawn } from 'node:child_process';
-import { mkdtempSync, writeFileSync } from 'node:fs';
+import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
@@ -19,7 +19,8 @@ export async function launch({ headless = true, width = 1366, height = 768 } = {
     '--disable-renderer-backgrounding', '--disable-backgrounding-occluded-windows', `--window-size=${width},${height}`,
     '--autoplay-policy=no-user-gesture-required', '--mute-audio',
   ];
-  if (headless) args.push('--headless=new', '--use-angle=d3d11', '--enable-unsafe-swiftshader=false');
+  // SOFTGL=1: 그래픽 칩 대신 소프트웨어(SwiftShader)로 그린다. 컴퓨터가 잠겨 그래픽 칩이 멈춘 때 논리 시험용(fps는 믿지 말 것)
+  if (headless) args.push('--headless=new', ...(process.env.SOFTGL ? ['--use-angle=swiftshader', '--enable-unsafe-swiftshader'] : ['--use-angle=d3d11', '--enable-unsafe-swiftshader=false']));
   // UNCAP=1: 60fps 제한을 풀어 그래픽 칩의 실제 여유를 본다
   if (process.env.UNCAP) args.push('--disable-gpu-vsync', '--disable-frame-rate-limit');
   else args.push('--window-position=40,40');
@@ -66,7 +67,7 @@ export async function launch({ headless = true, width = 1366, height = 768 } = {
     if (m.method === 'Network.loadingFinished' && net.has(m.params.requestId)) net.get(m.params.requestId).bytes = m.params.encodedDataLength;
   });
   const t = {
-    send: s, logs, net, sleep,
+    send: s, logs, net, sleep, listeners,
     async goto(url) { await s('Page.navigate', { url }); await sleep(500); },
     async eval(expr) {
       const r = await s('Runtime.evaluate', { expression: expr, awaitPromise: true, returnByValue: true });
@@ -93,7 +94,12 @@ export async function launch({ headless = true, width = 1366, height = 768 } = {
           r({ frames: a.length, avgFps: 1000 / avg, p95ms: p95, low1Fps: 1000 / p95, calls: S && S.calls, tris: S && S.tris, tier: __jk && __jk.W.getTier() }); } }
         requestAnimationFrame(f); })`);
     },
-    async close() { try { await send('Browser.close'); } catch {} proc.kill(); },
+    // 끝나면 임시 프로필 폴더도 지운다(크롬이 파일을 놓을 때까지 잠깐 기다렸다가)
+    async close() {
+      try { await send('Browser.close'); } catch {}
+      proc.kill();
+      for (let i = 0; i < 10; i++) { try { rmSync(dir, { recursive: true, force: true }); break; } catch { await sleep(300); } }
+    },
   };
   return t;
 }

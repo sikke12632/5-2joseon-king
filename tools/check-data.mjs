@@ -180,7 +180,7 @@ for (const id in era.difficulty || {}) {
 
 /* ---------- 잠금 조건이 실제로 열릴 수 있는지 (담임 제보 2026-10-21: T01 다른 길이 절대 안 열림) ----------
  * 그 사건 칸 전까지 "반드시 놓이는" 카드만으로 게이지를 최대한 올리거나 내린 범위를 셈한다.
- *  - 시작 50, 앞의 역사·사관 카드는 그 게이지에 가장 좋은 쪽을 골랐다고 본다
+ *  - 시작은 그 왕의 시작 게이지(10-12, 새싹은 50 쪽으로 절반), 앞의 역사·사관 카드는 그 게이지에 가장 좋은 쪽을 골랐다고 본다
  *  - 무작위 칸은 era 스테이지 slotsBefore(그 사건 앞에 꼭 두는 칸 수)만큼만 센다. 한 칸이 한 게이지를 SLOT(10)까지 움직인다고 본다
  *  - 난이도 배율(mult)을 곱해 반올림. 게이지마다 따로 본다(여러 게이지 조건은 각각 닿으면 통과)
  *  - flag(F)는 F를 세우는 다른 길이 앞 사건에 있어야, real(T)는 T가 앞에 있어야 한다
@@ -192,10 +192,16 @@ for (const id in era.difficulty || {}) {
     const hist = D.cards.filter((c) => (c.kind === 'history' || c.kind === 'sagwan') && !c.variant_of && c.stages.includes(st.id)).sort((a, b) => a.order - b.order);
     const before = st.slotsBefore || {};
     for (const dId of diffs) {
-      const mult = era.difficulty[dId].mult;
+      // 왕별 시작 게이지·변화 배율(10-12): 새싹은 시작값을 50 쪽으로 절반 당긴다
+      const info = (D.stageInfo || {})[st.id] || {};
+      const mult = era.difficulty[dId].mult * (info.mult || 1);
       const eff = (v) => Math.round(v * mult);
       const range = {};
-      for (const k of gaugeKeys) range[k] = [50, 50];
+      for (const k of gaugeKeys) {
+        const x = info.start && info.start[k] !== undefined ? info.start[k] : 50;
+        const v0 = dId === 'sprout' ? Math.round(50 + (x - 50) / 2) : x;
+        range[k] = [v0, v0];
+      }
       const flagsBefore = new Set();
       const seenBefore = new Set();
       let slots = 0;

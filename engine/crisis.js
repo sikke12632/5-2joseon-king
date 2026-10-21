@@ -108,7 +108,8 @@
       const z = zones[k];
       if (z.level === 'stable') delete run.forewarned[k];
     }
-    const max = byDiff(cfg().forewarnMax, 4);
+    // 예고 상한: 왕별 값(10-12 ②, 세종 3장)이 있으면 그것
+    const max = JK.Game.stageInfo().forewarnMax || byDiff(cfg().forewarnMax, 4);
     for (const k in zones) {
       const z = zones[k],
         p = prev[k] || { level: 'stable' };
@@ -177,7 +178,7 @@
     const ch = cfg().chance || {};
     // 다른 길(10-10-2)이 바꾼 위기 확률(예: 성 없이 문만 → 국방 낮음 ×1.5)
     const alt = (run.crisisMult || {})[best.k + ':' + best.z.side] || 1;
-    const p = Math.min(ch.cap || 0.95, (ch[best.z.level] || 0) * (JK.Game.diff().crisisMult || 1) * alt);
+    const p = Math.min(ch.cap || 0.95, (ch[best.z.level] || 0) * (JK.Game.diff().crisisMult || 1) * JK.Game.stageMult('crisisMult') * alt);
     if (rnd() >= p) return null;
     const card = era.data.cards.find((x) => x.kind === 'crisis' && x.level === 'event' && x.gauge === best.k && x.side === best.z.side && x.stages.includes(run.stage));
     if (!card) return null;

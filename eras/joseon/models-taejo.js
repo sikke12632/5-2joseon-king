@@ -481,4 +481,42 @@
     }
     return b.build();
   };
+
+  /* ---------- 시작 장면(설계서 10-12 ③) — 이름 없는 장식 ---------- */
+  // 멀리 개경 쪽 산 그림자: 구름 위로 솟은 푸른 먹빛 봉우리 셋(섬 밖 먼 곳)
+  M.kaesongHills = function () {
+    const b = new JK.Builder();
+    const ink = [col('#8b97a6'), col('#9aa6b4'), col('#a9b4c0')];
+    const peaks = [
+      [0, 0, 3.4, 2.6],
+      [-2.6, 0.9, 2.3, 2.0],
+      [2.4, 0.7, 2.0, 1.8],
+    ];
+    peaks.forEach(([x, z, h, r], i) => {
+      b.push().t(x, 0, z);
+      b.lathe([[r, 0, ink[i]], [r * 0.62, h * 0.45, ink[i]], [r * 0.3, h * 0.8, ink[i]], [0, h, ink[i]]], 7);
+      b.pop();
+    });
+    return b.build();
+  };
+  function flagPole(b, cloth, trim) {
+    b.ao(0, 0.4, 0.8);
+    b.box(0, 0.04, 0, 0.16, 0.08, 0.16, C.stoneDark, { top: C.stone, noBottom: true });
+    b.cyl(0, 0.08, 0, 0.032, 0.026, 2.1, 6, C.woodDark);
+    b.ao(0, 0, 1);
+    b.box(0.38, 1.86, 0, 0.72, 0.44, 0.015, cloth);
+    b.box(0.38, 2.09, 0, 0.75, 0.035, 0.02, trim);
+    b.ball(0, 2.22, 0, 0.055, 1, col('#d8b64e'));
+  }
+  // 고려 깃발(푸른 먹빛) · 새 깃발(붉은빛) — 어느 나라 깃발의 실제 모양을 따르지 않는 장식
+  M.goryeoFlag = function () {
+    const b = new JK.Builder();
+    flagPole(b, col('#3c5a78'), col('#26303e'));
+    return b.build();
+  };
+  M.newFlag = function () {
+    const b = new JK.Builder();
+    flagPole(b, col('#b23b30'), col('#d8b64e'));
+    return b.build();
+  };
 })();

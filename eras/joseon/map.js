@@ -147,6 +147,10 @@
       altOldWall: { kind: 'single', name: '', model: 'altOldWall', at: { x: -4.4, z: -4.6 }, rot: 0.6, label: 0, shadowR: [0.8, 0.2], alt: true },
       altSmallSG: { kind: 'single', name: '', model: 'altSmallSG', at: { site: 'seonggyun' }, label: 0, shadowR: [0.6, 0.4], alt: true, conflicts: ['seonggyun'] },
       gateFence: { kind: 'single', name: '', model: 'gateFence', at: { gate: 'sungnye' }, label: 0, shadowR: [0, 0], alt: true },
+      // 시작 장면(10-12 ③, 이름 없는 장식): 멀리 개경 쪽 산 그림자 · 고려 깃발 · 새 깃발
+      kaesongHills: { kind: 'single', name: '', model: 'kaesongHills', at: { x: -12.5, z: -11.5 }, rot: 0.5, label: 0, shadowR: [0, 0], y: -2.2 },
+      goryeoFlag: { kind: 'single', name: '', model: 'goryeoFlag', at: { x: 7.9, z: -4.6 }, label: 0, shadowR: [0.15, 0.15] },
+      newFlag: { kind: 'single', name: '', model: 'newFlag', at: { x: -8.3, z: -3.6 }, label: 0, shadowR: [0.15, 0.15] },
       // 태조 추가 집필 연출표(FX_T). 이름표는 근거가 있는 것만(문묘·천상열차분야지도 — CREDITS.md)
       munmyo: { kind: 'single', name: '문묘', model: 'munmyo', at: { x: 4.0, z: -3.12 }, label: 0.8, shadowR: [0.45, 0.3] },
       starStone: { kind: 'single', name: '천상열차분야지도', model: 'starStone', at: { x: -2.72, z: -3.35 }, rot: 0.3, label: 0.9, shadowR: [0.2, 0.1] },
