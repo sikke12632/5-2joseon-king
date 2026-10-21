@@ -26,7 +26,9 @@ export default async function (t) {
             if (c && !c.single) {
               const cost=(fx)=>{let m=0;for(const k in r.vals){const v=r.vals[k]+(fx[k]||0);m=Math.max(m,Math.abs(v-50));}return m;};
               dir = cost(c.choices.right.effects||{})<=cost(c.choices.left.effects||{}) ? 1 : -1;
-              if (JK.Cards.isLocked(dir)) dir=-dir; } }
+              if (JK.Cards.isLocked(dir)) dir=-dir;
+              // 실제 경로가 잠기면(난이도별 잠금) 아이처럼 열린 다른 길을 고른다
+              if (JK.Cards.isLocked(dir) && r.shownAlt && r.shownAlt.open) { G.commitAlt(c.paths.alt[r.shownAlt.idx].id); setTimeout(tick,5); return; } } }
           G.commit(dir); setTimeout(tick,5); };
         setTimeout(tick,300); })`).then(JSON.parse);
   const a = await play('normal');
@@ -46,10 +48,12 @@ export default async function (t) {
   ok('전쟁 앞(J02 전)에는 계기 없음', a.log.slice(0, at('J02') + 1).every((x) => !x.bar), a.log.slice(0, at('J02') + 1).map((x) => x.bar || '-').join(''));
   // 전쟁 비용: 보통 카드마다 국고 −1 → 전쟁 동안 국고 흐름에 비용이 섞인다(정확한 값은 카드 효과와 겹치므로 계기 글자로 확인)
   // 남한산성 식량: J09 뒤 카드마다 1씩 준다
-  const siege = a.log.filter((x, i) => i > at('J09'));
+  const siege = a.log.filter((x, i) => i > at('J09') && i <= at('J10')); // 남한산성: J09 뒤 ~ J10(항복)까지
   const foods = siege.map((x) => x.food);
-  ok('남한산성 식량이 J09 뒤 카드마다 줄어듦(보통 6)', a.state === 'fall' || (foods.length > 1 && foods[0] <= 6 && foods.every((f, i) => i === 0 || f === Math.max(0, foods[i - 1] - 1))), foods.join(','));
+  ok('남한산성 식량이 J09 뒤 ~ J10 카드마다 줄어듦(보통 6)', a.state === 'fall' || (foods.length > 1 && foods[0] <= 6 && foods.every((f, i) => i === 0 || f === Math.max(0, foods[i - 1] - 1))), foods.join(','));
   ok('식량 계기(눈금)', a.state === 'fall' || siege.every((x) => x.bar === 'meter'), siege.map((x) => x.bar || '-').join(''));
+  const afterJ10 = a.log.filter((x, i) => i > at('J10')).map((x) => x.food);
+  ok('J10(항복) 뒤에는 식량이 줄지 않음', a.state === 'fall' || afterJ10.every((f) => f === afterJ10[0]), afterJ10.join(','));
   // 섬: 경복궁·종묘가 치워지고 터가 섬 · 남한산성·삼전도비
   ok('경복궁·종묘 치움(J02)', a.state === 'fall' || (a.unscene.includes('gyeongbok') && a.unscene.includes('jongmyo')), a.unscene.join(','));
   ok('경복궁 터는 남고, 종묘는 J07에서 다시 섬', a.built.includes('gyeongbokRuin') && (a.state === 'fall' || (a.built.includes('jongmyo') && !a.built.includes('jongmyoRuin'))), a.built.join(','));

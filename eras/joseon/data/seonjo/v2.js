@@ -123,7 +123,7 @@
   "rarity": "common",
   "year": "1593",
   "conditions": [
-   "seen(J05) && !seen(J07)"
+   "seen(J05) && !seen(J07) && !flag(F_한양)"
   ],
   "conditions_text": "J05 뒤(임진왜란 중) 반드시 한 번 — 사슬 시작은 J02",
   "force": true,

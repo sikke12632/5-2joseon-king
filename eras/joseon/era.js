@@ -104,14 +104,15 @@
         kingRole: 'seonjo',
         randomSlots: [6, 9],
         // 남한산성(J09~J11)이 두세 장으로 끝나면 식량 눈금이 의미가 없다 — 사이에 무작위 칸을 꼭 둔다.
-        //  J09 바로 뒤에는 사슬 CJ04a·b(강화도 → 남한산성)가 반드시 두 장 붙으므로 J10 앞은 한 칸: 보통 식량 6이면 J11 즈음 바닥
+        //  남한산성은 J09(청이 쳐들어옴)부터 J10(주화·척화 끝에 항복)까지. J09 바로 뒤에 사슬 CJ04a·b(강화도 → 남한산성)가 반드시 두 장 붙고,
+        //  J10 앞 두 칸을 더 두어 보통 식량 6이면 J10 즈음 바닥난다. J11(항복 뒤)에는 식량을 쓰지 않는다
         //  J02 앞 한 칸: 전쟁 전 평화로운 한양 카드(DJ101~108)가 나올 자리
-        slotsBefore: { J02: 1, J10: 1, J11: 2 },
+        slotsBefore: { J02: 1, J10: 2, J11: 1 },
         realEnd: '실제로 선조는 1608년까지, 인조는 1649년까지 왕위에 있었다.',
         scene: [],
         // 전쟁 버티기(설계서 2-3): 숫자는 난이도표 stage 칸(warCost·food·starvePeople)
         war: { from: 'J02', to: 'J07', cost: 'warCost', name: '⚔ 임진왜란', hint: '전쟁 중에는 카드마다 국고가 줄어요' },
-        siege: { from: 'J09', to: 'J11', food: 'food', starve: 'starvePeople', name: '남한산성 식량', hint: '식량이 바닥나면 카드마다 백성이 줄어요. 끝까지 버텨도 결국 항복해요(역사 그대로)' },
+        siege: { from: 'J09', to: 'J10', food: 'food', starve: 'starvePeople', name: '남한산성 식량', hint: '식량이 바닥나면 카드마다 백성이 줄어요. 끝까지 버텨도 결국 항복해요(역사 그대로)' },
       },
       { id: 'yeongjo', king: '영조·정조', seal: '英祖', title: '붕당 저울', years: '1724~1800', ready: false },
       { id: 'gojong', king: '고종', seal: '高宗', title: '개항 압력', years: '1863~1899', ready: false },

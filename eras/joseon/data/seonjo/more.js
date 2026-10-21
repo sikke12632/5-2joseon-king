@@ -823,9 +823,9 @@
   ],
   "rarity": "common",
   "conditions": [
-   "seen(J02) && !seen(J07)"
+   "seen(J02) && !seen(J07) && !flag(F_한양)"
   ],
-  "conditions_text": "J02 뒤, J07 앞(임진왜란 동안)",
+  "conditions_text": "J02 뒤, J07 앞(임진왜란 동안) — 한양을 지킨 생은 빼고",
   "who": {
    "name": "도성에 남은 관리",
    "doll": "official_blue"
@@ -2153,9 +2153,9 @@
   ],
   "rarity": "common",
   "conditions": [
-   "seen(J07) && !seen(J09)"
+   "seen(J07) && !seen(J09) && !flag(F_한양)"
   ],
-  "conditions_text": "J07 뒤, J09 앞(임진왜란이 끝난 뒤)",
+  "conditions_text": "J07 뒤, J09 앞(임진왜란이 끝난 뒤) — 한양을 지킨 생은 빼고",
   "who": {
    "name": "한성부 관리",
    "doll": "official_green"

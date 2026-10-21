@@ -33,7 +33,7 @@ RULE = {
         'C03a': {'when': 'seen(J00) && !seen(J02)'},
         'C14a': {'when': 'seen(J00) && !seen(J02)'},
         'C04a': {'trigger': ('J04', 'right', 3)},                                 # J04 '의병을 돕는다' → 3장 뒤
-        'C05a': {'when': 'seen(J05) && !seen(J07)', 'force': True},               # 한양을 되찾은 뒤(임진왜란 중) 반드시 한 번
+        'C05a': {'when': 'seen(J05) && !seen(J07) && !flag(F_한양)', 'force': True},               # 한양을 되찾은 뒤(임진왜란 중) 반드시 한 번
         'R03': {'when': 'seen(J02) && !seen(J03)'},
         'R06': {'when': 'seen(J08) && !seen(J09)'},
         # R04(1619 광해군의 파병)는 그때 왕이 광해군인데 이 생은 J08까지 '선조'로 보여 빼 둠(광해군 인형·이름 바뀜이 생기면 넣는다)

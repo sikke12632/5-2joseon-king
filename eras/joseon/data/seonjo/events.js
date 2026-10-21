@@ -749,9 +749,9 @@
   ],
   "rarity": "common",
   "conditions": [
-   "seen(J07)"
+   "seen(J07) && !flag(F_한양)"
   ],
-  "conditions_text": "J07 뒤(전쟁이 끝나고 터를 치울 때)",
+  "conditions_text": "J07 뒤(전쟁이 끝나고 터를 치울 때 — 한양을 지킨 생은 빼고)",
   "who": {
    "name": "한성부 관리",
    "doll": "official_green"

@@ -21,7 +21,7 @@ DEV = {'발': 'invention', '저': 'scale', '개': 'open'}
 GRAIN = {'저울': 'balance', '복합': 'complex', '선물': 'gift', '수렁': 'mire', '씨앗': 'seed', '도박': 'gamble'}
 STATE = {'순조': 'smooth', '억지': 'forced', '늦게': 'late'}
 DIFF = G.get('DIFF_KEY', {'새싹': 'sprout', '보통': 'normal', '성군': 'sage', '실록': 'annals'})
-DOLL = {'장영실': 'jangyeongsil', '바닷가 고을 수령': 'official_red', '예조 관리': 'official_red', '의금부 관리': 'official_blue'}
+DOLL = {'장영실': 'jangyeongsil', '도성 문지기': 'general', '종묘를 지키는 관리': 'official_green', '국경의 역관': 'jungin', '명에 다녀온 사신': 'official_red', '바닷가 고을 수령': 'official_red', '예조 관리': 'official_red', '의금부 관리': 'official_blue'}
 
 
 def effects(s):
