@@ -424,3 +424,23 @@ body.over #altBtn, #deck:not(.show) ~ #altBtn { pointer-events: none; }
 #card.legend { box-shadow: 0 0 0 3px #e2b94a, 0 0 26px rgba(242,196,80,.75), inset 0 0 0 4px #e9c766, inset 0 0 0 9px #fff4d2; animation: legendGlow 2.4s ease-in-out infinite; }
 #card.legend #chainTag { background: linear-gradient(#e2b94a, #b88a22); color: #3a2a0a; }
 @keyframes legendGlow { 50% { box-shadow: 0 0 0 3px #f2d27a, 0 0 40px rgba(242,196,80,.95), inset 0 0 0 4px #e9c766, inset 0 0 0 9px #fff4d2; } }
+/* 담임 피드백(2026-10-21): 고른 뒤 큰 숫자 · 처음 위기 알림창 · 잠긴 조건 숫자 */
+.g-num { position: absolute; left: 50%; top: 2px; transform: translate(-50%, 0); font: bold 26px/1 'JKTitle', serif; pointer-events: none; z-index: 5; white-space: nowrap; animation: gNum 2.2s ease-out forwards; text-shadow: 0 0 3px #1d1712, 0 2px 4px rgba(0,0,0,.6), 0 0 1px #000; }
+.g-num.plus { color: #9cf0a8; }
+.g-num.minus { color: #ff8d7a; }
+@keyframes gNum { 0% { opacity: 0; transform: translate(-50%, 10px) scale(.6); } 12% { opacity: 1; transform: translate(-50%, 0) scale(1.15); } 25% { transform: translate(-50%, 0) scale(1); } 75% { opacity: 1; } 100% { opacity: 0; transform: translate(-50%, -22px); } }
+#warnFirst { z-index: 55; }
+.wf-box { width: min(440px, 92%); text-align: center; border: 3px solid #b23b30; box-shadow: 0 20px 50px rgba(60,10,10,.45); }
+#wfIcon svg { width: 54px; height: 54px; fill: #b23b30; animation: zDanger .7s ease-in-out 3; }
+#wfText { font-family: 'JKTitle', serif; font-size: 24px; color: #8d2f2a; margin: 6px 0 4px; word-break: keep-all; }
+#wfSub { font-size: 17px; color: #4a3a2a; margin: 0 0 12px; line-height: 1.5; word-break: keep-all; }
+#wfOk { padding: 8px 26px; border-radius: 999px; border: 0; background: var(--lacquer); color: var(--gold); font-size: 17px; cursor: pointer; font-family: inherit; }
+#chance span b { display: block; font-size: 14px; font-weight: normal; }
+#chance span small { display: block; font-size: 11px; opacity: .8; margin-top: 1px; }
+#chance span:not(:empty) { white-space: normal; word-break: keep-all; line-height: 1.35; }
+#altWhy b { display: block; font-weight: normal; font-size: 13px; color: #6b3a2a; }
+#altWhy small { display: block; font-size: 11px; color: #8a7a62; }
+#altWhy { display: block; word-break: keep-all; line-height: 1.35; text-align: center; }
+/* 버튼 아래 줄·다른 길 버튼이 있을 때: 카드를 줄여 패널이 화면 안에(디벗 1280×664 — 위 버튼과 겹치지 않게) */
+body:not(.portrait) #panel.extra { gap: 6px; }
+body:not(.portrait) #panel.extra #deck { aspect-ratio: auto; width: 100%; height: min(66vh, calc(100vh - 340px)); max-height: none; }

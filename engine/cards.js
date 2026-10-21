@@ -65,20 +65,24 @@
     // 잠긴 이유는 늘 보이게(버튼 줄 아래). 두 쪽 이유가 같으면 한 줄로
     if (lock.left || lock.right) {
       const same = lock.left && lock.right && lock.left === lock.right;
-      $('#chanceL').textContent = lock.left ? `🔒 ${lock.left}` : '';
-      $('#chanceR').textContent = same ? '' : lock.right ? `🔒 ${lock.right}` : '';
+      const fl = v.flavor || {};
+      const line = (t, f) => `<b>🔒 ${esc(t)}</b>${f && f !== t ? `<small>${esc(f)}</small>` : ''}`;
+      $('#chanceL').innerHTML = lock.left ? line(lock.left, fl.left) : '';
+      $('#chanceR').innerHTML = same ? '' : lock.right ? line(lock.right, fl.right) : '';
       $('#chance').style.display = '';
       $('#chance').classList.toggle('one', !!same);
     } else $('#chance').classList.remove('one');
     // 실제 경로가 잠긴 까닭인 게이지 아이콘을 깜빡인다(10-11-5)
     const need = new Set((v.need || []).map((x) => x.key));
     for (const el of document.querySelectorAll('.gauge')) el.classList.toggle('need', need.has(el.dataset.key));
+    // 버튼 아래 줄(잠김 이유·확률)이나 '다른 길' 버튼이 있으면 카드를 조금 줄여 패널이 화면(디벗 1280×664) 안에 들어가게
+    $('#panel').classList.toggle('extra', !!(v.alt || v.chance || lock.left || lock.right));
     // 카드 아래 '다른 길' 버튼(위로 끌거나 누르기)
     const ab = $('#altBtn');
     ab.style.display = v.alt ? '' : 'none';
     if (v.alt) {
       $('#altLabel').textContent = v.alt.label;
-      $('#altWhy').textContent = v.alt.locked ? `🔒 ${v.alt.reason}` : '';
+      $('#altWhy').innerHTML = v.alt.locked ? `<b>🔒 ${esc(v.alt.reason)}</b>${v.alt.flavor ? `<small>${esc(v.alt.flavor)}</small>` : ''}` : '';
       ab.classList.toggle('locked', !!v.alt.locked);
       ab.disabled = false;
     }
@@ -143,10 +147,16 @@
     }
   };
   // heavy: "그래도 역사는 흘렀다" 때 크게 흔들리며 깎임
+  // 고른 뒤: 게이지마다 "+10" "−15" 큰 숫자가 떠올랐다 사라진다(담임 피드백 — 모든 난이도. 고르기 전 미리보기는 난이도대로)
   C.flash = function (fx, heavy) {
     for (const k in fx) {
       const el = document.querySelector(`.gauge[data-key="${k}"]`);
       if (!el || !fx[k]) continue;
+      const num = document.createElement('div');
+      num.className = 'g-num ' + (fx[k] > 0 ? 'plus' : 'minus');
+      num.textContent = (fx[k] > 0 ? '+' : '−') + Math.abs(fx[k]);
+      el.appendChild(num);
+      setTimeout(() => num.remove(), 2300);
       el.classList.remove('up', 'down', 'hit');
       void el.offsetWidth;
       el.classList.add(fx[k] > 0 ? 'up' : 'down');

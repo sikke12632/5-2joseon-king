@@ -13,6 +13,7 @@ export default async function (t) {
   const show = async (id, vals) => {
     await ready();
     await setVals(vals);
+    await t.eval(`document.querySelector('#warnFirst').classList.add('hide')`); // 처음 위기 알림창은 닫고
     await t.eval(`__jk.G.debugInsert('${id}')`);
     await t.waitFor(`JK.Cards.isReady() && __jk.G.run.deck[__jk.G.run.pos]==='${id}' && !__jk.G.run.pending`, 8000);
     await t.sleep(300);
@@ -36,7 +37,9 @@ export default async function (t) {
   await t.eval(`__jk.G.setDifficulty('sprout')`);
   await show('T04', { treasury: 10 });
   let v = await view();
-  ok('잠김 이유와 모자란 숫자', /곳간과 백성의 힘/.test(v.L) && /국고 10 더/.test(v.L), v.L);
+  // 담임 피드백(2026-10-21): 잠긴 조건은 모든 난이도에서 숫자로 ("국고 20 이상 필요 · 지금 10"), 분위기 문장은 그 밑에 작게
+  ok('잠김 조건 숫자', /국고 20 이상 필요 · 지금 10/.test(v.L), v.L);
+  ok('분위기 문장(작게)', /곳간과 백성의 힘/.test(await t.eval(`document.querySelector('#chance').textContent`)));
   ok('국고 아이콘 깜빡임', v.need.join() === 'treasury', v.need.join());
   ok('다른 길 열림', !v.altLocked, v.alt);
   if (OUT) await t.shot(`${OUT}/true-lock-sprout.png`);
@@ -45,7 +48,7 @@ export default async function (t) {
   await t.eval(`__jk.G.setDifficulty('normal')`);
   await show('T04', { treasury: 25 });
   v = await view();
-  ok('보통은 게이지 이름만', /\(국고\)/.test(v.L) && !/더/.test(v.L), v.L);
+  ok('보통도 숫자로', /국고 30 이상 필요 · 지금 25/.test(v.L), v.L);
   await show('T04', { treasury: 40 });
   v = await view();
   ok('조건을 채우면 열림', !/🔒/.test(v.L) && !/🔒/.test(v.R), `${v.L} | ${v.R}`);
@@ -59,7 +62,7 @@ export default async function (t) {
   await t.eval(`__jk.G.run.choices.T04='alt'`);
   await show('T05', { treasury: 60 });
   v = await view();
-  ok('성군은 이유 문장만(단서 없음)', /새 궁궐을 지을 곳간이 모자란다/.test(v.L) && !/\(/.test(v.L), v.L);
+  ok('성군: 앞 사건 조건을 글로', /앞에서 「천도」를 실제 역사대로 해야 열림/.test(v.L), v.L);
   ok('실제 경로가 잠기면 다른 길은 조건 없이 열림(국고 60이라 원래 조건은 안 맞음)', !v.altLocked, v.alt);
   await t.eval(`__jk.G.run.choices.T04='left'`);
   await t.eval(`__jk.G.setDifficulty('normal')`);

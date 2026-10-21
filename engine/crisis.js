@@ -63,6 +63,17 @@
       }
     }
     run.zones = zones;
+    // 판에서 그 게이지가 처음 경고 구간(이상)에 들어가면 화면 가운데 큰 알림 한 번(담임 피드백). 누르면 닫힘
+    if (!quiet && showUI) {
+      run.firstWarned = run.firstWarned || {};
+      for (const k in zones) {
+        const z = zones[k];
+        if (z.level === 'stable' || run.firstWarned[k]) continue;
+        run.firstWarned[k] = true;
+        firstWarn(run, k, z.side);
+        break;
+      }
+    }
     // 세계 반응: 구간 + 지금 벌어진 위기 사건
     const sceneZones = {};
     for (const k in zones) sceneZones[k] = { level: zones[k].level === 'stable' ? 'stable' : RANK[zones[k].level] >= 2 ? 'danger' : 'warn', side: zones[k].side };
@@ -72,6 +83,22 @@
     W.state.edgeTarget = Object.values(zones).some((z) => z.level === 'end') ? 1 : 0;
     return zones;
   };
+
+  const eul = (w) => w + ((w.charCodeAt(w.length - 1) - 0xac00) % 28 ? '을' : '를');
+  function firstWarn(run, k, side) {
+    const el = document.getElementById('warnFirst');
+    if (!el) return;
+    const g = era.gauges.find((x) => x.key === k);
+    const ev = era.data.cards.find((x) => x.kind === 'crisis' && x.level === 'event' && x.gauge === k && x.side === side && x.stages.includes(run.stage));
+    document.getElementById('wfIcon').innerHTML = `<svg viewBox="0 0 24 24">${g.icon}</svg>`;
+    document.getElementById('wfText').textContent = `⚠️ ${g.name} 게이지가 ${side === 'low' ? '낮아졌습니다' : '너무 높아졌습니다'}.`;
+    document.getElementById('wfSub').textContent =
+      `이대로 두면 ${ev ? `「${ev.name}」 같은 ` : ''}위기가 일어날 수 있어요! ${side === 'low' ? `${eul(g.name)} 올리는` : `${eul(g.name)} 낮추는`} 쪽을 골라 보세요.`;
+    el.classList.remove('hide');
+    const close = () => el.classList.add('hide');
+    el.onclick = close;
+    document.getElementById('wfOk').onclick = close;
+  }
 
   /* ---------- 예고 카드 (10-8-2) ---------- */
   // 안정 → 경고로 처음 들어간 게이지·방향에 예고 카드. 안정으로 돌아가야 다시 나온다. 왕당 최대 4장(새싹 5)

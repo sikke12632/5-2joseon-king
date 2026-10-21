@@ -178,6 +178,14 @@
     $('#title').classList.remove('gone');
     paintTitle();
   };
+  // 처음 위기 알림창은 Enter·Space·Esc로도 닫힌다
+  window.addEventListener('keydown', (e) => {
+    const w = document.getElementById('warnFirst');
+    if (w && !w.classList.contains('hide') && ['Enter', ' ', 'Escape'].includes(e.key)) {
+      w.classList.add('hide');
+      e.preventDefault();
+    }
+  });
   UI.setStage = function (st) {
     $('#stageSeal').textContent = st.seal;
     $('#stageName').textContent = `${st.king} · ${st.title}`;

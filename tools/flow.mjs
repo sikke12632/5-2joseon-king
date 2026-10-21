@@ -27,7 +27,10 @@ export default async function (t) {
     if (st !== 'play') break;
     const info = await t.eval("(()=>{const r=__jk.G.run;return (r.pending?'[기록]':r.deck[r.pos])+' '+JSON.stringify(r.vals)})()");
     if (n === 3 && OUT) await t.shot(OUT + '/p0-1-카드.png');
-    const dir = (PAT[i++] || 'R') === 'R' ? 1 : -1;
+    // 처음 위기 알림창은 눌러 닫는다
+    await t.eval(`(()=>{const w=document.querySelector('#warnFirst');if(w&&!w.classList.contains('hide')){console.log('처음 위기 알림: '+document.querySelector('#wfText').textContent);w.click();}})()`);
+    let dir = (PAT[i++] || 'R') === 'R' ? 1 : -1;
+    if (await t.eval(`JK.Cards.isLocked(${dir})`)) dir = -dir; // 잠긴 쪽이면 반대쪽
     await swipe(dir);
     console.log(n, dir > 0 ? 'R' : 'L', info);
     await t.sleep(400);

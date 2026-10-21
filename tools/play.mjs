@@ -7,7 +7,7 @@ const FORCE = Object.fromEntries((process.env.FORCE || '').split(',').filter(Boo
 export const options = { width: Number(process.env.W || 1366), height: Number(process.env.H || 768) };
 export default async function (t) {
   const key = async (k) => {
-    const code = k === 'R' ? ['ArrowRight', 39] : ['ArrowLeft', 37];
+    const code = k === 'R' ? ['ArrowRight', 39] : k === 'U' ? ['ArrowUp', 38] : ['ArrowLeft', 37];
     await t.send('Input.dispatchKeyEvent', { type: 'keyDown', key: code[0], code: code[0], windowsVirtualKeyCode: code[1] });
     await t.send('Input.dispatchKeyEvent', { type: 'keyUp', key: code[0], code: code[0], windowsVirtualKeyCode: code[1] });
   };
@@ -21,6 +21,8 @@ export default async function (t) {
   await t.sleep(2500);
   console.log('덱', await t.eval("__jk.G.run.deck.join(' ')"));
   const ready = "__jk.G.state !== 'play' || (JK.Cards.isReady() && getComputedStyle(document.querySelector('#card')).opacity > 0.95)";
+  const warned = [], locks = [];
+  let numShot = false;
   for (let n = 0; n < 80; n++) {
     await t.waitFor(ready, 20000);
     if ((await t.eval('__jk.G.state')) !== 'play') break;
@@ -31,13 +33,36 @@ export default async function (t) {
       const cost=(fx)=>{let m=0;for(const k in r.vals){const v=r.vals[k]+(fx[k]||0);m=Math.max(m,Math.abs(v-50));}return m;};
       return cost(c.choices.right.effects)<=cost(c.choices.left.effects)?'R':'L';})()`);
     if (SHOTS.includes(cur + '-card') && OUT) await t.shot(`${OUT}/${cur}-card.png`);
-    await key(dir);
-    console.log(n, cur, dir, await t.eval('JSON.stringify(__jk.G.run.vals)'));
+    // 처음 위기 알림창은 눌러 닫는다(몇 번 떴는지 센다)
+    if (await t.eval(`!document.querySelector('#warnFirst').classList.contains('hide')`)) {
+      warned.push(await t.eval(`document.querySelector('#wfText').textContent`));
+      if (SHOTS.includes('warn') && OUT && warned.length === 1) await t.shot(`${OUT}/warn-first.png`);
+      await t.eval(`document.querySelector('#warnFirst').click()`);
+      await t.sleep(200);
+    }
+    // 잠긴 쪽이면 다른 쪽, 둘 다 잠기면 다른 길(↑)
+    let d = dir;
+    if (await t.eval(`JK.Cards.isLocked(${dir === 'R' ? 1 : -1})`)) {
+      locks.push(cur + ':' + (await t.eval(`document.querySelector('#chance').textContent`)));
+      if (SHOTS.includes('lock') && OUT && locks.length === 1) await t.shot(`${OUT}/lock-card.png`);
+      d = (await t.eval(`JK.Cards.isLocked(${dir === 'R' ? -1 : 1})`)) ? 'U' : dir === 'R' ? 'L' : 'R';
+    }
+    await key(d);
+    if (SHOTS.includes('num') && OUT && !numShot && cur !== '기록') {
+      await t.sleep(450);
+      if (await t.eval(`!!document.querySelector('.g-num')`)) {
+        numShot = true;
+        await t.shot(`${OUT}/result-numbers.png`);
+      }
+    }
+    console.log(n, cur, d, await t.eval('JSON.stringify(__jk.G.run.vals)'));
     if (SHOTS.includes(cur) && OUT) {
       await t.sleep(Number(process.env.SHOT_DELAY || 2600));
       await t.shot(`${OUT}/${cur}.png`);
     }
   }
+  console.log('처음 위기 알림:', warned.length ? warned.join(' / ') : '없음');
+  console.log('잠긴 선택지:', locks.length ? locks.join(' / ') : '없음');
   console.log('상태', await t.eval('__jk.G.state'), '| 지은 것', await t.eval("__jk.G.run.built.join(',')"), '| 상태', await t.eval('JSON.stringify(__jk.G.run.states)'));
   if (process.env.QUIZ !== '0') {
     // 비교 화면(10-10-5) → 퀴즈

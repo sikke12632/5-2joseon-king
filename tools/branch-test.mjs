@@ -13,6 +13,7 @@ export default async function (t) {
   const show = async (id, vals) => {
     await ready();
     await setVals(vals);
+    await t.eval(`document.querySelector('#warnFirst').classList.add('hide')`); // 처음 위기 알림창은 닫고
     await t.eval(`__jk.G.debugInsert('${id}')`);
     await t.waitFor(`JK.Cards.isReady() && __jk.G.run.deck[__jk.G.run.pos]==='${id}' && !__jk.G.run.pending`, 8000);
     await t.sleep(300);

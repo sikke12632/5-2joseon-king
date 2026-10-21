@@ -370,16 +370,21 @@
   function pathView(run, c) {
     const real = c.paths.real || {};
     const lock = {};
+    const flavor = {};
     for (const sk of ['right', 'left']) {
       const L = real['lock_' + sk];
-      if (L && JK.Cond.test(L.when, cctx(run))) lock[sk] = L.reason || '지금은 고를 수 없다';
+      if (L && JK.Cond.test(L.when, cctx(run))) {
+        lock[sk] = needText(run, L.when, true) || L.reason || '지금은 고를 수 없다';
+        flavor[sk] = L.reason || '';
+      }
     }
     // 난이도별 실제 경로 요구(10-11-2): 못 채우면 좌우 두 버튼이 함께 잠기고, 다른 길은 조건 없이 열린다
     const need = real.require && real.require[G.diffId()];
     const realShut = !!need && !JK.Cond.test(need, cctx(run));
     if (realShut) {
-      const why = (real.require_reason || '지금은 실제 역사대로 갈 수 없다') + needHint(run, need);
-      lock.right = lock.left = why;
+      // 숫자 조건을 크게, 분위기 문장(require_reason)은 그 밑에 작게
+      lock.right = lock.left = needText(run, need) || real.require_reason || '지금은 실제 역사대로 갈 수 없다';
+      flavor.right = flavor.left = real.require_reason || '';
     }
     const alts = c.paths.alt || [];
     let ai = realShut ? 0 : alts.findIndex((a) => JK.Cond.test(a.unlock, cctx(run)));
@@ -393,10 +398,64 @@
       delete lock[size('right') <= size('left') ? 'right' : 'left'];
     }
     run.shownAlt = a ? { card: c.id, idx: ai, open } : null;
-    const out = { lock, need: realShut ? missingGauges(run, need) : [] };
-    if (a) out.alt = { label: a.label, locked: !open, reason: open ? '' : full ? branchCfg().fullReason || '이미 나라가 많이 흔들렸다' : a.lock_reason || '' };
+    const out = { lock, flavor, need: realShut ? missingGauges(run, need) : [] };
+    if (a) {
+      const fullWhy = `${branchCfg().fullReason || '이미 나라가 많이 흔들렸다'} (한 왕에 다른 길은 ${branchCfg().maxPerStage || 3}번까지)`;
+      out.alt = { label: a.label, locked: !open, reason: open ? '' : full ? fullWhy : needText(run, a.unlock) || a.lock_reason || '', flavor: open || full ? '' : a.lock_reason || '' };
+    }
     if (a && open) out.fxAlt = ((s) => s)(Object.fromEntries(Object.entries(a.effects || {}).map(([k, x]) => [k, G.effect(k, x, run.vals)])));
     return out;
+  }
+  // 잠긴 조건을 글로(담임 피드백): "양반 35 이상 필요 · 지금 22", 플래그는 "앞에서 「…」을 … 해야 열림"
+  //  expr: 조건 식(참이어야 열림). invert: 잠김 식(참이면 잠김 — 단순 비교 하나만 뒤집는다)
+  const OPW = { '>=': '이상', '<=': '이하', '>': '초과', '<': '미만' };
+  const OPINV = { '<': '>=', '<=': '>', '>': '<=', '>=': '<' };
+  const josa = (w, a, b) => w + ((w.charCodeAt(w.length - 1) - 0xac00) % 28 ? a : b);
+  function needText(run, expr, invert) {
+    const gname = (k) => (era.gauges.find((g) => g.key === k) || {}).name || k;
+    const altLabel = (f) => {
+      for (const c of era.data.cards) for (const a of (c.paths && c.paths.alt) || []) if (a.set_flag === f) return a.label;
+      return f.replace(/^F_/, '');
+    };
+    const alts = [];
+    for (const alt of String(expr).split('||')) {
+      const g = [],
+        cur = [],
+        other = [];
+      for (let t of alt.split('&&')) {
+        t = t.trim();
+        if (/^\(.*\)$/.test(t) && !/^\w+\(/.test(t)) t = t.slice(1, -1).trim();
+        let m = t.match(/^gauge\((\w+)\)\s*(>=|<=|>|<)\s*(\d+)$/);
+        if (m) {
+          const op = invert ? OPINV[m[2]] : m[2];
+          const v = run.vals[m[1]],
+            n = +m[3];
+          const met = { '>=': v >= n, '<=': v <= n, '>': v > n, '<': v < n }[op];
+          // 이미 채운 조건은 빼고 모자란 것만 보여 준다
+          if (!met) {
+            g.push(`${gname(m[1])} ${m[3]} ${OPW[op]}`);
+            cur.push([m[1], v]);
+          }
+          continue;
+        }
+        if ((m = t.match(/^real\((\w+)\)$/)) && !JK.Cond.test(t, cctx(run))) {
+          const ev = (cardsById[m[1]] || {}).event || m[1];
+          other.push(`앞에서 「${ev}」${josa(ev, '을', '를').slice(-1)} 실제 역사대로 해야 열림`);
+          continue;
+        }
+        if ((m = t.match(/^(!?)flag\((\S+)\)$/)) && !JK.Cond.test(t, cctx(run))) {
+          const l = altLabel(m[2]);
+          other.push(m[1] ? `앞에서 「${l}」${josa(l, '을', '를').slice(-1)} 고르지 않은 판에서만` : `앞에서 「${l}」${josa(l, '을', '를').slice(-1)} 골라야 열림`);
+        }
+      }
+      let s = '';
+      if (g.length) {
+        s = `${g.join(' + ')} 필요 · 지금 ` + (cur.length === 1 ? cur[0][1] : cur.map(([k, v]) => `${gname(k)} ${v}`).join(', '));
+      }
+      if (other.length) s += (s ? ' · ' : '') + other.join(' · ');
+      if (s) alts.push(s);
+    }
+    return alts.join(' 또는 ');
   }
   // 잠긴 이유에 붙는 단서(10-11-5): 새싹 "국고 8 더" / 보통 "(국고)" / 성군·실록 없음
   function missingGauges(run, expr) {
@@ -540,8 +599,10 @@
       for (const k in sideEff.effects || {}) {
         if (!(k in run.vals)) continue;
         const d = G.effect(k, sideEff.effects[k], run.vals);
-        applied[k] = d;
-        run.vals[k] = JK.clamp(run.vals[k] + d, 0, 100);
+        // 화면에 띄우는 숫자는 실제로 움직인 만큼(0·100에서 멈춘 만큼은 빼고)
+        const nv = JK.clamp(run.vals[k] + d, 0, 100);
+        applied[k] = nv - run.vals[k];
+        run.vals[k] = nv;
         big = Math.max(big, Math.abs(d));
       }
       for (const k in run.vals) if (run.vals[k] <= 10 || run.vals[k] >= 90) run.stageStats.edge = true;
