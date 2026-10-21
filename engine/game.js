@@ -814,7 +814,7 @@
     if (c.kind === 'crisis' && c.level !== 'warn' && side) {
       cres = JK.Crisis.resolve(run, c, sideKey, Object.assign({}, run.vals), JK.rng((run.stageSeed + run.pos * 131 + (run.stats.fallsRun || 0) * 7 + 99) >>> 0));
       const at = c.side === 'low' ? 0 : 100;
-      const frec = era.data.falls.find((f) => f.gauge === c.gauge && f.at === at);
+      const frec = era.data.falls.find((f) => f.gauge === c.gauge && f.at === at) || era.data.falls.find((f) => f.gauge === c.gauge);
       S.addCrisis(cres, frec ? frec.id : c.gauge + at);
       Cards.gaugeMark(null);
       if (cres.fell) {
@@ -897,6 +897,7 @@
       if (cres) {
         run.eventScene = null;
         JK.Crisis.afterHeld(run, c);
+        refreshMeters();
         Cards.setGauges(run.vals);
         W.state.people = run.vals.people;
         W.camTo(W.CAM_PLAY, 1.6);
@@ -1032,14 +1033,23 @@
   function applyDevice(run, dv) {
     const cfg = devCfg(run);
     if (!cfg) return;
-    const v = dv[cfg.key];
-    if (!v) return;
     const before = run.device[cfg.key] || 0;
-    run.device[cfg.key] = JK.clamp(before + v, 0, cfg.max);
+    let v = dv[cfg.key] || 0;
+    // 붕당 저울(설계서 2-4): scaleToward 가운데로 N칸 · scaleAway 지금 기운 쪽으로 N칸 더(가운데면 그대로)
+    if (dv.scaleToward) v += -Math.sign(before) * Math.min(Math.abs(before), dv.scaleToward);
+    if (dv.scaleAway) v += Math.sign(before) * dv.scaleAway;
+    if (!v) return;
+    run.device[cfg.key] = JK.clamp(before + v, cfg.min || 0, cfg.max);
     if (run.device[cfg.key] === before) return;
     setTimeout(() => JK.UI.setDevice(cfg, run.device, false, run.device[cfg.key] - before), 500);
     if (cfg.title && run.device[cfg.key] >= cfg.max) titleNow([cfg.title]);
   }
+  // 시험용: 장치 효과를 바로 넣고 새 값을 돌려준다(yeongjo-test)
+  G.debugDevice = function (dv) {
+    applyDevice(G.run, dv);
+    const cfg = devCfg(G.run);
+    return cfg ? G.run.device[cfg.key] : null;
+  };
   G.deviceTriggers = function (run) {
     const cfg = devCfg(run || G.run);
     if (!cfg) return [];
@@ -1152,7 +1162,7 @@
     W.state.inkTarget = 1;
     W.camTo({ dist: 37, el: 0.5 }, 3.5);
     if (JK.Audio) JK.Audio.gong();
-    const rec = era.data.falls.find((f) => f.gauge === key && f.at === at) || { id: key + at, name: '실각', text: '' };
+    const rec = era.data.falls.find((f) => f.gauge === key && f.at === at) || era.data.falls.find((f) => f.gauge === key) || { id: key + at, name: '실각', text: '' };
     if (!preview) {
       S.addFall(rec.id);
       S.saveMeta();
@@ -1164,12 +1174,13 @@
     }
     const st = stageOf(run.stage);
     const D = G.diff();
-    const g = era.gauges.find((x) => x.key === key);
+    const g = JK.Crisis.gaugeOf(key);
     // 사관의 귀띔(10-7): 새싹은 자세히, 보통은 게이지 이름만
     let hint = '';
     // 받침에 따라 을/를
     const eul = (w) => w + ((w.charCodeAt(w.length - 1) - 0xac00) % 28 ? '을' : '를');
-    if (D.hint === 'full') hint = `사관의 귀띔: ${g.name} 게이지를 지켜 보세요. ${g.name}에 점이 빛나는 카드에서 ${eul(g.name)} ${at === 0 ? '아끼는' : '덜 올리는'} 쪽을 골라 보면 어떨까요?`;
+    if (JK.Crisis.isVirtual(key)) hint = D.hint === 'none' ? '' : `사관의 귀띔: ${g.name}을 지켜 보세요. 한쪽 붕당 편만 들지 말고, 고루 뽑는 쪽을 골라 보면 어떨까요?`;
+    else if (D.hint === 'full') hint = `사관의 귀띔: ${g.name} 게이지를 지켜 보세요. ${g.name}에 점이 빛나는 카드에서 ${eul(g.name)} ${at === 0 ? '아끼는' : '덜 올리는'} 쪽을 골라 보면 어떨까요?`;
     else if (D.hint === 'gauge') hint = `사관의 귀띔: ${g.name} 게이지를 지켜 보세요.`;
     const again = '이 왕의 처음부터 다시!';
     const t0 = performance.now();
@@ -1261,6 +1272,8 @@
     const branch = brDone[0] || null;
     if (branch) got.push('branch:' + branch.id);
     if (brDone.length >= 2) got.push('branch:two');
+    // 붕당 저울을 ±2 안으로 지켜 끝냄(설계서 2-4) → 「흔들림 없는 저울」
+    if (st.device && st.device.steadyTitle && Math.abs((run.device || {})[st.device.key] || 0) <= 2) got.push(st.device.steadyTitle);
     W.setTOD(Math.min(1, st.tod[1] + 0.06));
     const qs = pickQuiz(st.id, run.stageSeed);
     // 나의 역사 vs 실제 역사(10-10-5): 퀴즈 바로 앞. 기록관에도 남긴다

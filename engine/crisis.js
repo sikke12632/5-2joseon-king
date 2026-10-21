@@ -24,6 +24,26 @@
   const dId = () => JK.Game.diffId();
   const byDiff = (o, fallback) => (o && typeof o === 'object' ? (o[dId()] !== undefined ? o[dId()] : o.normal !== undefined ? o.normal : fallback) : o !== undefined ? o : fallback);
 
+  /* ---------- 가상 게이지: 왕별 장치를 위기 게이지처럼 (영조·정조 붕당 저울) ---------- */
+  // 저울 s(−5~+5) → 값 50+10s. 구간은 칸 수로: |3| 경고 · |4| 위험 · |5| 끝(벼랑 없음, 설계서 10-8). 위기 카드 gauge 'faction'
+  const VIRTUAL = { faction: true };
+  C.virtual = function (run) {
+    const st = run && (era.stages || []).find((x) => x.id === run.stage);
+    const d = st && st.device;
+    if (!d || !d.signed) return {};
+    return { faction: 50 + 10 * ((run.device || {})[d.key] || 0) };
+  };
+  C.isVirtual = (k) => !!VIRTUAL[k];
+  C.gaugeOf = (k) => era.gauges.find((x) => x.key === k) || (era.virtualGauges || []).find((x) => x.key === k) || { key: k, name: k, icon: '' };
+  const allVals = (run, vals) => Object.assign({}, C.virtual(run), vals || run.vals);
+  function zoneFor(k, v) {
+    if (!VIRTUAL[k]) return C.zoneOf(v);
+    const a = Math.round(Math.abs(v - 50) / 10);
+    const level = a >= 5 ? 'end' : a >= 4 ? 'danger' : a >= 3 ? 'warn' : 'stable';
+    return { level, side: level === 'stable' ? null : v < 50 ? 'low' : 'high', d: 50 - Math.abs(v - 50) };
+  }
+  C.zoneFor = zoneFor;
+
   /* ---------- 구간 (10-8-1) ---------- */
   C.zoneOf = function (v) {
     const Z = byDiff(cfg().zones, { stable: 26, warn: 16 });
@@ -38,13 +58,13 @@
   };
   C.zones = function (vals) {
     const out = {};
-    for (const k in vals) out[k] = C.zoneOf(vals[k]);
+    for (const k in vals) out[k] = zoneFor(k, vals[k]);
     return out;
   };
 
   /* ---------- 눈에 보이는 경고 + 세계 반응 (10-8-4) ---------- */
   C.apply = function (run, quiet) {
-    const zones = C.zones(run.vals);
+    const zones = C.zones(allVals(run));
     const D = JK.Game.diff();
     const showUI = D.warn !== 0; // 실록 도전은 아이콘 경고를 숨긴다(10-7)
     Cards.setZones(showUI ? zones : {}, run.followups || [], run.cooldown || {});
@@ -54,8 +74,13 @@
         const z = zones[k],
           p = prev[k] || { level: 'stable' };
         if (z.level !== 'stable' && (RANK[z.level] > RANK[p.level] || z.side !== p.side)) {
-          const g = era.gauges.find((x) => x.key === k);
+          const g = C.gaugeOf(k);
           const a = ((cfg().alerts || {})[k] || {})[z.side] || {};
+          if (VIRTUAL[k]) {
+            // 가상 게이지(붕당 저울)는 아이콘이 없으니 글 알림만
+            Cards.toast(a[z.level] || a.danger || a.warn || `⚖️ ${g.name}이 ${(g.sides || {})[z.side] || '한'} 쪽으로 크게 기울었어요!`, 2800);
+            break;
+          }
           const text = a[z.level] || a.danger || a.warn || `${g.name} 게이지가 ${z.side === 'low' ? '바닥나' : '넘쳐'} 가고 있어요!`;
           Cards.alert(g, text, RANK[z.level] >= 2 ? 'danger' : 'warn');
           break;
@@ -68,7 +93,7 @@
       run.firstWarned = run.firstWarned || {};
       for (const k in zones) {
         const z = zones[k];
-        if (z.level === 'stable' || run.firstWarned[k]) continue;
+        if (z.level === 'stable' || run.firstWarned[k] || VIRTUAL[k]) continue;
         run.firstWarned[k] = true;
         firstWarn(run, k, z.side);
         break;
@@ -131,7 +156,7 @@
   /* ---------- 위기 사건 굴림 (10-8-3 ①) ---------- */
   // 카드를 넘긴 뒤 부른다. 다음 자리에 끼워 넣을 카드 id(없으면 null)
   C.pick = function (run, rnd, prevZones) {
-    const zones = run.zones || C.zones(run.vals);
+    const zones = run.zones || C.zones(allVals(run));
     // 같은 위기의 쉬는 장수 줄이기. 끝났을 때 문제 게이지가 아직 거리 15 이하이면 후속 위기를 바로 다음 카드에(10-8-3 ⑤)
     run.followups = run.followups || [];
     run.pendingFollow = run.pendingFollow || {};
@@ -195,7 +220,7 @@
   // card: 위기·후속 카드, sideKey: 'right'(강한 대응) | 'left'(가벼운 대응), vals: 고르기 전 게이지
   C.fallChance = function (card, sideKey, vals) {
     const F = cfg().fall || {};
-    const z = C.zoneOf(vals[card.gauge]);
+    const z = zoneFor(card.gauge, allVals(JK.Game.run, vals)[card.gauge]);
     const base = (F.base || {})[z.level] || 0;
     const side = card.choices[sideKey];
     const strong = sideKey === (card.strong || 'right');
@@ -232,7 +257,9 @@
     const r = C.fallChance(card, sideKey, vals0);
     const fell = rnd() < r.p;
     if (card.level === 'followup') run.followups = (run.followups || []).filter((f) => f.gauge !== card.gauge);
-    const rec = { card: card.id, name: card.name || card.who.name, gauge: card.gauge, side: card.side, value: vals0[card.gauge], choice: card.choices[sideKey].label, p: r.p, level: r.level, stage: run.stage };
+    const v0 = allVals(run, vals0)[card.gauge];
+    // 가상 게이지는 장치 값(저울 칸)으로 적는다
+    const rec = { card: card.id, name: card.name || card.who.name, gauge: card.gauge, side: card.side, value: VIRTUAL[card.gauge] ? Math.round((v0 - 50) / 10) : v0, choice: card.choices[sideKey].label, p: r.p, level: r.level, stage: run.stage };
     run.crisisLog = (run.crisisLog || []).concat(Object.assign({ fell }, rec));
     if (fell) return Object.assign({ fell: true }, rec);
     // 수습: 같은 위기의 쉬는 장수(후속을 수습했으면 +2), 손상(위험 이하에서 수습하면)
@@ -247,9 +274,16 @@
   // 효과가 들어간 뒤 부른다: ① 문제 게이지를 최소 거리 8까지(10-8-3 ⑤-1) ② 쉬는 장수가 끝나면 볼 후속 위기를 걸어 둔다
   C.afterHeld = function (run, card) {
     const min = cfg().minAfterHeld || 0;
-    const v = run.vals[card.gauge];
-    if (card.side === 'low' && v < min) run.vals[card.gauge] = min;
-    if (card.side === 'high' && v > 100 - min) run.vals[card.gauge] = 100 - min;
+    if (VIRTUAL[card.gauge]) {
+      // 붕당 저울: 수습하면 적어도 3칸 안으로(위험 구간 밖)
+      const st = (era.stages || []).find((x) => x.id === run.stage) || {};
+      const key = (st.device || {}).key;
+      if (key && Math.abs(run.device[key] || 0) > 3) run.device[key] = Math.sign(run.device[key]) * 3;
+    } else {
+      const v = run.vals[card.gauge];
+      if (card.side === 'low' && v < min) run.vals[card.gauge] = min;
+      if (card.side === 'high' && v > 100 - min) run.vals[card.gauge] = 100 - min;
+    }
     const step = card.level === 'followup' ? (card.step || 2) + 1 : 2;
     const next = era.data.cards.find((x) => x.kind === 'crisis' && x.level === 'followup' && x.gauge === card.gauge && x.side === card.side && x.stages.includes(run.stage));
     run.pendingFollow = run.pendingFollow || {};

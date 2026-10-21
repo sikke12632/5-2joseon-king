@@ -90,6 +90,10 @@
       hak2: { x: -4.7, z: 0.2, hw: 0.4, hd: 0.26, h: 0.02 },
       hak3: { x: 1.1, z: 4.3, hw: 0.4, hd: 0.26, h: 0.02 },
       hak4: { x: -1.7, z: -0.55, hw: 0.4, hd: 0.26, h: 0.02 },
+      // 영조·정조 생활 건물 자리(마을 집이 덮지 않게)
+      sechaek: { x: 2.9, z: 2.4, hw: 0.26, hd: 0.18, h: 0.02 },
+      talnori: { x: 2.3, z: 4.9, hw: 0.45, hd: 0.45, h: 0.01 },
+      brickHouse: { x: 5.75, z: 2.25, hw: 0.25, hd: 0.18, h: 0.02 },
     },
     // 게이지 위기 때 사람이 모이고 연기가 오르는 자리(이름 없음)
     crisis: {
@@ -179,6 +183,18 @@
       jongmyoRuin: { kind: 'single', name: '', model: 'jongmyoRuin', at: { site: 'jongmyo' }, label: 0, shadowR: [1.4, 0.9] },
       namhansan: { kind: 'single', name: '남한산성', model: 'namhansan', at: { x: 6.75, z: 5.5 }, rot: -0.6, label: 1.2, shadowR: [0.9, 0.7] },
       samjeondo: { kind: 'single', name: '삼전도비', model: 'samjeondo', at: { riverPhi: 1.0 }, label: 0.7, shadowR: [0.25, 0.2] },
+      // 영조·정조(설계서 2-4): 탕평비는 성균관 앞 · 규장각은 경복궁 터 동쪽 궁궐 숲(창덕궁 쪽) · 좌판은 종로 큰길가 · 화성은 도성 밖 서남쪽 언덕(수원 쪽)
+      //  배다리는 한강을 가로질러 · 장시 천막은 성 밖 들판 고을 셋 · 세책점·벽돌집·탈놀이 마당은 마을 안
+      tangpyeong: { kind: 'single', name: '탕평비', model: 'tangpyeong', at: { x: 4.0, z: -3.45 }, label: 0.55, shadowR: [0.15, 0.1] },
+      gyujang: { kind: 'single', name: '규장각', model: 'gyujang', at: { x: 2.55, z: -5.15 }, rot: 0.15, label: 0.65, shadowR: [0.45, 0.3] },
+      jwapan: { kind: 'spots', name: '좌판', model: 'jwapan', points: [[-1.7, 1.78], [-0.75, 1.75], [1.0, 1.62], [2.05, 1.52], [3.05, 1.42]], label: 0.4 },
+      hwaseong: { kind: 'single', name: '수원 화성', model: 'hwaseong', at: { x: -7.9, z: 1.75 }, rot: 0.4, label: 0.9, shadowR: [0.9, 0.7] },
+      geojunggi: { kind: 'single', name: '거중기', model: 'geojunggi', at: { x: -6.75, z: 2.55 }, rot: 0.4, label: 0.6, shadowR: [0.18, 0.12] },
+      baedari: { kind: 'single', name: '배다리', model: 'baedari', at: { riverPhi: 1.62 }, label: 0.4, shadowR: [0, 0], y: 0.0 },
+      jangsi: { kind: 'spots', name: '장시', model: 'jangsi', points: [[6.05, 2.95], [-6.4, -0.9], [1.7, 5.4]], label: 0.4 },
+      sechaek: { kind: 'single', name: '세책점', model: 'sechaek', at: { site: 'sechaek' }, label: 0.45, shadowR: [0.2, 0.12] },
+      talnori: { kind: 'single', name: '탈놀이 마당', model: 'talnori', at: { site: 'talnori' }, label: 0.4, shadowR: [0, 0] },
+      brickHouse: { kind: 'single', name: '벽돌집', model: 'brickHouse', at: { site: 'brickHouse' }, rot: -0.3, label: 0.4, shadowR: [0.2, 0.12] },
       // 초가 마을은 이름 없는 장식 무리(연출표 7-1): 처음 몇 채에서 카드마다 조금씩 늘어난다
       choga: { kind: 'village', name: '', grow: 2, model: 'choga', max: 40, focus: [-1.5, 2.6], extra: [[-4.6, 7.0], [-5.6, 6.2], [-1.2, 7.4], [0.6, 7.3], [-7.8, 1.4], [-7.6, 0.3]] },
       giwa: { kind: 'village', name: '기와집 마을', model: 'giwa', max: 30, focus: [1.0, 0.8] },

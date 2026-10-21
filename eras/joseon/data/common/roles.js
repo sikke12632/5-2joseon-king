@@ -49,6 +49,13 @@
     yisunsin: { name: '이순신', tag: '장수', cloth: '#3a4a5e', trim: '#c99a2e', hat: 'helmet', items: ['armor', 'bow'], bg: '#bcd0e0' },
     gwakjaewoo: { name: '곽재우', tag: '의병장', cloth: '#b23b30', trim: '#3a2a20', hat: 'gat', items: ['belt'], bg: '#ecd0c0' },
     qing: { name: '청 사신', tag: '이웃', cloth: '#6a5a3a', trim: '#2a2a2a', hat: 'furhat', items: ['furcoat'], bg: '#dcd2c0' },
+    // 영조·정조(설계서 2-4·7-3): 왕 둘은 익선관·곤룡포(색만 조금 다르게) · 두 붕당은 관복 색과 배경색으로만(게임 장치, 실제 이름 없음)
+    yeongjo: { name: '영조', tag: '임금', cloth: '#c3322c', trim: '#e2b64c', hat: 'ikseongwan', items: ['bo', 'okdae'], bg: '#f0d8a8' },
+    jeongjo: { name: '정조', tag: '임금', cloth: '#b8342e', trim: '#d8b64e', hat: 'ikseongwan', items: ['bo', 'okdae'], bg: '#e8dcc0' },
+    party_blue: { name: '푸른 붕당 대신', tag: '관리', cloth: '#2f5d9a', trim: '#26303e', hat: 'samo', items: ['gakdae', 'hol'], bg: '#b8cfee' },
+    party_red: { name: '붉은 붕당 대신', tag: '관리', cloth: '#a8343a', trim: '#26303e', hat: 'samo', items: ['gakdae', 'hol'], bg: '#f0c4c0' },
+    jeongyakyong: { name: '정약용', tag: '학자', cloth: '#3f6a5a', trim: '#26303e', hat: 'samo', items: ['gakdae', 'book'], bg: '#cfe2d6' },
+    mandeok: { name: '김만덕', tag: '상인', cloth: '#c98a5a', trim: '#6a3a2a', hat: 'bun', items: ['bundle'], bg: '#f2dcc4' },
     jangyeongsil: { name: '장영실', tag: '장인', cloth: '#d2c4a4', trim: '#7a5a38', hat: 'paeraengi', items: ['belt', 'hammer'], bg: '#cfe0d6' },
   });
 })();

@@ -1032,6 +1032,53 @@
   }
  },
  {
+  "id": "D021",
+  "kind": "daily",
+  "stages": [
+   "yeongjo",
+   "gojong"
+  ],
+  "rarity": "common",
+  "who": {
+   "name": "어느 집안 어른",
+   "doll": "yangban"
+  },
+  "line": "재산을 맏아들에게 몰아주겠다는 집안이 늘었사옵니다.",
+  "choice_type": "free",
+  "choices": {
+   "right": {
+    "label": "맏아들에게 준다",
+    "effects": {
+     "nobles": 10,
+     "people": -5
+    },
+    "this_run": "집안의 큰일은 맏아들이 맡게 되었다."
+   },
+   "left": {
+    "label": "고르게 나눈다",
+    "effects": {
+     "people": 5,
+     "nobles": -10
+    },
+    "this_run": "전하는 고르게 나누라 했다."
+   }
+  },
+  "grain": "balance",
+  "out_of_textbook": false,
+  "sources": [
+   {
+    "type": "guide",
+    "page": "286~287",
+    "tb": "99"
+   }
+  ],
+  "sources_text": "지도서 286~287(교과서 99) 조선 후기로 갈수록 남성 중심 질서가 강해짐",
+  "learn": "조선 후기 여성의 삶",
+  "fx": {
+   "note": "사당 앞에 맏아들 인형이 선다."
+  }
+ },
+ {
   "id": "D022",
   "kind": "daily",
   "stages": [
@@ -2080,6 +2127,1576 @@
   }
  },
  {
+  "id": "D050",
+  "kind": "daily",
+  "stages": [
+   "yeongjo"
+  ],
+  "required_in": "yeongjo",
+  "rarity": "common",
+  "who": {
+   "name": "경기도 농민",
+   "doll": "farmer"
+  },
+  "line": "모를 따로 길러 논에 옮겨 심으면, 벼를 거둔 뒤 보리도 심을 수 있다 하옵니다. 널리 알릴까요?",
+  "choice_type": "free",
+  "choices": {
+   "right": {
+    "label": "모내기를 알린다",
+    "effects": {
+     "people": 15,
+     "treasury": -5
+    },
+    "this_run": "벼와 보리를 한 해에 두 번 거두어 곡식이 크게 늘었다."
+   },
+   "left": {
+    "label": "옛 방식을 지킨다",
+    "effects": {
+     "treasury": 5,
+     "people": -10
+    },
+    "this_run": "마을은 옛 방식대로 씨를 뿌렸다."
+   }
+  },
+  "grain": "balance",
+  "out_of_textbook": false,
+  "sources": [
+   {
+    "type": "guide",
+    "page": "283",
+    "tb": "95"
+   }
+  ],
+  "sources_text": "지도서 283(교과서 95) 모내기법·이모작·곡물 생산 증가",
+  "learn": "모내기법과 이모작",
+  "fx": {
+   "note": "논에 줄 맞춘 모가 초록 바둑판처럼 채워진다."
+  }
+ },
+ {
+  "id": "D051",
+  "kind": "daily",
+  "stages": [
+   "yeongjo"
+  ],
+  "required_in": "yeongjo",
+  "rarity": "common",
+  "who": {
+   "name": "호조 관리",
+   "doll": "official_green"
+  },
+  "line": "장터마다 동전으로 값을 치르는 일이 흔해졌사옵니다. 상평통보를 더 찍을까요?",
+  "choice_type": "free",
+  "choices": {
+   "right": {
+    "label": "동전을 찍는다",
+    "effects": {
+     "people": 10,
+     "treasury": -10
+    },
+    "this_run": "장터마다 엽전 소리가 짤랑였다.",
+    "build": [
+     "jangsi"
+    ]
+   },
+   "left": {
+    "label": "찍지 않는다",
+    "effects": {
+     "treasury": 5,
+     "people": -5
+    },
+    "this_run": "쌀과 베로 물건을 바꾸는 일이 여전했다.",
+    "build": [
+     "jangsi"
+    ]
+   }
+  },
+  "grain": "balance",
+  "out_of_textbook": false,
+  "sources": [
+   {
+    "type": "guide",
+    "page": "283",
+    "tb": "95"
+   }
+  ],
+  "sources_text": "지도서 283(교과서 95) 장시·상평통보",
+  "learn": "장시와 상평통보",
+  "fx": {
+   "build": [
+    "jangsi"
+   ],
+   "note": "장시 천막 좌판이 “뽕”, 엽전이 반짝인다."
+  }
+ },
+ {
+  "id": "D052",
+  "kind": "daily",
+  "stages": [
+   "yeongjo"
+  ],
+  "rarity": "common",
+  "who": {
+   "name": "떠돌이 장사꾼",
+   "doll": "merchant"
+  },
+  "line": "이웃 고을 장날이 겹쳐 헷갈리옵니다. 고을마다 장날을 다르게 정해 주소서.",
+  "choice_type": "free",
+  "choices": {
+   "right": {
+    "label": "장날을 나눈다",
+    "effects": {
+     "people": 10,
+     "nobles": -5
+    },
+    "this_run": "2·7일장, 3·8일장… 장사꾼들이 장을 따라 돌았다."
+   },
+   "left": {
+    "label": "그대로 둔다",
+    "effects": {
+     "nobles": 5,
+     "people": -5
+    },
+    "this_run": "장날은 그대로였다."
+   }
+  },
+  "grain": "balance",
+  "out_of_textbook": false,
+  "sources": [
+   {
+    "type": "guide",
+    "page": "283"
+   }
+  ],
+  "sources_text": "지도서 283 참고 자료: 고을마다 5일장, 장날을 달리해 행상이 돌아다님",
+  "learn": "장시",
+  "fx": {
+   "note": "고을 지도에 장날 숫자가 떠오른다."
+  }
+ },
+ {
+  "id": "D053",
+  "kind": "daily",
+  "stages": [
+   "yeongjo"
+  ],
+  "required_in": "yeongjo",
+  "rarity": "common",
+  "who": {
+   "name": "이웃 선비",
+   "doll": "yangban"
+  },
+  "line": "돗자리를 짜서 파는 가난한 양반이 있사옵니다. 양반 체면이 깎인다는 말이 나오옵니다.",
+  "choice_type": "free",
+  "choices": {
+   "right": {
+    "label": "쌀을 보낸다",
+    "effects": {
+     "nobles": 10,
+     "treasury": -10
+    },
+    "this_run": "전하는 쌀을 보내 체면을 세워 주었다."
+   },
+   "left": {
+    "label": "일하게 둔다",
+    "effects": {
+     "people": 5,
+     "treasury": 5,
+     "nobles": -10
+    },
+    "this_run": "전하는 일하는 게 부끄러운 일이 아니라 했다."
+   }
+  },
+  "grain": "complex",
+  "out_of_textbook": false,
+  "sources": [
+   {
+    "type": "guide",
+    "page": "283",
+    "tb": "95"
+   }
+  ],
+  "sources_text": "지도서 283(교과서 95) 김홍도 <자리 짜기>, 가난한 양반",
+  "learn": "신분제의 변화",
+  "fx": {
+   "note": "양반 인형이 사방관을 쓴 채 자리를 짠다."
+  }
+ },
+ {
+  "id": "D054",
+  "kind": "daily",
+  "stages": [
+   "yeongjo"
+  ],
+  "rarity": "common",
+  "who": {
+   "name": "고을 수령",
+   "doll": "official_red"
+  },
+  "line": "돈을 모은 상민이 양반 대접을 받고 싶다 하옵니다.",
+  "choice_type": "free",
+  "choices": {
+   "right": {
+    "label": "대접을 허락한다",
+    "effects": {
+     "people": 10,
+     "nobles": -10
+    },
+    "this_run": "마을에 새 ‘양반’이 생겼다."
+   },
+   "left": {
+    "label": "신분을 지킨다",
+    "effects": {
+     "nobles": 10,
+     "people": -5
+    },
+    "this_run": "전하는 신분은 함부로 바꿀 수 없다 했다."
+   }
+  },
+  "grain": "balance",
+  "out_of_textbook": false,
+  "sources": [
+   {
+    "type": "guide",
+    "page": "283",
+    "tb": "95"
+   }
+  ],
+  "sources_text": "지도서 283(교과서 95) 상민 중 양반이 되는 사람이 많이 생김",
+  "learn": "신분제의 변화",
+  "fx": {
+   "note": "초가가 기와집으로 바뀐다."
+  }
+ },
+ {
+  "id": "D055",
+  "kind": "daily",
+  "stages": [
+   "yeongjo"
+  ],
+  "required_in": "yeongjo",
+  "rarity": "common",
+  "who": {
+   "name": "주변 나라를 다녀온 사신",
+   "doll": "official_red"
+  },
+  "line": "안경, 자명종, 천리경을 가져왔사옵니다. 더 사들일까요?",
+  "choice_type": "free",
+  "choices": {
+   "right": {
+    "label": "더 사들인다",
+    "effects": {
+     "nobles": 10,
+     "army": 5,
+     "treasury": -15
+    },
+    "this_run": "안경을 쓴 대신이 ‘글씨가 또렷하다!’ 외쳤다."
+   },
+   "left": {
+    "label": "구경만 한다",
+    "effects": {
+     "treasury": 10,
+     "nobles": -5
+    },
+    "this_run": "신기한 물건은 구경만 했다."
+   }
+  },
+  "grain": "complex",
+  "out_of_textbook": false,
+  "sources": [
+   {
+    "type": "guide",
+    "page": "284",
+    "tb": "96"
+   }
+  ],
+  "sources_text": "지도서 284(교과서 96) 안경·자명종·천리경",
+  "learn": "새로운 문물의 수용",
+  "fx": {
+   "note": "궁궐 창가에서 자명종이 “땡”, 성벽 위 병사가 천리경을 든다."
+  }
+ },
+ {
+  "id": "D056",
+  "kind": "daily",
+  "stages": [
+   "yeongjo"
+  ],
+  "required_in": "yeongjo",
+  "rarity": "common",
+  "who": {
+   "name": "실학을 공부하는 선비",
+   "doll": "yangban"
+  },
+  "line": "중국이 세상 한가운데가 아닌 세계지도가 들어왔사옵니다. 궁에 걸어 둘까요?",
+  "choice_type": "free",
+  "choices": {
+   "right": {
+    "label": "지도를 건다",
+    "effects": {
+     "people": 5,
+     "nobles": -10
+    },
+    "this_run": "세상에 나라가 이렇게 많았나, 모두 놀랐다."
+   },
+   "left": {
+    "label": "옛 지도를 둔다",
+    "effects": {
+     "nobles": 10,
+     "people": -5
+    },
+    "this_run": "옛 지도가 그대로 걸렸다."
+   }
+  },
+  "grain": "balance",
+  "out_of_textbook": false,
+  "sources": [
+   {
+    "type": "guide",
+    "page": "284~285",
+    "tb": "96~97"
+   }
+  ],
+  "sources_text": "지도서 284~285(교과서 96~97) <곤여만국전도>, 중국 중심 세계관에서 벗어남",
+  "learn": "세계관의 변화",
+  "fx": {
+   "note": "궁궐 벽에 둥근 세계지도가 펼쳐진다."
+  }
+ },
+ {
+  "id": "D057",
+  "kind": "daily",
+  "stages": [
+   "yeongjo"
+  ],
+  "required_in": "yeongjo",
+  "rarity": "common",
+  "who": {
+   "name": "실학자 박지원",
+   "doll": "official_green"
+  },
+  "line": "청에서 본 벽돌집과 잘 닦인 길을 본받아 상공업을 키우소서.",
+  "choice_type": "free",
+  "choices": {
+   "right": {
+    "label": "청을 배운다",
+    "effects": {
+     "treasury": 15,
+     "nobles": -10
+    },
+    "this_run": "벽돌 가마에서 연기가 올랐다.",
+    "build": [
+     "brickHouse"
+    ]
+   },
+   "left": {
+    "label": "우리 것을 지킨다",
+    "effects": {
+     "nobles": 10,
+     "treasury": -5
+    },
+    "this_run": "선비들은 오랑캐 것을 배울 수 없다고 했다.",
+    "build": [
+     "brickHouse"
+    ]
+   }
+  },
+  "grain": "balance",
+  "out_of_textbook": false,
+  "sources": [
+   {
+    "type": "guide",
+    "page": "286",
+    "tb": "98"
+   }
+  ],
+  "sources_text": "지도서 286(교과서 98) 박지원: 청의 문물을 받아들여 상공업 발전",
+  "learn": "실학",
+  "fx": {
+   "build": [
+    "brickHouse"
+   ],
+   "note": "마을 한쪽에 벽돌집 한 채가 “뽕”."
+  }
+ },
+ {
+  "id": "D058",
+  "kind": "daily",
+  "stages": [
+   "yeongjo"
+  ],
+  "rarity": "common",
+  "who": {
+   "name": "실학자 정약용",
+   "doll": "jeongyakyong"
+  },
+  "line": "농민이 자기 땅에서 농사지을 수 있게 해야 하옵니다.",
+  "choice_type": "free",
+  "choices": {
+   "right": {
+    "label": "땅을 나눈다",
+    "effects": {
+     "people": 15,
+     "nobles": -15
+    },
+    "this_run": "농민들 눈이 반짝였다."
+   },
+   "left": {
+    "label": "그대로 둔다",
+    "effects": {
+     "nobles": 10,
+     "people": -10
+    },
+    "this_run": "땅은 땅 주인의 것으로 남았다."
+   }
+  },
+  "grain": "balance",
+  "out_of_textbook": false,
+  "sources": [
+   {
+    "type": "guide",
+    "page": "286",
+    "tb": "98"
+   }
+  ],
+  "sources_text": "지도서 286(교과서 98) 정약용의 주장",
+  "learn": "실학",
+  "fx": {
+   "note": "논두렁마다 작은 이름 팻말이 꽂힌다."
+  }
+ },
+ {
+  "id": "D059",
+  "kind": "daily",
+  "stages": [
+   "yeongjo"
+  ],
+  "required_in": "yeongjo",
+  "rarity": "common",
+  "who": {
+   "name": "천주교를 믿는 선비",
+   "doll": "yangban"
+  },
+  "line": "모든 사람은 평등하다 믿사옵니다. 그래서 제사를 지내지 않겠사옵니다.",
+  "choice_type": "free",
+  "choices": {
+   "right": {
+    "label": "믿음을 둔다",
+    "effects": {
+     "people": 5,
+     "nobles": -15
+    },
+    "this_run": "전하는 믿음은 마음의 일이라 했다."
+   },
+   "left": {
+    "label": "제사를 명한다",
+    "effects": {
+     "nobles": 10,
+     "people": -10
+    },
+    "this_run": "전하는 조상 제사를 지내라 했다."
+   }
+  },
+  "grain": "balance",
+  "out_of_textbook": false,
+  "sources": [
+   {
+    "type": "guide",
+    "page": "285",
+    "tb": "97"
+   }
+  ],
+  "sources_text": "지도서 285(교과서 97) 서학(천주교) · 평등, 제사를 지내지 않음",
+  "learn": "서학의 전래",
+  "fx": {
+   "note": "작은 초가 안에 촛불 하나."
+  }
+ },
+ {
+  "id": "D060",
+  "kind": "daily",
+  "stages": [
+   "yeongjo"
+  ],
+  "rarity": "common",
+  "who": {
+   "name": "성리학자 임윤지당의 오빠",
+   "doll": "official_blue"
+  },
+  "line": "누이가 쓴 성리학 글을 책으로 묶고 싶사옵니다.",
+  "choice_type": "free",
+  "choices": {
+   "right": {
+    "label": "책을 묶게 한다",
+    "effects": {
+     "people": 5,
+     "nobles": -5
+    },
+    "this_run": "‘여성과 남성의 타고난 성품은 다르지 않다’는 글이 남았다."
+   },
+   "left": {
+    "label": "상자에 둔다",
+    "effects": {
+     "nobles": 5,
+     "people": -5
+    },
+    "this_run": "글은 집 안 상자에 담겼다."
+   }
+  },
+  "grain": "balance",
+  "out_of_textbook": false,
+  "sources": [
+   {
+    "type": "guide",
+    "page": "286~287",
+    "tb": "99"
+   }
+  ],
+  "sources_text": "지도서 286~287(교과서 99) 임윤지당",
+  "learn": "조선 후기 여성",
+  "fx": {
+   "note": "기와집 사랑방에 책 한 권이 놓인다."
+  }
+ },
+ {
+  "id": "D061",
+  "kind": "daily",
+  "stages": [
+   "yeongjo"
+  ],
+  "required_in": "yeongjo",
+  "rarity": "common",
+  "who": {
+   "name": "세책점 주인",
+   "doll": "official_red"
+  },
+  "line": "돈을 받고 소설책을 빌려주는 가게가 늘었사옵니다. 《춘향전》을 빌리려 줄을 선다 하옵니다.",
+  "choice_type": "free",
+  "choices": {
+   "right": {
+    "label": "가게를 둔다",
+    "effects": {
+     "people": 10,
+     "nobles": -5
+    },
+    "this_run": "세책점 앞이 북적였다.",
+    "build": [
+     "sechaek"
+    ]
+   },
+   "left": {
+    "label": "단속한다",
+    "effects": {
+     "nobles": 5,
+     "people": -10
+    },
+    "this_run": "전하는 소설보다 경전을 읽으라 했다.",
+    "build": [
+     "sechaek"
+    ]
+   }
+  },
+  "grain": "balance",
+  "out_of_textbook": false,
+  "sources": [
+   {
+    "type": "guide",
+    "page": "292",
+    "tb": "100"
+   },
+   {
+    "type": "guide",
+    "page": "229"
+   }
+  ],
+  "sources_text": "지도서 292(교과서 100) 한글 소설·세책점 · 229(《춘향전》을 빌려 감)",
+  "learn": "한글 소설과 세책점",
+  "fx": {
+   "build": [
+    "sechaek"
+   ],
+   "note": "장터 옆 세책점에 책 묶음이 매달린다."
+  }
+ },
+ {
+  "id": "D062",
+  "kind": "daily",
+  "stages": [
+   "yeongjo"
+  ],
+  "rarity": "common",
+  "who": {
+   "name": "포도청 관리",
+   "doll": "official_blue"
+  },
+  "line": "책 읽어 주는 전기수 앞에 사람이 몰려 길이 막혔사옵니다.",
+  "choice_type": "free",
+  "choices": {
+   "right": {
+    "label": "마당을 내준다",
+    "effects": {
+     "people": 10,
+     "treasury": -5
+    },
+    "this_run": "전하는 길가에 이야기 마당을 따로 만들어 주었다."
+   },
+   "left": {
+    "label": "흩어지게 한다",
+    "effects": {
+     "army": 5,
+     "people": -5
+    },
+    "this_run": "사람들은 흩어졌다."
+   }
+  },
+  "grain": "balance",
+  "out_of_textbook": false,
+  "sources": [
+   {
+    "type": "guide",
+    "page": "292",
+    "tb": "100"
+   }
+  ],
+  "sources_text": "지도서 292(교과서 100), 294 전기수",
+  "learn": "서민 문화",
+  "fx": {
+   "note": "길모퉁이에 사람 인형들이 동그랗게 모인다."
+  }
+ },
+ {
+  "id": "D063",
+  "kind": "daily",
+  "stages": [
+   "yeongjo",
+   "gojong"
+  ],
+  "required_in": "gojong",
+  "rarity": "common",
+  "who": {
+   "name": "소리꾼",
+   "doll": "official_blue"
+  },
+  "line": "궁에서 판소리를 하고 싶사옵니다. 양반 나리들도 좋아하신다 하옵니다.",
+  "choice_type": "free",
+  "choices": {
+   "right": {
+    "label": "궁에서 듣는다",
+    "effects": {
+     "people": 5,
+     "nobles": 5,
+     "treasury": -10
+    },
+    "this_run": "북 장단에 맞춰 이야기가 노래가 되었다."
+   },
+   "left": {
+    "label": "장터로 보낸다",
+    "effects": {
+     "treasury": 5,
+     "people": -5
+    },
+    "this_run": "소리꾼은 장터로 돌아갔다."
+   }
+  },
+  "grain": "complex",
+  "out_of_textbook": false,
+  "sources": [
+   {
+    "type": "guide",
+    "page": "292",
+    "tb": "100"
+   }
+  ],
+  "sources_text": "지도서 292(교과서 100) 판소리: 서민도 양반도 즐김",
+  "learn": "판소리",
+  "fx": {
+   "note": "마당에 돗자리와 북, 부채를 든 소리꾼."
+  }
+ },
+ {
+  "id": "D064",
+  "kind": "daily",
+  "stages": [
+   "yeongjo"
+  ],
+  "required_in": "yeongjo",
+  "rarity": "common",
+  "who": {
+   "name": "양반 대표",
+   "doll": "yangban"
+  },
+  "line": "장터 탈놀이에서 양반을 놀리는 대사가 나온다고 양반들이 화가 났사옵니다. 막을까요?",
+  "choice_type": "free",
+  "choices": {
+   "right": {
+    "label": "탈놀이를 막는다",
+    "effects": {
+     "nobles": 10,
+     "people": -15
+    },
+    "this_run": "탈놀이 마당이 조용해졌다.",
+    "build": [
+     "talnori"
+    ]
+   },
+   "left": {
+    "label": "웃게 둔다",
+    "effects": {
+     "people": 10,
+     "nobles": -10
+    },
+    "this_run": "초랭이의 말에 장터가 웃음바다가 되었다.",
+    "build": [
+     "talnori"
+    ]
+   }
+  },
+  "grain": "balance",
+  "out_of_textbook": false,
+  "sources": [
+   {
+    "type": "guide",
+    "page": "292",
+    "tb": "100"
+   },
+   {
+    "type": "guide",
+    "page": "296"
+   }
+  ],
+  "sources_text": "지도서 292(교과서 100) 탈놀이 · 296 하회 별신굿 탈놀이 대사(양반을 비웃는 말)",
+  "learn": "탈놀이와 서민들의 생각",
+  "fx": {
+   "build": [
+    "talnori"
+   ],
+   "note": "장터 마당에 탈 쓴 인형들이 춤춘다."
+  }
+ },
+ {
+  "id": "D065",
+  "kind": "daily",
+  "stages": [
+   "yeongjo"
+  ],
+  "required_in": "yeongjo",
+  "rarity": "common",
+  "who": {
+   "name": "화원 김홍도",
+   "doll": "jungin"
+  },
+  "line": "장터와 서당, 일하는 백성의 모습을 그리고 싶사옵니다.",
+  "choice_type": "free",
+  "choices": {
+   "right": {
+    "label": "백성을 그린다",
+    "effects": {
+     "people": 10,
+     "treasury": -5
+    },
+    "this_run": "<서당>, <벼 타작> 같은 그림이 남았다."
+   },
+   "left": {
+    "label": "행사를 그린다",
+    "effects": {
+     "nobles": 5,
+     "people": -5
+    },
+    "this_run": "궁중 행사 그림부터 그리게 했다."
+   }
+  },
+  "grain": "balance",
+  "out_of_textbook": false,
+  "sources": [
+   {
+    "type": "guide",
+    "page": "293",
+    "tb": "101"
+   },
+   {
+    "type": "guide",
+    "page": "295"
+   }
+  ],
+  "sources_text": "지도서 293(교과서 101) 풍속화 · 295 김홍도",
+  "learn": "풍속화",
+  "fx": {
+   "note": "하늘에 풍속화 한 장이 펼쳐졌다 접힌다."
+  }
+ },
+ {
+  "id": "D066",
+  "kind": "daily",
+  "stages": [
+   "yeongjo",
+   "gojong"
+  ],
+  "required_in": "gojong",
+  "rarity": "common",
+  "who": {
+   "name": "마을 사람",
+   "doll": "official_blue"
+  },
+  "line": "새해에 까치호랑이 그림을 집집마다 거는 게 유행이옵니다. 궁에도 걸까요?",
+  "choice_type": "free",
+  "choices": {
+   "right": {
+    "label": "궁에도 건다",
+    "effects": {
+     "people": 10,
+     "treasury": -5
+    },
+    "this_run": "나쁜 운은 가고 복은 오너라!"
+   },
+   "left": {
+    "label": "걸지 않는다",
+    "effects": {
+     "nobles": 5,
+     "people": -5
+    },
+    "this_run": "점잖지 않다는 선비도 있었다."
+   }
+  },
+  "grain": "balance",
+  "out_of_textbook": false,
+  "sources": [
+   {
+    "type": "guide",
+    "page": "293",
+    "tb": "101"
+   }
+  ],
+  "sources_text": "지도서 293(교과서 101) 민화 <호랑이와 까치>",
+  "learn": "민화",
+  "fx": {
+   "note": "집집마다 대문에 그림이 붙는다."
+  }
+ },
+ {
+  "id": "D067",
+  "kind": "daily",
+  "stages": [
+   "yeongjo",
+   "gojong"
+  ],
+  "rarity": "common",
+  "who": {
+   "name": "궁궐 상궁",
+   "doll": "courtlady"
+  },
+  "line": "‘목숨 수(壽)’, ‘복 복(福)’ 글자 그림을 대비마마 방에 걸어 드릴까요?",
+  "choice_type": "free",
+  "choices": {
+   "right": {
+    "label": "방에 건다",
+    "effects": {
+     "people": 5,
+     "nobles": 5,
+     "treasury": -5
+    },
+    "this_run": "방 안이 환해졌다."
+   },
+   "left": {
+    "label": "창고에 둔다",
+    "effects": {
+     "treasury": 5,
+     "people": -5
+    },
+    "this_run": "그림은 창고에 두었다."
+   }
+  },
+  "grain": "complex",
+  "out_of_textbook": false,
+  "sources": [
+   {
+    "type": "guide",
+    "page": "293",
+    "tb": "101"
+   }
+  ],
+  "sources_text": "지도서 293(교과서 101) <수복문자도>",
+  "learn": "민화",
+  "fx": {
+   "note": "방 안 병풍에 글자 그림."
+  }
+ },
+ {
+  "id": "D068",
+  "kind": "daily",
+  "stages": [
+   "yeongjo"
+  ],
+  "rarity": "common",
+  "who": {
+   "name": "장터 사람들",
+   "doll": "official_red"
+  },
+  "line": "장터 씨름판에 사람이 몰렸사옵니다. 상을 내릴까요?",
+  "choice_type": "free",
+  "choices": {
+   "right": {
+    "label": "상을 내린다",
+    "effects": {
+     "people": 10,
+     "treasury": -5
+    },
+    "this_run": "장사의 이름이 고을에 퍼졌다."
+   },
+   "left": {
+    "label": "그냥 둔다",
+    "effects": {
+     "treasury": 5,
+     "people": -5
+    },
+    "this_run": "씨름판은 저녁에 흩어졌다."
+   }
+  },
+  "grain": "balance",
+  "out_of_textbook": false,
+  "sources": [
+   {
+    "type": "guide",
+    "page": "229",
+    "tb": "70~71"
+   }
+  ],
+  "sources_text": "지도서 229(교과서 70~71 그림: 시장의 씨름 시합)",
+  "learn": "장시와 서민 생활",
+  "fx": {
+   "note": "장터 가운데 씨름판."
+  }
+ },
+ {
+  "id": "D069",
+  "kind": "daily",
+  "stages": [
+   "yeongjo"
+  ],
+  "rarity": "common",
+  "who": {
+   "name": "혼례를 앞둔 집안",
+   "doll": "official_red"
+  },
+  "line": "여인들 머리에 얹는 가체가 너무 비싸 혼례를 못 치르는 집이 있사옵니다. 가체를 금할까요?",
+  "choice_type": "free",
+  "choices": {
+   "right": {
+    "label": "가체를 금한다",
+    "effects": {
+     "people": 10,
+     "nobles": -10
+    },
+    "this_run": "족두리를 쓰라는 명이 내려졌다."
+   },
+   "left": {
+    "label": "그대로 둔다",
+    "effects": {
+     "nobles": 5,
+     "people": -10
+    },
+    "this_run": "가체는 더 높아지고 무거워졌다."
+   }
+  },
+  "grain": "balance",
+  "out_of_textbook": true,
+  "sources": [
+   {
+    "type": "web",
+    "title": "한국민족문화대백과사전 '가체'(영조 1756 금지, 정조 1788 다시 ",
+    "url": "https://encykorea.aks.ac.kr/Article/E0000380"
+   }
+  ],
+  "sources_text": "[교과서 밖] 한국민족문화대백과사전 '가체'(영조 1756 금지, 정조 1788 다시 금지) https://encykorea.aks.ac.kr/Article/E0000380",
+  "learn": "조선 후기 생활",
+  "fx": {
+   "note": "여인 인형의 큰 머리가 작은 족두리로 바뀐다."
+  }
+ },
+ {
+  "id": "D070",
+  "kind": "daily",
+  "stages": [
+   "yeongjo"
+  ],
+  "conditions_text": "Y 앞부분(영조)",
+  "rarity": "common",
+  "who": {
+   "name": "억울한 백성",
+   "doll": "farmer"
+  },
+  "line": "억울한 일을 임금께 바로 알리고 싶사옵니다. 신문고를 다시 걸어 주소서.",
+  "choice_type": "free",
+  "choices": {
+   "right": {
+    "label": "신문고를 건다",
+    "effects": {
+     "people": 10,
+     "nobles": -5
+    },
+    "this_run": "궁궐 문 앞에 북이 다시 걸렸다."
+   },
+   "left": {
+    "label": "수령에게 맡긴다",
+    "effects": {
+     "nobles": 5,
+     "people": -5
+    },
+    "this_run": "억울한 사연은 수령에게 가져가라 했다."
+   }
+  },
+  "grain": "balance",
+  "out_of_textbook": true,
+  "sources": [
+   {
+    "type": "web",
+    "title": "한국민족문화대백과사전 '신문고'(태종 1401 설치, 영조 1771 되살",
+    "url": "https://encykorea.aks.ac.kr/Article/E0032945"
+   }
+  ],
+  "sources_text": "[교과서 밖] 한국민족문화대백과사전 '신문고'(태종 1401 설치, 영조 1771 되살림) https://encykorea.aks.ac.kr/Article/E0032945",
+  "learn": "백성의 목소리",
+  "fx": {
+   "note": "궁궐 문 앞에 북 하나가 “뽕”."
+  }
+ },
+ {
+  "id": "D071",
+  "kind": "daily",
+  "stages": [
+   "yeongjo",
+   "gojong"
+  ],
+  "rarity": "common",
+  "who": {
+   "name": "소작 농민",
+   "doll": "farmer"
+  },
+  "line": "땅 주인이 소작료를 올렸다며 농민들이 호소하옵니다.",
+  "choice_type": "free",
+  "choices": {
+   "right": {
+    "label": "소작료를 살핀다",
+    "effects": {
+     "people": 10,
+     "nobles": -10
+    },
+    "this_run": "수령이 소작료를 살폈다."
+   },
+   "left": {
+    "label": "땅 주인에게 맡긴다",
+    "effects": {
+     "nobles": 10,
+     "people": -10
+    },
+    "this_run": "농민들은 더 많은 곡식을 바쳤다."
+   }
+  },
+  "grain": "balance",
+  "out_of_textbook": false,
+  "sources": [
+   {
+    "type": "guide",
+    "page": "293"
+   }
+  ],
+  "sources_text": "지도서 293 <벼 타작> 해설: 지주에게 소작료를 내고 땅을 빌려 농사",
+  "learn": "조선 후기 농민의 삶",
+  "fx": {
+   "note": "타작마당에서 감독하는 사람과 일하는 농부들."
+  }
+ },
+ {
+  "id": "D072",
+  "kind": "daily",
+  "stages": [
+   "yeongjo"
+  ],
+  "rarity": "common",
+  "who": {
+   "name": "농민",
+   "doll": "farmer"
+  },
+  "line": "쌀 대신 인삼과 담배를 길러 팔겠다는 농민이 늘었사옵니다.",
+  "choice_type": "free",
+  "choices": {
+   "right": {
+    "label": "인삼을 허락한다",
+    "effects": {
+     "treasury": 10,
+     "people": 5,
+     "army": -5
+    },
+    "this_run": "장터에 인삼 좌판이 늘었다."
+   },
+   "left": {
+    "label": "쌀부터 짓게 한다",
+    "effects": {
+     "army": 5,
+     "people": -5
+    },
+    "this_run": "전하는 쌀부터 지으라 했다."
+   }
+  },
+  "grain": "complex",
+  "out_of_textbook": false,
+  "sources": [
+   {
+    "type": "guide",
+    "page": "283",
+    "tb": "95"
+   }
+  ],
+  "sources_text": "지도서 283(교과서 95) 인삼·담배 등 상품 작물",
+  "learn": "상품 작물",
+  "fx": {
+   "note": "밭 한쪽이 인삼밭 그늘막으로 바뀐다."
+  }
+ },
+ {
+  "id": "D073",
+  "kind": "daily",
+  "stages": [
+   "yeongjo"
+  ],
+  "rarity": "common",
+  "who": {
+   "name": "떠돌이 장사꾼",
+   "doll": "merchant"
+  },
+  "line": "장날마다 고을을 도는 장사꾼들이 길을 닦아 달라 하옵니다.",
+  "choice_type": "free",
+  "choices": {
+   "right": {
+    "label": "길을 닦는다",
+    "effects": {
+     "people": 10,
+     "treasury": -10
+    },
+    "this_run": "장삿길이 반듯해졌다."
+   },
+   "left": {
+    "label": "그대로 둔다",
+    "effects": {
+     "treasury": 5,
+     "people": -5
+    },
+    "this_run": "진흙탕 길이 그대로였다."
+   }
+  },
+  "grain": "balance",
+  "out_of_textbook": false,
+  "sources": [
+   {
+    "type": "guide",
+    "page": "283"
+   }
+  ],
+  "sources_text": "지도서 283 참고 자료: 행상들이 지역을 돌아다님",
+  "learn": "장시",
+  "fx": {
+   "note": "장터로 가는 길이 넓어진다."
+  }
+ },
+ {
+  "id": "D074",
+  "kind": "daily",
+  "stages": [
+   "yeongjo"
+  ],
+  "conditions_text": "Y05 뒤(정조)",
+  "rarity": "common",
+  "who": {
+   "name": "정조의 화원 선발 관리",
+   "doll": "jungin"
+  },
+  "line": "임금의 초상화(어진)를 그릴 화원을 뽑으려 하옵니다.",
+  "choice_type": "free",
+  "choices": {
+   "right": {
+    "label": "화원을 뽑는다",
+    "effects": {
+     "nobles": 5,
+     "treasury": -5
+    },
+    "this_run": "김홍도가 뽑혀 붓을 들었다."
+   },
+   "left": {
+    "label": "다음으로 미룬다",
+    "effects": {
+     "treasury": 5,
+     "nobles": -5
+    },
+    "this_run": "초상화는 다음으로 미뤘다."
+   }
+  },
+  "grain": "balance",
+  "out_of_textbook": true,
+  "sources": [
+   {
+    "type": "guide",
+    "page": "295"
+   }
+  ],
+  "sources_text": "[교과서 밖] 지도서 295 참고 자료(1781년 김홍도가 정조 어진을 그림)",
+  "learn": "김홍도",
+  "fx": {
+   "note": "궁궐 안에 화가 인형과 큰 비단 화폭."
+  }
+ },
+ {
+  "id": "D075",
+  "kind": "daily",
+  "stages": [
+   "yeongjo",
+   "gojong"
+  ],
+  "rarity": "common",
+  "who": {
+   "name": "마을 어른",
+   "doll": "official_green"
+  },
+  "line": "마을 수호신께 평화와 풍년을 비는 별신굿과 탈놀이를 하겠다 하옵니다.",
+  "choice_type": "free",
+  "choices": {
+   "right": {
+    "label": "굿을 허락한다",
+    "effects": {
+     "people": 10,
+     "nobles": -5
+    },
+    "this_run": "하회탈이 웃으며 마을을 돌았다."
+   },
+   "left": {
+    "label": "조용히 하게 한다",
+    "effects": {
+     "nobles": 5,
+     "people": -5
+    },
+    "this_run": "굿은 조용히 치렀다."
+   }
+  },
+  "grain": "balance",
+  "out_of_textbook": false,
+  "sources": [
+   {
+    "type": "guide",
+    "page": "281",
+    "tb": "92"
+   }
+  ],
+  "sources_text": "지도서 281(교과서 92 사진: 하회 별신굿 탈놀이)",
+  "learn": "탈놀이",
+  "fx": {
+   "note": "마을 마당에 하회탈 춤."
+  }
+ },
+ {
+  "id": "D076",
+  "kind": "daily",
+  "stages": [
+   "yeongjo"
+  ],
+  "rarity": "common",
+  "who": {
+   "name": "화원 신윤복",
+   "doll": "jungin"
+  },
+  "line": "장옷 입고 길을 나서는 여인처럼, 사람들의 모습을 곱고 섬세하게 그리고 싶사옵니다.",
+  "choice_type": "free",
+  "choices": {
+   "right": {
+    "label": "그리게 한다",
+    "effects": {
+     "people": 5,
+     "nobles": -5
+    },
+    "this_run": "섬세한 선과 고운 색의 풍속화가 남았다."
+   },
+   "left": {
+    "label": "산수화를 권한다",
+    "effects": {
+     "nobles": 5,
+     "people": -5
+    },
+    "this_run": "점잖은 산수화부터 그리라 했다."
+   }
+  },
+  "grain": "balance",
+  "out_of_textbook": false,
+  "sources": [
+   {
+    "type": "guide",
+    "page": "293",
+    "tb": "101"
+   },
+   {
+    "type": "guide",
+    "page": "295"
+   }
+  ],
+  "sources_text": "지도서 293(교과서 101 신윤복 <장옷 입은 여인>) · 295 참고 자료(신윤복의 풍속화)",
+  "learn": "풍속화",
+  "fx": {
+   "note": "하늘에 여인 그림 한 장이 펼쳐졌다 접힌다."
+  }
+ },
+ {
+  "id": "D080",
+  "kind": "daily",
+  "stages": [
+   "yeongjo"
+  ],
+  "rarity": "common",
+  "who": {
+   "name": "푸른 붕당 대신",
+   "doll": "party_blue"
+  },
+  "line": "저쪽 붕당 사람이 잘못을 저질렀사옵니다. 그 붕당 사람을 모두 벼슬에서 내쫓으소서.",
+  "choice_type": "free",
+  "choices": {
+   "right": {
+    "label": "모두 내쫓는다",
+    "effects": {
+     "nobles": 5,
+     "people": -5
+    },
+    "device": {
+     "scale": 2
+    },
+    "this_run": "한쪽 붕당 사람들이 조정을 떠났다."
+   },
+   "left": {
+    "label": "한 사람만 벌한다",
+    "effects": {
+     "nobles": -5,
+     "people": 5
+    },
+    "device": {
+     "scaleToward": 1
+    },
+    "this_run": "전하는 잘못한 한 사람만 벌했다."
+   }
+  },
+  "grain": "balance",
+  "out_of_textbook": false,
+  "sources": [
+   {
+    "type": "guide",
+    "page": "282",
+    "tb": "94"
+   }
+  ],
+  "sources_text": "지도서 282(교과서 94) 붕당 간 다툼과 탕평 / 붕당 색은 게임 장치",
+  "learn": "붕당과 탕평",
+  "fx": {
+   "note": "저울의 푸른 쪽이 내려간다."
+  }
+ },
+ {
+  "id": "D081",
+  "kind": "daily",
+  "stages": [
+   "yeongjo"
+  ],
+  "rarity": "common",
+  "who": {
+   "name": "붉은 붕당 대신",
+   "doll": "party_red"
+  },
+  "line": "저쪽 붕당이 상소로 전하를 속이고 있사옵니다. 저희 말만 들으소서.",
+  "choice_type": "free",
+  "choices": {
+   "right": {
+    "label": "그 말만 듣는다",
+    "effects": {
+     "nobles": 5,
+     "treasury": -5
+    },
+    "device": {
+     "scale": -2
+    },
+    "this_run": "붉은 붕당 사람들이 웃었다."
+   },
+   "left": {
+    "label": "두 말 다 듣는다",
+    "effects": {
+     "nobles": -5,
+     "people": 5
+    },
+    "device": {
+     "scaleToward": 1
+    },
+    "this_run": "전하는 두 쪽 말을 다 들었다."
+   }
+  },
+  "grain": "balance",
+  "out_of_textbook": false,
+  "sources": [
+   {
+    "type": "guide",
+    "page": "282",
+    "tb": "94"
+   }
+  ],
+  "sources_text": "지도서 282(교과서 94) / 붕당 색은 게임 장치",
+  "learn": "붕당과 탕평",
+  "fx": {
+   "note": "저울의 붉은 쪽이 내려간다."
+  }
+ },
+ {
+  "id": "D082",
+  "kind": "daily",
+  "stages": [
+   "yeongjo"
+  ],
+  "rarity": "common",
+  "who": {
+   "name": "이조 판서",
+   "doll": "official_blue"
+  },
+  "line": "이번 인사에서는 두 붕당에서 고루 뽑으소서.",
+  "choice_type": "free",
+  "choices": {
+   "right": {
+    "label": "고루 뽑는다",
+    "effects": {
+     "nobles": -5,
+     "people": 5
+    },
+    "device": {
+     "scaleToward": 2
+    },
+    "this_run": "두 붕당 사람이 나란히 벼슬을 받았다."
+   },
+   "left": {
+    "label": "가까운 신하 쓴다",
+    "effects": {
+     "nobles": 5,
+     "treasury": -5
+    },
+    "device": {
+     "scaleAway": 1
+    },
+    "this_run": "전하는 가까운 신하들을 먼저 썼다."
+   }
+  },
+  "grain": "balance",
+  "out_of_textbook": false,
+  "sources": [
+   {
+    "type": "guide",
+    "page": "282",
+    "tb": "94"
+   }
+  ],
+  "sources_text": "지도서 282(교과서 94) 인물을 고루 뽑아 쓰는 탕평 정치",
+  "learn": "탕평 정치",
+  "fx": {
+   "note": "저울이 가운데로 돌아온다."
+  }
+ },
+ {
+  "id": "D083",
+  "kind": "daily",
+  "stages": [
+   "yeongjo"
+  ],
+  "rarity": "common",
+  "who": {
+   "name": "승정원 관리",
+   "doll": "official_red"
+  },
+  "line": "두 붕당이 서로를 꾸짖는 상소를 하루에 수십 장 올리옵니다. 다 읽으시겠사옵니까?",
+  "choice_type": "free",
+  "choices": {
+   "right": {
+    "label": "다 읽는다",
+    "effects": {
+     "nobles": 5,
+     "treasury": -5
+    },
+    "device": {
+     "scaleAway": 1
+    },
+    "this_run": "전하는 밤새 상소를 읽었다."
+   },
+   "left": {
+    "label": "돌려보낸다",
+    "effects": {
+     "nobles": -10
+    },
+    "device": {
+     "scaleToward": 1
+    },
+    "this_run": "전하는 다툼만 담긴 상소는 돌려보냈다."
+   }
+  },
+  "grain": "balance",
+  "out_of_textbook": false,
+  "sources": [
+   {
+    "type": "guide",
+    "page": "282",
+    "tb": "94"
+   }
+  ],
+  "sources_text": "지도서 282(교과서 94) 붕당 간 다툼이 잦아짐",
+  "learn": "붕당",
+  "fx": {
+   "note": "왕의 책상에 상소 두루마리가 산처럼 쌓인다."
+  }
+ },
+ {
+  "id": "D084",
+  "kind": "daily",
+  "stages": [
+   "yeongjo"
+  ],
+  "rarity": "common",
+  "who": {
+   "name": "수라간 상궁",
+   "doll": "courtlady"
+  },
+  "line": "묵과 고기, 나물을 골고루 섞은 음식을 올렸사옵니다. 대신들과 함께 드실까요?",
+  "choice_type": "free",
+  "choices": {
+   "right": {
+    "label": "함께 먹는다",
+    "effects": {
+     "nobles": 5,
+     "treasury": -5
+    },
+    "device": {
+     "scaleToward": 1
+    },
+    "this_run": "서로 다른 붕당 대신들이 한 상에 앉았다."
+   },
+   "left": {
+    "label": "홀로 먹는다",
+    "effects": {
+     "treasury": 5,
+     "nobles": -5
+    },
+    "this_run": "전하는 홀로 수라를 들었다."
+   }
+  },
+  "grain": "balance",
+  "out_of_textbook": false,
+  "sources": [
+   {
+    "type": "guide",
+    "page": "282",
+    "tb": "94"
+   }
+  ],
+  "sources_text": "지도서 282(교과서 94 생각 깨우기: 탕평채 이야기) — 영조 유래는 ‘전해지는 이야기’",
+  "learn": "탕평",
+  "fx": {
+   "note": "한 상 위에 여러 색 음식이 섞인 접시."
+  }
+ },
+ {
   "id": "D103",
   "kind": "daily",
   "stages": [
@@ -2964,6 +4581,52 @@
   }
  },
  {
+  "id": "D127",
+  "kind": "daily",
+  "stages": [
+   "yeongjo"
+  ],
+  "conditions_text": "Y08 뒤",
+  "rarity": "common",
+  "who": {
+   "name": "정조의 신하",
+   "doll": "official_red"
+  },
+  "line": "서북공심돈처럼 적을 살피는 높은 건물을 화성 곳곳에 더 지을까요?",
+  "choice_type": "free",
+  "choices": {
+   "right": {
+    "label": "망루를 짓는다",
+    "effects": {
+     "army": 10,
+     "treasury": -10
+    },
+    "this_run": "성벽 위에 높은 망루가 섰다."
+   },
+   "left": {
+    "label": "성벽만 둔다",
+    "effects": {
+     "treasury": 5,
+     "army": -5
+    },
+    "this_run": "성벽만 튼튼히 했다."
+   }
+  },
+  "grain": "balance",
+  "out_of_textbook": false,
+  "sources": [
+   {
+    "type": "guide",
+    "page": "288~289"
+   }
+  ],
+  "sources_text": "지도서 288~289 서북공심돈(적을 살피고 공격하기 좋음)",
+  "learn": "수원 화성",
+  "fx": {
+   "note": "화성 성벽 위 망루가 “뽕”."
+  }
+ },
+ {
   "id": "D130",
   "kind": "daily",
   "stages": [
@@ -3154,6 +4817,53 @@
   "learn": "임진왜란의 피해",
   "fx": {
    "note": "관아 마당에 큰 가마솥과 줄 선 사람들."
+  }
+ },
+ {
+  "id": "D134",
+  "kind": "daily",
+  "stages": [
+   "yeongjo"
+  ],
+  "conditions_text": "D055 뒤",
+  "rarity": "common",
+  "who": {
+   "name": "승정원 관리",
+   "doll": "official_red"
+  },
+  "line": "궁궐 자명종이 제시간에 울리지 않아 대신들이 회의에 늦었사옵니다.",
+  "choice_type": "free",
+  "choices": {
+   "right": {
+    "label": "장인을 부른다",
+    "effects": {
+     "nobles": 5,
+     "treasury": -5
+    },
+    "this_run": "장인이 자명종 속 톱니를 고쳤다."
+   },
+   "left": {
+    "label": "해시계를 본다",
+    "effects": {
+     "treasury": 5,
+     "nobles": -5
+    },
+    "this_run": "대신들은 해시계를 보고 모였다."
+   }
+  },
+  "grain": "balance",
+  "out_of_textbook": false,
+  "sources": [
+   {
+    "type": "guide",
+    "page": "284",
+    "tb": "96"
+   }
+  ],
+  "sources_text": "지도서 284(교과서 96) 자명종 / 일반 상황",
+  "learn": "새로운 문물",
+  "fx": {
+   "note": "자명종 바늘이 빙글 돌고 “땡”."
   }
  }
 ]);

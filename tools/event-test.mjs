@@ -145,7 +145,7 @@ export default async function (t) {
     r.pos=5; r.ev.rest=2; o.rest=JK.Events.tryReplace(r,one); r.ev.rest=0;
     r.ev.count=4; o.max=JK.Events.tryReplace(r,one); r.ev.count=0;
     let li=-1; for(let i=r.deck.length-1;i>=0;i--){ const c=__jk.G.card(r.deck[i]); if(c&&c.kind==='history'){li=i;break;} } r.pos=li-1; o.beforeLast=JK.Events.tryReplace(r,one);
-    r.pos=6; o.ok=JK.Events.tryReplace(r,one);
+    for (let p=4; p<li-1 && !o.ok; p++) { r.pos=p; o.ok=JK.Events.tryReplace(r,one); } // 덱 모양에 따라 한 자리(6)만 보면 가끔 비어 있어(2026-10-22) 여러 자리를 본다
     const s=JSON.parse(save); Object.assign(r,s); return o;})()`);
   ok('처음 3장 없음', rules.first === null);
   ok('쉬는 장수 동안 없음', rules.rest === null);

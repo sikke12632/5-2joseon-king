@@ -589,6 +589,17 @@ body.over #devBar { opacity: 0; }
 #devTicks i.on { background: linear-gradient(#ffe39a, #d8a83a); box-shadow: 0 0 8px rgba(255,200,80,.8); }
 #devTicks i.mark::after { content: '★'; position: absolute; left: 0; right: 0; top: -13px; text-align: center; font-size: 10px; font-style: normal; color: #a0741a; }
 #devNum { font-size: 14px; font-weight: 700; min-width: 2.4em; }
+/* 붕당 저울(영조·정조): 가운데 칸을 두고 왼쪽 붉은·오른쪽 푸른으로 채운다. 3칸 노랑 · 4칸 이상 붉은 테 */
+#devBar.signed #devTicks { gap: 2px; }
+#devBar.signed #devTicks i { width: 11px; }
+#devBar.signed #devTicks i.mid { width: 6px; background: #8a6a3a; }
+#devBar.signed #devTicks i.on { background: linear-gradient(#9cc0f0, #2f5d9a); box-shadow: 0 0 7px rgba(80,130,220,.8); }
+#devBar.signed #devTicks i.on.neg { background: linear-gradient(#f4a8a0, #a8343a); box-shadow: 0 0 7px rgba(220,80,70,.8); }
+#devBar.signed #devNum { min-width: 3.6em; white-space: nowrap; }
+#devBar.signed #devDelta { font-size: 15px; white-space: nowrap; }
+#devBar.zwarn { border-color: #d8a020; box-shadow: 0 0 0 3px rgba(240,190,60,.45), 0 3px 10px rgba(60,40,20,.22); }
+#devBar.zdanger { border-color: #b23b30; animation: devDanger 1.2s ease-in-out infinite; }
+@keyframes devDanger { 50% { box-shadow: 0 0 0 4px rgba(220,70,60,.5), 0 0 18px rgba(220,70,60,.7); } }
 #devBar.text { background: linear-gradient(#f4e2da, #e6c8bc); border-color: #9a3d3a; }
 #devBar.text #devNum { color: #9a3d3a; white-space: nowrap; }
 #devDelta { position: absolute; right: -6px; top: -14px; font: 700 20px/1 'JKTitle', serif; color: #2f7a3a; opacity: 0; }

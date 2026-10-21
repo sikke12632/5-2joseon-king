@@ -76,7 +76,7 @@ for (const c of D.cards) {
   if (c.kind === 'history' && !c.real_history && !(c.variant_of && c.real_note)) err(id, '역사 카드에 「실제 역사」(real_history) 없음');
   // 위기 카드(설계서 10-8): 어느 게이지·어느 쪽·예고(warn)/사건(event)/후속(followup)
   if (c.kind === 'crisis') {
-    if (!gaugeKeys.includes(c.gauge)) err(id, `위기 카드 gauge 이상: ${c.gauge}`);
+    if (!gaugeKeys.includes(c.gauge) && !(era.virtualGauges || []).some((g) => g.key === c.gauge)) err(id, `위기 카드 gauge 이상: ${c.gauge}`);
     if (!['low', 'high'].includes(c.side)) err(id, `위기 카드 side 이상: ${c.side}`);
     if (!['warn', 'event', 'followup'].includes(c.level)) err(id, `위기 카드 level 이상: ${c.level}`);
     if (c.level !== 'warn' && !c.name) err(id, '위기 이름(name) 없음 — 실각 화면·기록관에 쓴다');

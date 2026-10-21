@@ -276,6 +276,35 @@
       return;
     }
     const v = vals[cfg.key] || 0;
+    // 저울(가운데 0, 양쪽으로 기움 — 영조·정조 붕당 저울): 칸 min~max, 가운데에서 v까지 채움(왼쪽 붉은·오른쪽 푸른)
+    el.classList.toggle('signed', !!cfg.signed);
+    if (cfg.signed) {
+      const n = cfg.max - cfg.min + 1;
+      if (el.dataset.key !== cfg.key + n) {
+        el.dataset.key = cfg.key + n;
+        $('#devName').textContent = cfg.name;
+        $('#devTicks').innerHTML = Array.from({ length: n }, (_, i) => `<i data-v="${cfg.min + i}"${cfg.min + i === 0 ? ' class="mid"' : ''}></i>`).join('');
+      }
+      [...$('#devTicks').children].forEach((t) => {
+        const tv = +t.dataset.v;
+        t.classList.toggle('on', tv !== 0 && Math.sign(tv) === Math.sign(v) && Math.abs(tv) <= Math.abs(v));
+        t.classList.toggle('neg', tv < 0);
+      });
+      const a = Math.abs(v);
+      el.classList.toggle('zwarn', a === 3);
+      el.classList.toggle('zdanger', a >= 4);
+      const side = v < 0 ? cfg.sides.low : cfg.sides.high;
+      $('#devNum').textContent = v ? `${side} ${a}` : '가운데';
+      el.title = `${cfg.name} ${v ? side + ' 쪽으로 ' + a + '칸' : '가운데'}` + (cfg.hint ? ` — ${cfg.hint}` : '');
+      if (!instant && delta) {
+        el.classList.remove('up', 'down');
+        void el.offsetWidth;
+        // 가운데로 오면 좋은 쪽(초록), 멀어지면 붉은 쪽
+        el.classList.add(Math.abs(v) < Math.abs(v - delta) ? 'up' : 'down');
+        $('#devDelta').textContent = Math.abs(v) < Math.abs(v - delta) ? '탕평' : '기울어짐';
+      }
+      return;
+    }
     const trig = cfg.key === 'invention' ? JK.Game.deviceTriggers() : [];
     if (el.dataset.key !== cfg.key + cfg.max) {
       el.dataset.key = cfg.key + cfg.max;

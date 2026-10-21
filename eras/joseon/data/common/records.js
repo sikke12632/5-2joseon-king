@@ -141,7 +141,7 @@
   "name": "흔들림 없는 저울",
   "hint": "두 깃발 사이에서",
   "cond": "영조·정조 끝에 붕당 저울 ±2 안",
-  "rule": "later"
+  "rule": "scaleSteady"
  },
  {
   "id": "title10",

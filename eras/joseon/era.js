@@ -31,6 +31,14 @@
     { t: 1.0, top: '#4a5478', hor: '#b8bcd0', bot: '#8a8ea8', sun: '#d8dcf0', si: 1.2, hs: '#9aa2c4', hg: '#c8ccd8', hi: 0.85, el: 0.15, az: -1.1, night: 0.7, ink: '#2c3050' },
   ];
 
+  // 설계서 2-4 하늘: 풍성한 가을, 장터의 저녁 등불
+  const SKY_AUTUMN_EVENING = [
+    { t: 0.0, top: '#7fb0e2', hor: '#fbe9cc', bot: '#f2e8d8', sun: '#fff0d0', si: 2.4, hs: '#d2e2f6', hg: '#e8d6b0', hi: 1.05, el: 0.6, az: 1.1, night: 0.0, ink: '#3b4a66' },
+    { t: 0.45, top: '#78a8de', hor: '#f6e2bc', bot: '#eadcc4', sun: '#ffe8bc', si: 2.3, hs: '#cddcf0', hg: '#e2cc9c', hi: 1.0, el: 0.7, az: 0.2, night: 0.0, ink: '#3b4a66' },
+    { t: 0.8, top: '#9a8fb8', hor: '#f4c894', bot: '#e2c6a4', sun: '#ffc888', si: 1.9, hs: '#d8c4d8', hg: '#e0b888', hi: 0.95, el: 0.3, az: -0.6, night: 0.15, ink: '#3c3a58' },
+    { t: 1.0, top: '#4e4a78', hor: '#e2a676', bot: '#a88a84', sun: '#ffb070', si: 1.4, hs: '#a8a0c4', hg: '#c09070', hi: 0.85, el: 0.12, az: -1.1, night: 0.6, ink: '#2c3050' },
+  ];
+
   JK.era = {
     id: 'joseon',
     title: '조선의 왕',
@@ -114,10 +122,33 @@
         war: { from: 'J02', to: 'J07', cost: 'warCost', name: '⚔ 임진왜란', hint: '전쟁 중에는 카드마다 국고가 줄어요' },
         siege: { from: 'J09', to: 'J10', food: 'food', starve: 'starvePeople', name: '남한산성 식량', hint: '식량이 바닥나면 카드마다 백성이 줄어요. 끝까지 버텨도 결국 항복해요(역사 그대로)' },
       },
-      { id: 'yeongjo', king: '영조·정조', seal: '英祖', title: '붕당 저울', years: '1724~1800', ready: false },
+      {
+        id: 'yeongjo',
+        king: '영조·정조',
+        // 한 생에 두 왕(설계서 2-4): 처음은 영조, Y04(사관 — 1776 정조 즉위)가 뜨는 순간 정조로
+        kingFirst: '영조',
+        kingSwap: { at: 'Y04', name: '정조', role: 'jeongjo', text: '왕이 바뀌었다 — 이제부터 정조' },
+        seal: '英祖',
+        title: '붕당 저울',
+        years: '1724~1800',
+        ready: true,
+        sky: SKY_AUTUMN_EVENING,
+        tod: [0.04, 0.97],
+        // 시작 한양(설계서 1장·2-4): 임진왜란 때 불탄 경복궁은 빈 터(풀밭), 종묘·도성·성균관은 서 있다. 마을이 넓어졌다
+        prebuilt: { choga: 24, giwa: 22, gyeongbokRuin: 1, jongmyo: 1, sajik: 1, wall: 1, heungin: 1, donui: 1, sungnye: 1, sukjeong: 1, seonggyun: 1, seodang: 1, hyanggyo: 1, seowon: 1 },
+        kingRole: 'yeongjo',
+        randomSlots: [6, 9],
+        slotsBefore: {},
+        realEnd: '실제로 영조는 1776년까지 52년, 정조는 1800년까지 24년 동안 왕위에 있었다.',
+        scene: [],
+        // 붕당 저울(설계서 2-4): −5(붉은 붕당 쪽) ~ +5(푸른 붕당 쪽), 시작 0. |3| 경고 · |4| 위험 · |5| 끝 — 위기는 가상 게이지(50+10×저울)로 crisis.js가 굴린다
+        device: { key: 'scale', name: '붕당 저울', signed: true, min: -5, max: 5, start: { scale: 0 }, sides: { low: '붉은', high: '푸른' }, steadyTitle: 'scaleSteady', hint: '한쪽 붕당 편을 들면 기울어요. 3칸부터 위험! 고루 뽑는 탕평으로 가운데로' },
+      },
       { id: 'gojong', king: '고종', seal: '高宗', title: '개항 압력', years: '1863~1899', ready: false },
     ],
     data: D,
+    // 위기 엔진이 게이지처럼 다루는 왕별 장치(crisis.js 가상 게이지) — 영조·정조 붕당 저울
+    virtualGauges: [{ key: 'faction', name: '붕당 저울', sides: { low: '붉은 붕당', high: '푸른 붕당' } }],
     // 게이지 위기 (설계서 10-8, v3 규칙). 단계별 값은 { sprout, normal, sage, annals }
     crisis: {
       // 10-8-1 구간: 거리(0·100까지 남은 값) < warn → 위험, < stable → 경고, < cliff(6) → 벼랑, 0 → 끝
@@ -243,7 +274,7 @@
       firstCards: 3,
       chainAfter: [3, 6],
       chainDepth: 3,
-      mindBoost: { ET16: 3, ES17: 3, EJ17: 3 },
+      mindBoost: { ET16: 3, ES17: 3, EJ17: 3, EY17: 3 },
       names: { bad: '흉', good: '길', guest: '손님', box: '상자', mind: '마음', chain: '연쇄' },
     },
     // 왕의 마음 (설계서 10-13-2) — [게임 속 일]. 0~100, 숫자는 보이지 않고 붓에 먹이 차오른다

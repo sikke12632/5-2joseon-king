@@ -80,6 +80,19 @@ STAGE_FX = {
     'J09': {'fx': {'snow': True}},
     'J10': {'build': ['namhansan']},
     'J11': {'build': ['samjeondo'], 'fx': {'heavy': True}},
+    # 영조·정조(설계서 2-4 세워지는 것·3-4 연출): 탕평비 · 규장각 · 신해통공 좌판 · 수원 화성·거중기 · 배다리 · 김만덕 쌀 배
+    #  장시 천막(D051) · 벽돌집(D057) · 세책점(D061) · 탈놀이 마당(D064). Y04(사관, 사도 세자)는 해가 저물었다 다시 뜸
+    'Y02': {'build': ['tangpyeong']},
+    'Y04': {'fx': {'dusk': True}},
+    'Y05': {'build': ['gyujang']},
+    'Y07': {'build': ['jwapan']},
+    'Y08': {'build': ['hwaseong', 'geojunggi']},
+    'Y09': {'build': ['baedari']},
+    'Y10': {'fx': {'scene': 'ship'}},
+    'D051': {'build': ['jangsi']},
+    'D057': {'build': ['brickHouse']},
+    'D061': {'build': ['sechaek']},
+    'D064': {'build': ['talnori']},
     'D001': {'build': ['seodang']},
     'D003': {'build': ['hyanggyo']},
     'D018': {'build': ['bridge']},
@@ -101,6 +114,13 @@ def effects(s):
             fx[GAUGE[k]] = v
         else:
             dev[DEVICE[k]] = v
+    # 붕당 저울(영조·정조): "저0쪽N" 가운데(0)로 N칸 · "저기운쪽+N" 지금 기운 쪽으로 N칸 더(0이면 그대로)
+    m = re.search(r'저0쪽(\d+)', s)
+    if m:
+        dev['scaleToward'] = int(m.group(1))
+    m = re.search(r'저기운쪽\+(\d+)', s)
+    if m:
+        dev['scaleAway'] = int(m.group(1))
     return fx, dev
 
 
@@ -288,7 +308,7 @@ def records():
             falls.append({'id': gmap[m.group(1)] + str(at), 'gauge': gmap[m.group(1)], 'at': at, 'side': 'low' if at == 0 else 'high', 'name': r[1], 'text': r[2]})
         elif r[0].startswith('붕당'):
             falls.append({'id': 'faction', 'gauge': 'faction', 'at': 0, 'name': r[1], 'text': r[2], 'stages': ['yeongjo']})
-    rules = {'과학 임금의 벗': 'invention6', '아슬아슬 줄타기': 'edgeClear','위기를 넘긴 임금': 'held5', '벼랑 끝의 임금': 'heldAtEnd', '같은 위기는 두 번 없다': 'cancel3'}
+    rules = {'과학 임금의 벗': 'invention6', '흔들림 없는 저울': 'scaleSteady', '아슬아슬 줄타기': 'edgeClear','위기를 넘긴 임금': 'held5', '벼랑 끝의 임금': 'heldAtEnd', '같은 위기는 두 번 없다': 'cancel3'}
     titles = []
     for r in table_after('### 4-2. 엔딩 칭호'):
         if not r[0].isdigit():
@@ -358,6 +378,15 @@ def role_of(name, cid):
         return 'sagwan'
     if '장영실' in n:
         return 'jangyeongsil'
+    # 영조·정조: 두 붕당 대신(푸른/붉은 깃발 — 게임 장치) · 정약용 · 김만덕
+    if '푸른 붕당' in n or n == '한 붕당의 대신':
+        return 'party_blue'
+    if '붉은 붕당' in n:
+        return 'party_red'
+    if '정약용' in n:
+        return 'jeongyakyong'
+    if '김만덕' in n:
+        return 'mandeok'
     if '이순신' in n:
         return 'yisunsin'
     if '곽재우' in n:
@@ -635,20 +664,25 @@ REQUIRE = real_requires()
 
 # ---------- 위기 카드 (10-8-5): 예고 NT·위기 KT·후속 KTb, 모두 [게임 속 일] ----------
 # 번호 순서: 01 백성 낮음, 02 백성 높음, 03 양반 낮음 … 08 국방 높음. 오른쪽 = 강한 대응
-CRISIS_ORDER = [('people', 'low'), ('people', 'high'), ('nobles', 'low'), ('nobles', 'high'), ('treasury', 'low'), ('treasury', 'high'), ('army', 'low'), ('army', 'high')]
+CRISIS_ORDER = [('people', 'low'), ('people', 'high'), ('nobles', 'low'), ('nobles', 'high'), ('treasury', 'low'), ('treasury', 'high'), ('army', 'low'), ('army', 'high'),
+                # 09·10: 영조·정조 붕당 위기 — 붕당 저울을 위기 엔진의 가상 게이지 'faction'으로(engine/crisis.js)
+                ('faction', 'low'), ('faction', 'high')]
 # 수습하면 손상되는 건물(10-8-5 아래 줄). 지도에 없는 곳(관아·곳간·공신 집)은 비워 두면 엔진이 지어진 건물 하나를 고른다
 CRISIS_DAMAGE = {'04': ['gyeongbok'], '07': ['wall'], '08': ['sungnye', 'heungin', 'donui', 'sukjeong']}
 # 왕별로 다른 곳(세종 KS07 → 4군 6진 진). 없으면 위 표
-CRISIS_DAMAGE_BY = {'S': {'07': ['jin'], '04': [], '08': []}, 'J': {'04': [], '07': ['wall'], '08': []}}
-CRISIS_DOLL = {'고을에서 올라온 관리': 'official_green', '호조 판서': 'official_red', '호조 관리': 'official_blue', '승지': 'official_red', '내관': 'naegwan', '장터를 돌아본 내관': 'naegwan', '곳간지기': 'farmer', '바닷가 군관': 'official_green', '병조 관리': 'official_blue', '병조 판서': 'official_red', '북방 군관': 'general', '성을 지키는 군관': 'general'}
+CRISIS_DAMAGE_BY = {'S': {'07': ['jin'], '04': [], '08': []}, 'J': {'04': [], '07': ['wall'], '08': []}, 'Y': {'04': [], '07': ['wall'], '08': []}}
+CRISIS_DOLL = {'고을에서 올라온 관리': 'official_green', '호조 판서': 'official_red', '호조 관리': 'official_blue', '승지': 'official_red', '내관': 'naegwan', '장터를 돌아본 내관': 'naegwan', '곳간지기': 'farmer', '바닷가 군관': 'official_green', '병조 관리': 'official_blue', '병조 판서': 'official_red', '북방 군관': 'general', '성을 지키는 군관': 'general', '장시를 돌아본 관리': 'official_green'}
 
 
 def crisis_side(cell):
     lm = re.match(r'\*\*\[([^\]]+)\]\*\*\s*(.*?)\s+—\s+(?:이번 [판생]에서:\s*)?(.*)$', cell)
     if not lm:
         raise SystemExit('위기 카드 칸을 못 읽음: ' + cell)
-    fx, _ = effects(lm.group(2))
-    return {'label': lm.group(1).strip(), 'effects': fx, 'this_run': lm.group(3).strip().strip('"“”')}
+    fx, dev = effects(lm.group(2))
+    o = {'label': lm.group(1).strip(), 'effects': fx, 'this_run': lm.group(3).strip().strip('"“”')}
+    if dev:
+        o['device'] = dev  # 붕당 위기의 "저0쪽N"(저울을 가운데로)
+    return o
 
 
 def crisis_cards():
@@ -678,7 +712,7 @@ def crisis_cards():
             who = r[2]
             out.append(dict(base, id=r[0], gauge=g, side=side, level='warn', who={'name': who, 'doll': CRISIS_DOLL.get(who) or role_of(who, r[0])}, line=r[3], conditions_text=r[1],
                             choices={'right': crisis_side(r[4]), 'left': crisis_side(r[5])}, sources=[], fx={}))
-        for r in rows('**위기 8장'):
+        for r in rows('**위기 '):  # '**위기 8장' · 영조·정조는 '**위기 10장'
             n = r[0][-2:]
             g, side = CRISIS_ORDER[int(n) - 1]
             name = re.sub(r'\s*\(.*?\)\s*$', '', r[1]).strip()
