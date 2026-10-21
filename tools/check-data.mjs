@@ -9,7 +9,8 @@ import vm from 'node:vm';
 
 const ROOT = dirname(dirname(fileURLToPath(import.meta.url)));
 const ERA = process.argv[2] || 'joseon';
-const REVIEW = 'C:/Users/USER/Desktop/사회/lessons/sahoe-5-2/u2';
+// 복습 사이트 퀴즈(JSON) 폴더: REVIEW=경로 로 바꿀 수 있다. 기본은 저장소 안 작업/자료/review-u2(저장소에는 없음 — 없으면 경고만)
+const REVIEW = process.env.REVIEW || join(dirname(dirname(fileURLToPath(import.meta.url))), '작업', '자료', 'review-u2');
 const LABEL_MAX = 14; // 버튼 글 최대 글자 수(공백 포함)
 
 const errors = [];
