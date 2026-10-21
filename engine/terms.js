@@ -72,8 +72,11 @@
   T.king = function (stageId) {
     const era = JK.era;
     const id = stageId || (JK.Game && JK.Game.run && JK.Game.run.stage);
+    // 한 판에 두 왕(선조·인조): 지금 그 생의 왕 이름(run.kingName)
+    const run = JK.Game && JK.Game.run;
+    if (run && run.kingName && run.stage === id) return run.kingName;
     const st = era.stages.find((s) => s.id === id) || era.stages[0];
-    return st.king;
+    return st.kingFirst || st.king;
   };
   // 자리표 {왕} {왕은} {왕이} {왕을} {왕의} … 를 이름 + 맞는 조사로
   T.withKing = function (s, stageId) {

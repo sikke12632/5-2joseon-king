@@ -174,6 +174,11 @@
       cheugu: { kind: 'spots', name: '측우기', model: 'cheugu', points: [[-4.7, 6.05], [-1.3, 7.05], [-7.25, 2.1], [1.86, -2.3]], label: 0.4 },
       jin: { kind: 'single', name: '4군 6진', model: 'jin', at: { x: -4.9, z: -6.75 }, rot: 0.62, label: 1.0, shadowR: [1.1, 0.25] },
       kiln: { kind: 'single', name: '백자 가마', model: 'kiln', at: { x: 6.25, z: 4.55 }, rot: -0.5, label: 0.6, shadowR: [0.5, 0.2] },
+      // 선조·인조(설계서 7-1·2-3): 불탄 경복궁 터(주춧돌·기단만 — 고종 때까지 남음) · 불탄 종묘 터 · 남한산성(남쪽 산 위, 눈) · 삼전도비(한강 가, 거북 받침)
+      gyeongbokRuin: { kind: 'single', name: '경복궁 터', model: 'gyeongbokRuin', at: { site: 'gyeongbok' }, label: 0.6, shadowR: [2.2, 1.7] },
+      jongmyoRuin: { kind: 'single', name: '', model: 'jongmyoRuin', at: { site: 'jongmyo' }, label: 0, shadowR: [1.4, 0.9] },
+      namhansan: { kind: 'single', name: '남한산성', model: 'namhansan', at: { x: 6.75, z: 5.5 }, rot: -0.6, label: 1.2, shadowR: [0.9, 0.7] },
+      samjeondo: { kind: 'single', name: '삼전도비', model: 'samjeondo', at: { riverPhi: 1.0 }, label: 0.7, shadowR: [0.25, 0.2] },
       // 초가 마을은 이름 없는 장식 무리(연출표 7-1): 처음 몇 채에서 카드마다 조금씩 늘어난다
       choga: { kind: 'village', name: '', grow: 2, model: 'choga', max: 40, focus: [-1.5, 2.6], extra: [[-4.6, 7.0], [-5.6, 6.2], [-1.2, 7.4], [0.6, 7.3], [-7.8, 1.4], [-7.6, 0.3]] },
       giwa: { kind: 'village', name: '기와집 마을', model: 'giwa', max: 30, focus: [1.0, 0.8] },

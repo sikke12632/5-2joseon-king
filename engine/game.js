@@ -203,6 +203,7 @@
     run.flags = Object.assign({}, run.flagsBefore || {});
     run.flagsBefore = Object.assign({}, run.flags);
     run.grown = run.grownBefore || 0;
+    run.unscene = []; // 이번 생에 치운 시작 장식·처음 건물(왕을 새로 시작하면 다시 선다)
     run.stageStats = { edge: false, falls: run.stageStats && run.stageStats.stage === stageId ? run.stageStats.falls : 0, stage: stageId };
     run.waiting = null;
     // 게이지 위기 상태(10-8): 왕을 새로 시작하면 모두 처음부터. 손상된 건물도 이때 고쳐진다
@@ -233,6 +234,11 @@
     run.lastShown = '';
     // 왕별 장치(설계서 2장, 세종 발명 진행도): 왕을 시작할 때마다 처음 값
     run.device = Object.assign({}, (st.device && st.device.start) || {});
+    // 한 판에 두 왕(설계서 2-3): 처음 왕 이름. kingSwap 카드에서 바뀐다
+    run.kingName = st.kingFirst || null;
+    run.kingRole = st.kingRole || st.id;
+    // 전쟁 버티기(설계서 2-3): 전쟁 구간 국고 비용 · 산성 식량
+    run.food = st.siege ? G.diff().stage[st.siege.food] || 6 : 0;
     JK.Events.reset(run, G.stageInfo(stageId));
     G.state = 'play';
     setupWorld(st, false);
@@ -261,6 +267,7 @@
     // 시작 장면(10-12 ③): 이번 판에서 치우지 않은 장식만(T01에서 내려간 고려 깃발 등은 G.run.unscene)
     for (const k of st.scene || []) if (!(G.run.unscene || []).includes(k)) W.buildInstant(k);
     for (const k in st.prebuilt || {}) {
+      if ((G.run.unscene || []).includes(k)) continue;
       const v = era.map.buildings[k];
       W.buildInstant(k, st.prebuilt[k]);
       if (v && v.grow && G.run.grown) W.growVillage(k, v.grow * G.run.grown, true);
@@ -279,10 +286,13 @@
     for (const k in G.run.damaged || {}) W.setBuildState(k, 'damaged', 0);
     JK.UI.setStage(st);
     refreshSeal();
-    JK.Events.setKing(pics[st.kingRole || st.id], st.name);
+    JK.Events.setKing(pics[G.run.kingRole || st.kingRole || st.id], st.name);
     JK.Events.refresh(G.run, true);
-    JK.UI.setDevice(st.device || null, G.run.device || {}, true);
-    if (JK.EvFx) JK.EvFx.reset();
+    refreshMeters(true);
+    if (JK.EvFx) {
+      JK.EvFx.reset();
+      if (fl.snow) JK.EvFx.ambient('snow', true);
+    }
   }
   function setTOD(instant) {
     const st = stageOf(G.run.stage);
@@ -469,6 +479,13 @@
       }
     }
     if (!run.seenRun.includes(c.id)) run.seenRun.push(c.id);
+    // 한 판에 두 왕(설계서 2-3): 그 카드가 뜨는 순간 왕 인형·이름이 바뀐다(선조 → 인조)
+    if (st.kingSwap && (c.variant_of || c.id) === st.kingSwap.at && run.kingName !== st.kingSwap.name) {
+      run.kingName = st.kingSwap.name;
+      run.kingRole = st.kingSwap.role;
+      JK.Events.setKing(pics[run.kingRole], run.kingName);
+      setTimeout(() => Cards.toast(st.kingSwap.text || `왕이 바뀌었다 — ${run.kingName}`, 2800), 600);
+    }
     // 역사 분기(10-10-1): 실제 경로 잠김 · 아래 '다른 길' 버튼(열림 조건) · 막다른 길 금지
     if (c.paths && c.choices) Object.assign(v, pathView(run, c));
     // 실제 경로가 잠겨 다른 길만 열림: 왕의 마음 +10
@@ -932,6 +949,8 @@
       if (v.kind === 'village' && v.grow && !builds.includes(k)) setTimeout(() => W.growVillage(k, v.grow), 600);
     }
     run.grown = (run.grown || 0) + 1;
+    // 전쟁 버티기(설계서 2-3): 전쟁 구간 카드마다 국고 · 산성 구간 식량
+    stageTick(run);
     // 왕의 마음: 경고 이하에서 넘긴 장 +2, 기질·무너질 듯한 밤·돌발 쉬는 장수 줄이기
     JK.Events.afterCard(run, c);
     run.pos++;
@@ -976,6 +995,40 @@
    * 장치 카드(kind 'device', device_card { key, step, after, before }): 창(after를 본 뒤 ~ before 앞)이 열린 동안
    * 진행도가 그 카드의 문턱(난이도별)에 닿으면 바로 다음 자리에, 끝까지 못 닿으면 창 마지막(before 바로 앞)에 반드시 나온다 */
   const devCfg = (run) => (stageOf(run.stage) || {}).device || null;
+  // 구간 안인가: from 카드를 지났고 to 카드는 아직
+  const inSpan = (run, sp) => !!sp && run.seenRun.includes(sp.from) && !run.seenRun.includes(sp.to);
+  // 전쟁 버티기(설계서 2-3) — stage.war { from, to, cost(난이도표 칸), name } · stage.siege { from, to, food, starve, name }
+  function stageTick(run) {
+    const st = stageOf(run.stage);
+    const D = G.diff().stage || {};
+    const fx = {};
+    if (inSpan(run, st.war) && D[st.war.cost]) fx.treasury = D[st.war.cost];
+    if (inSpan(run, st.siege)) {
+      if (run.food > 0) run.food--;
+      else if (D[st.siege.starve]) fx.people = D[st.siege.starve];
+    }
+    const applied = {};
+    for (const k in fx) {
+      const nv = JK.clamp(run.vals[k] + fx[k], 0, 100);
+      applied[k] = nv - run.vals[k];
+      run.vals[k] = nv;
+    }
+    if (Object.keys(applied).some((k) => applied[k])) setTimeout(() => (Cards.setGauges(run.vals), Cards.flash(applied, true)), 1200);
+    refreshMeters();
+  }
+  // 왼쪽 위 장치 막대: 발명 진행도(세종) · 전쟁 중(국고 비용) · 산성 식량 눈금
+  function refreshMeters(instant) {
+    const run = G.run;
+    const st = stageOf(run.stage);
+    if (st.device) return JK.UI.setDevice(st.device, run.device || {}, instant);
+    if (st.siege && (inSpan(run, st.siege) || run.seenRun.includes(st.siege.to)))
+      return JK.UI.setDevice({ key: 'food', name: st.siege.name, max: G.diff().stage[st.siege.food] || 6, hint: st.siege.hint }, { food: run.food }, instant);
+    if (st.war && inSpan(run, st.war)) {
+      const c = (G.diff().stage || {})[st.war.cost] || 0;
+      return JK.UI.setDevice({ key: 'war', name: st.war.name, text: c ? `카드마다 국고 ${c}` : '전쟁 중', hint: st.war.hint }, {}, instant);
+    }
+    JK.UI.setDevice(null);
+  }
   function applyDevice(run, dv) {
     const cfg = devCfg(run);
     if (!cfg) return;
@@ -1039,8 +1092,10 @@
     return end;
   }
   function unbuild(k, delay) {
-    // 시작 장면 장식(stage.scene)은 run.built에 없으므로 따로 기록해 둔다
-    if ((stageOf(G.run.stage).scene || []).includes(k)) {
+    // 시작 장면 장식(stage.scene)·처음부터 선 건물(prebuilt)은 run.built에 없으므로 따로 기록해 둔다
+    const st0 = stageOf(G.run.stage);
+    if ((st0.scene || []).includes(k) || (k in (st0.prebuilt || {}) && !G.run.built.includes(k))) {
+      if ((G.run.unscene || []).includes(k)) return;
       G.run.unscene = (G.run.unscene || []).concat(k);
       setTimeout(() => W.unbuild(k, 2.6), delay || 0);
       return;
@@ -1063,6 +1118,12 @@
       setTimeout(() => W.fxBoats(true), 600);
     }
     if (f.skyText) setTimeout(() => W.fxSkyText(f.skyText), 400);
+    // 눈이 내리기 시작해 그 생 끝까지(병자호란 J09) · 무거운 "쿵"(삼전도비 J11)
+    if (f.snow) {
+      run.flags.snow = true;
+      if (JK.EvFx) setTimeout(() => JK.EvFx.ambient('snow', true), 500);
+    }
+    if (f.heavy) setTimeout(() => (W.shake(0.9), JK.Audio && JK.Audio.drum && JK.Audio.drum()), 1600);
     for (const k of f.remove || []) unbuild(k, 600);
     // 잠깐 떠올랐다 사라지는 장식(예: 수창궁 즉위 — 이름표 없는 옛 궁궐)
     if (f.flash && !run.built.includes(f.flash)) {

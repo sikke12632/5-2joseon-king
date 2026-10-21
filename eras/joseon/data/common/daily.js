@@ -1277,6 +1277,809 @@
   }
  },
  {
+  "id": "D027",
+  "kind": "daily",
+  "stages": [
+   "seonjo",
+   "yeongjo"
+  ],
+  "rarity": "common",
+  "who": {
+   "name": "궁녀",
+   "doll": "courtlady"
+  },
+  "line": "중전마마께서 한글로 편지를 쓰셨사옵니다. 궁 안에서도 한글을 더 쓰게 할까요?",
+  "choice_type": "free",
+  "choices": {
+   "right": {
+    "label": "한글을 권한다",
+    "effects": {
+     "people": 5,
+     "nobles": -5
+    },
+    "this_run": "궁녀들도 한글로 편지를 주고받았다."
+   },
+   "left": {
+    "label": "한자를 지킨다",
+    "effects": {
+     "nobles": 5,
+     "people": -5
+    },
+    "this_run": "나라의 공식 문서는 여전히 한자로 썼다."
+   }
+  },
+  "grain": "balance",
+  "out_of_textbook": false,
+  "sources": [
+   {
+    "type": "guide",
+    "page": "263"
+   }
+  ],
+  "sources_text": "지도서 263 유의점: 공식 문서는 한자, 한글 사용자는 늘었고 왕·왕비의 한글 편지가 남음",
+  "learn": "훈민정음 이후 한글 사용",
+  "fx": {
+   "note": "궁궐 창호지 너머로 한글 편지가 접힌다."
+  }
+ },
+ {
+  "id": "D028",
+  "kind": "daily",
+  "stages": [
+   "seonjo",
+   "yeongjo"
+  ],
+  "rarity": "common",
+  "who": {
+   "name": "형조 관리",
+   "doll": "official_red"
+  },
+  "line": "주인의 잘못을 관아에 알리려는 노비가 있사옵니다. 《경국대전》은 이런 고발을 받지 말라 하옵니다.",
+  "choice_type": "free",
+  "choices": {
+   "right": {
+    "label": "고발을 받아 준다",
+    "effects": {
+     "people": 10,
+     "nobles": -15
+    },
+    "this_run": "관아가 술렁였다."
+   },
+   "left": {
+    "label": "법대로 막는다",
+    "effects": {
+     "nobles": 10,
+     "people": -10
+    },
+    "this_run": "고발은 받아들여지지 않았다. 신분이 낮은 사람이 높은 사람을 고발하기 어려운 법이었다."
+   }
+  },
+  "grain": "balance",
+  "out_of_textbook": false,
+  "sources": [
+   {
+    "type": "guide",
+    "page": "244~245",
+    "tb": "80"
+   }
+  ],
+  "sources_text": "지도서 244~245(교과서 80) 《경국대전》 노비 고발 조항과 그 까닭",
+  "learn": "《경국대전》과 신분 질서",
+  "fx": {
+   "note": "관아 마당에 북이 놓여 있다."
+  }
+ },
+ {
+  "id": "D029",
+  "kind": "daily",
+  "stages": [
+   "seonjo"
+  ],
+  "required_in": "seonjo",
+  "conditions_text": "전쟁 중",
+  "rarity": "common",
+  "who": {
+   "name": "병조 관리",
+   "doll": "official_red"
+  },
+  "line": "군사가 모자라온데, 법전에는 부모가 70세가 넘으면 아들 하나는 군대에서 빼 준다 하옵니다. 예외 없이 뽑을까요?",
+  "choice_type": "free",
+  "choices": {
+   "right": {
+    "label": "모두 뽑는다",
+    "effects": {
+     "army": 15,
+     "people": -10,
+     "nobles": -5
+    },
+    "this_run": "효를 어긴다며 원성이 컸다."
+   },
+   "left": {
+    "label": "법전대로 둔다",
+    "effects": {
+     "people": 10,
+     "army": -10
+    },
+    "this_run": "법전대로 부모 곁을 지키게 했다."
+   }
+  },
+  "grain": "complex",
+  "out_of_textbook": false,
+  "sources": [
+   {
+    "type": "guide",
+    "page": "244",
+    "tb": "80"
+   }
+  ],
+  "sources_text": "지도서 244(교과서 80) 《경국대전》 군역 면제 조항(효)",
+  "learn": "《경국대전》과 효",
+  "fx": {
+   "note": "마을 어귀에서 늙은 부모와 아들 인형이 손을 잡는다."
+  }
+ },
+ {
+  "id": "D030",
+  "kind": "daily",
+  "stages": [
+   "seonjo"
+  ],
+  "required_in": "seonjo",
+  "conditions_text": "임진왜란 중(J02~J07)",
+  "rarity": "common",
+  "who": {
+   "name": "피란 온 양반 오희문",
+   "doll": "yangban"
+  },
+  "line": "골짜기 시냇가에서 잠을 잤사옵니다. 피란 온 사람들에게 곡식을 나누어 주소서.",
+  "choice_type": "free",
+  "choices": {
+   "right": {
+    "label": "곡식을 나눈다",
+    "effects": {
+     "people": 15,
+     "treasury": -10
+    },
+    "this_run": "굶주린 피란민들이 죽 한 그릇씩 받았다."
+   },
+   "left": {
+    "label": "군량으로 둔다",
+    "effects": {
+     "treasury": 5,
+     "people": -10
+    },
+    "this_run": "곡식은 군사들 몫으로 남겼다."
+   }
+  },
+  "grain": "balance",
+  "out_of_textbook": false,
+  "sources": [
+   {
+    "type": "guide",
+    "page": "237",
+    "tb": "79"
+   }
+  ],
+  "sources_text": "지도서 237(교과서 79) 《쇄미록》(임진왜란 중 오희문의 일기)",
+  "learn": "전쟁 속 사람들의 삶",
+  "fx": {
+   "note": "산골짜기에 피란민 천막과 모닥불."
+  }
+ },
+ {
+  "id": "D031",
+  "kind": "daily",
+  "stages": [
+   "seonjo"
+  ],
+  "required_in": "seonjo",
+  "conditions_text": "병자호란 중(J09~J10)",
+  "rarity": "common",
+  "who": {
+   "name": "남평 조씨",
+   "doll": "official_red"
+  },
+  "line": "남한산성에 계신 남편이 남쪽으로 피란하라 했사옵니다. 나루에 배를 대 주시겠사옵니까?",
+  "choice_type": "free",
+  "choices": {
+   "right": {
+    "label": "배를 대 준다",
+    "effects": {
+     "people": 10,
+     "treasury": -5,
+     "army": -5
+    },
+    "this_run": "피란민들이 배를 타고 강을 건넜다."
+   },
+   "left": {
+    "label": "군사가 쓴다",
+    "effects": {
+     "army": 5,
+     "people": -10
+    },
+    "this_run": "배는 군사들이 쓰기로 했다."
+   }
+  },
+  "grain": "complex",
+  "out_of_textbook": false,
+  "sources": [
+   {
+    "type": "guide",
+    "page": "237",
+    "tb": "79"
+   }
+  ],
+  "sources_text": "지도서 237(교과서 79) 《병자일기》(병자호란 중 남평 조씨의 일기)",
+  "learn": "전쟁 속 사람들의 삶",
+  "fx": {
+   "note": "얼어붙은 나루에 작은 배 한 척."
+  }
+ },
+ {
+  "id": "D032",
+  "kind": "daily",
+  "stages": [
+   "seonjo"
+  ],
+  "conditions_text": "J07 뒤",
+  "rarity": "common",
+  "who": {
+   "name": "고을 농민",
+   "doll": "farmer"
+  },
+  "line": "전쟁으로 집과 논밭이 다 타 버렸사옵니다. 씨앗을 나누어 주소서.",
+  "choice_type": "free",
+  "choices": {
+   "right": {
+    "label": "씨앗을 나눈다",
+    "effects": {
+     "people": 15,
+     "treasury": -15
+    },
+    "this_run": "탄 들판에 씨앗이 뿌려졌다."
+   },
+   "left": {
+    "label": "곳간을 지킨다",
+    "effects": {
+     "treasury": 10,
+     "people": -15
+    },
+    "this_run": "농민들은 빈손으로 들판에 섰다."
+   }
+  },
+  "grain": "balance",
+  "out_of_textbook": false,
+  "sources": [
+   {
+    "type": "guide",
+    "page": "235",
+    "tb": "77"
+   }
+  ],
+  "sources_text": "지도서 235(교과서 77 그림: 집과 땅이 다 타 버린 백성)",
+  "learn": "임진왜란의 피해",
+  "fx": {
+   "note": "검게 탄 논에 초록 싹이 하나둘 돋는다."
+  }
+ },
+ {
+  "id": "D033",
+  "kind": "daily",
+  "stages": [
+   "seonjo"
+  ],
+  "conditions_text": "J04~J07",
+  "rarity": "common",
+  "who": {
+   "name": "의병장",
+   "doll": "official_green"
+  },
+  "line": "의병들이 먹을 쌀이 떨어졌다 하옵니다.",
+  "choice_type": "free",
+  "choices": {
+   "right": {
+    "label": "쌀을 보낸다",
+    "effects": {
+     "army": 10,
+     "treasury": -10
+    },
+    "this_run": "쌀 수레가 산길을 올랐다."
+   },
+   "left": {
+    "label": "스스로 버티게",
+    "effects": {
+     "treasury": 5,
+     "army": -10
+    },
+    "this_run": "의병들은 산나물로 버텼다."
+   }
+  },
+  "grain": "balance",
+  "out_of_textbook": false,
+  "sources": [
+   {
+    "type": "guide",
+    "page": "235",
+    "tb": "77"
+   }
+  ],
+  "sources_text": "지도서 235(교과서 77) 의병의 활약",
+  "learn": "의병",
+  "fx": {
+   "note": "산길에 쌀 수레와 깃발."
+  }
+ },
+ {
+  "id": "D034",
+  "kind": "daily",
+  "stages": [
+   "seonjo"
+  ],
+  "conditions_text": "J02 뒤, J04 앞",
+  "rarity": "common",
+  "who": {
+   "name": "피란길 마을 사람",
+   "doll": "official_blue"
+  },
+  "line": "피란길의 백성들이 임금 행렬을 막고 ‘저희를 두고 가시옵니까’ 하옵니다.",
+  "choice_type": "free",
+  "choices": {
+   "right": {
+    "label": "백성을 달랜다",
+    "effects": {
+     "people": 10,
+     "army": -10
+    },
+    "this_run": "전하는 잠시 멈추어 백성들을 달랬다."
+   },
+   "left": {
+    "label": "서둘러 떠난다",
+    "effects": {
+     "army": 5,
+     "people": -10
+    },
+    "this_run": "행렬은 서둘러 북쪽으로 떠났다."
+   }
+  },
+  "grain": "balance",
+  "out_of_textbook": false,
+  "sources": [
+   {
+    "type": "guide",
+    "page": "239"
+   }
+  ],
+  "sources_text": "지도서 239(선조의 의주 피란) / 일반 상황",
+  "learn": "임진왜란 초기",
+  "fx": {
+   "note": "빗속의 피란 행렬."
+  }
+ },
+ {
+  "id": "D035",
+  "kind": "daily",
+  "stages": [
+   "seonjo"
+  ],
+  "conditions_text": "J05~J07",
+  "rarity": "common",
+  "who": {
+   "name": "유성룡",
+   "doll": "yuseongryong"
+  },
+  "line": "포를 쏘는 군사, 활 쏘는 군사, 창칼 쓰는 군사를 나누어 훈련하는 군영을 만드소서.",
+  "choice_type": "free",
+  "choices": {
+   "right": {
+    "label": "군영을 만든다",
+    "effects": {
+     "army": 15,
+     "treasury": -10
+    },
+    "this_run": "훈련장에 포 소리가 울렸다."
+   },
+   "left": {
+    "label": "예전대로 한다",
+    "effects": {
+     "treasury": 5,
+     "army": -10
+    },
+    "this_run": "군사들은 예전처럼 모였다 흩어졌다."
+   }
+  },
+  "grain": "balance",
+  "out_of_textbook": true,
+  "sources": [
+   {
+    "type": "web",
+    "title": "한국민족문화대백과사전 '훈련도감'(1593)",
+    "url": "https://encykorea.aks.ac.kr/Article/E0065793"
+   }
+  ],
+  "sources_text": "[교과서 밖] 한국민족문화대백과사전 '훈련도감'(1593) https://encykorea.aks.ac.kr/Article/E0065793",
+  "learn": "임진왜란 중 군사 제도",
+  "fx": {
+   "note": "도성 안 훈련장에 깃발 세 가지 색."
+  }
+ },
+ {
+  "id": "D036",
+  "kind": "daily",
+  "stages": [
+   "seonjo",
+   "yeongjo"
+  ],
+  "conditions_text": "J11 뒤",
+  "rarity": "common",
+  "who": {
+   "name": "호조 관리",
+   "doll": "official_green"
+  },
+  "line": "청에 바칠 물품 목록이 왔사옵니다. 줄여 달라 청해 볼까요?",
+  "choice_type": "free",
+  "choices": {
+   "right": {
+    "label": "줄여 달라 한다",
+    "effects": {
+     "treasury": 10,
+     "army": -10
+    },
+    "this_run": "사신이 무거운 걸음으로 떠났다."
+   },
+   "left": {
+    "label": "목록대로 낸다",
+    "effects": {
+     "army": 5,
+     "treasury": -15
+    },
+    "this_run": "목록대로 수레에 실었다."
+   }
+  },
+  "grain": "balance",
+  "out_of_textbook": false,
+  "sources": [
+   {
+    "type": "guide",
+    "page": "236",
+    "tb": "78"
+   }
+  ],
+  "sources_text": "지도서 236(교과서 78) 청에 물품을 바침",
+  "learn": "병자호란의 결과",
+  "fx": {
+   "note": "북쪽 길로 물품 수레 행렬."
+  }
+ },
+ {
+  "id": "D037",
+  "kind": "daily",
+  "stages": [
+   "seonjo"
+  ],
+  "conditions_text": "J11 뒤",
+  "rarity": "common",
+  "who": {
+   "name": "국경 고을 관리",
+   "doll": "official_green"
+  },
+  "line": "청에 끌려갔다 도망쳐 온 백성들이 있사옵니다. 청은 돌려보내라 하옵니다.",
+  "choice_type": "free",
+  "choices": {
+   "right": {
+    "label": "숨겨 준다",
+    "effects": {
+     "people": 15,
+     "army": -15
+    },
+    "this_run": "관리들은 그들을 산골 마을에 숨겨 주었다."
+   },
+   "left": {
+    "label": "돌려보낸다",
+    "effects": {
+     "army": 5,
+     "people": -15
+    },
+    "this_run": "백성들은 눈물을 흘리며 국경으로 돌아갔다."
+   }
+  },
+  "grain": "balance",
+  "out_of_textbook": false,
+  "sources": [
+   {
+    "type": "guide",
+    "page": "239"
+   }
+  ],
+  "sources_text": "지도서 239 청은 도망 나온 조선인을 다시 돌려보내라고 요구",
+  "learn": "병자호란의 고통",
+  "fx": {
+   "note": "눈 덮인 국경 강가의 발자국."
+  }
+ },
+ {
+  "id": "D038",
+  "kind": "daily",
+  "stages": [
+   "seonjo"
+  ],
+  "conditions_text": "임진왜란 중",
+  "rarity": "common",
+  "who": {
+   "name": "피란 가는 양반",
+   "doll": "yangban"
+  },
+  "line": "적이 검은 갓을 쓴 양반을 붙잡아 간다 하여, 양반들도 패랭이를 쓰고 피란하옵니다. 체면을 지키라 할까요?",
+  "choice_type": "free",
+  "choices": {
+   "right": {
+    "label": "체면을 지키게",
+    "effects": {
+     "nobles": 5,
+     "army": -5
+    },
+    "this_run": "갓을 고집한 양반들은 길을 돌아가야 했다."
+   },
+   "left": {
+    "label": "패랭이를 허락",
+    "effects": {
+     "people": 5,
+     "nobles": -5
+    },
+    "this_run": "양반도 패랭이를 쓰고 길을 떠났다."
+   }
+  },
+  "grain": "balance",
+  "out_of_textbook": true,
+  "sources": [
+   {
+    "type": "web",
+    "title": "한국민족문화대백과사전 '패랭이'(연려실기술 등의 기록)",
+    "url": "https://encykorea.aks.ac.kr/Article/E0059795"
+   }
+  ],
+  "sources_text": "[교과서 밖] 한국민족문화대백과사전 '패랭이'(연려실기술 등의 기록) https://encykorea.aks.ac.kr/Article/E0059795",
+  "learn": "신분을 나타내는 옷차림",
+  "fx": {
+   "note": "양반 인형의 검은 갓이 패랭이로 바뀐다."
+  }
+ },
+ {
+  "id": "D039",
+  "kind": "daily",
+  "stages": [
+   "seonjo",
+   "yeongjo"
+  ],
+  "conditions_text": "J05 뒤",
+  "rarity": "common",
+  "who": {
+   "name": "호조 판서",
+   "doll": "official_blue"
+  },
+  "line": "나라 살림이 바닥이옵니다. 곡식을 바치는 사람에게 이름 칸이 빈 명예 벼슬 문서를 주면 어떨까요?",
+  "choice_type": "free",
+  "choices": {
+   "right": {
+    "label": "문서를 판다",
+    "effects": {
+     "treasury": 15,
+     "nobles": -10
+    },
+    "this_run": "곡식 수레가 관아 앞에 줄을 섰다."
+   },
+   "left": {
+    "label": "팔지 않는다",
+    "effects": {
+     "nobles": 5,
+     "treasury": -10
+    },
+    "this_run": "나라 곳간은 비어 갔다."
+   }
+  },
+  "grain": "balance",
+  "out_of_textbook": true,
+  "sources": [
+   {
+    "type": "web",
+    "title": "한국민족문화대백과사전 '공명첩'(임진왜란 중 생김, 이름뿐인 벼슬)",
+    "url": "https://encykorea.aks.ac.kr/Article/E0004276"
+   }
+  ],
+  "sources_text": "[교과서 밖] 한국민족문화대백과사전 '공명첩'(임진왜란 중 생김, 이름뿐인 벼슬) https://encykorea.aks.ac.kr/Article/E0004276",
+  "learn": "조선 후기 신분 질서의 흔들림",
+  "fx": {
+   "note": "관아 앞에 빈칸 있는 문서가 쌓인다."
+  }
+ },
+ {
+  "id": "D040",
+  "kind": "daily",
+  "stages": [
+   "seonjo",
+   "yeongjo"
+  ],
+  "rarity": "common",
+  "who": {
+   "name": "장수",
+   "doll": "official_blue"
+  },
+  "line": "전쟁에서 공을 세운 노비를 상민으로 풀어 주소서.",
+  "choice_type": "free",
+  "choices": {
+   "right": {
+    "label": "상민으로 푼다",
+    "effects": {
+     "people": 10,
+     "army": 5,
+     "nobles": -10
+    },
+    "this_run": "노비 문서 한 장이 불살라졌다."
+   },
+   "left": {
+    "label": "칭찬만 한다",
+    "effects": {
+     "nobles": 10,
+     "people": -10
+    },
+    "this_run": "공은 칭찬만 받았다."
+   }
+  },
+  "grain": "complex",
+  "out_of_textbook": false,
+  "sources": [
+   {
+    "type": "guide",
+    "page": "283",
+    "tb": "95"
+   }
+  ],
+  "sources_text": "지도서 283(교과서 95) 상민으로 신분이 상승한 천민이 많아짐",
+  "learn": "신분제의 변화",
+  "fx": {
+   "note": "노비 인형의 옷이 상민 옷으로 바뀐다."
+  }
+ },
+ {
+  "id": "D041",
+  "kind": "daily",
+  "stages": [
+   "seonjo"
+  ],
+  "conditions_text": "J10 앞(병자호란 중)",
+  "rarity": "common",
+  "who": {
+   "name": "남한산성의 장수",
+   "doll": "official_blue"
+  },
+  "line": "성 안 식량이 바닥나고 있사옵니다. 군사 밥부터 지키고 백성 몫을 줄일까요?",
+  "choice_type": "free",
+  "choices": {
+   "right": {
+    "label": "군사 몫을 지킨다",
+    "effects": {
+     "army": 5,
+     "people": -10
+    },
+    "this_run": "군사들은 성벽을 지켰다."
+   },
+   "left": {
+    "label": "함께 나눈다",
+    "effects": {
+     "people": 5,
+     "army": -10
+    },
+    "this_run": "군사와 백성이 죽을 나누어 먹었다."
+   }
+  },
+  "grain": "balance",
+  "out_of_textbook": false,
+  "sources": [
+   {
+    "type": "guide",
+    "page": "236",
+    "tb": "78"
+   }
+  ],
+  "sources_text": "지도서 236(교과서 78) 남한산성은 식량이 부족했음",
+  "learn": "병자호란",
+  "fx": {
+   "note": "성 안 곳간의 쌀자루가 줄어든다."
+  }
+ },
+ {
+  "id": "D042",
+  "kind": "daily",
+  "stages": [
+   "seonjo"
+  ],
+  "conditions_text": "J03~J07",
+  "rarity": "common",
+  "who": {
+   "name": "전라좌수영 군관",
+   "doll": "official_blue"
+  },
+  "line": "거북선 덮개 위의 칼과 송곳을 새로 갈아야 하옵니다.",
+  "choice_type": "free",
+  "choices": {
+   "right": {
+    "label": "칼을 새로 간다",
+    "effects": {
+     "army": 10,
+     "treasury": -10
+    },
+    "this_run": "덮개 위 칼날이 햇빛에 번쩍였다."
+   },
+   "left": {
+    "label": "낡은 칼로 버틴다",
+    "effects": {
+     "treasury": 5,
+     "army": -5
+    },
+    "this_run": "낡은 칼로 버텼다."
+   }
+  },
+  "grain": "balance",
+  "out_of_textbook": true,
+  "sources": [
+   {
+    "type": "web",
+    "title": "송곳)",
+    "url": "https://contents.history.go.kr/mobile/kc/view.do?levelId=kc_r300020&code=kc_age_30"
+   }
+  ],
+  "sources_text": "[교과서 밖] 우리역사넷 '거북선'(덮개 위 칼·송곳) https://contents.history.go.kr/mobile/kc/view.do?levelId=kc_r300020&code=kc_age_30",
+  "learn": "거북선",
+  "fx": {
+   "note": "부두에 거북선이 정박해 있다."
+  }
+ },
+ {
+  "id": "D043",
+  "kind": "daily",
+  "stages": [
+   "seonjo"
+  ],
+  "conditions_text": "J07 뒤, J08 앞",
+  "rarity": "common",
+  "who": {
+   "name": "사신",
+   "doll": "official_red"
+  },
+  "line": "전쟁 때 일본에 끌려간 도공과 학자가 많다 하옵니다. 사신을 보내 데려오시겠사옵니까?",
+  "choice_type": "free",
+  "choices": {
+   "right": {
+    "label": "사신을 보낸다",
+    "effects": {
+     "people": 10,
+     "treasury": -10
+    },
+    "this_run": "사신의 배가 바다를 건넜다."
+   },
+   "left": {
+    "label": "보내지 않는다",
+    "effects": {
+     "treasury": 5,
+     "people": -10
+    },
+    "this_run": "바다 건너 소식은 끊겼다."
+   }
+  },
+  "grain": "balance",
+  "out_of_textbook": false,
+  "sources": [
+   {
+    "type": "guide",
+    "page": "239"
+   }
+  ],
+  "sources_text": "지도서 239 일본이 도공·학자 등을 끌고 감 / 사신 파견은 일반 상황",
+  "learn": "임진왜란의 영향",
+  "fx": {
+   "note": "수평선을 향하는 돛배."
+  }
+ },
+ {
   "id": "D103",
   "kind": "daily",
   "stages": [
@@ -2115,6 +2918,52 @@
   }
  },
  {
+  "id": "D126",
+  "kind": "daily",
+  "stages": [
+   "seonjo"
+  ],
+  "conditions_text": "J07 뒤",
+  "rarity": "common",
+  "who": {
+   "name": "전쟁 뒤 돌아온 관리",
+   "doll": "official_green"
+  },
+  "line": "전쟁으로 불탄 호적과 토지 문서를 다시 만들어야 하옵니다.",
+  "choice_type": "free",
+  "choices": {
+   "right": {
+    "label": "장부를 만든다",
+    "effects": {
+     "treasury": 10,
+     "people": -10
+    },
+    "this_run": "관리들이 마을마다 사람과 땅을 다시 셌다."
+   },
+   "left": {
+    "label": "비워 둔다",
+    "effects": {
+     "people": 5,
+     "treasury": -10
+    },
+    "this_run": "문서는 비어 있는 채로 두었다."
+   }
+  },
+  "grain": "balance",
+  "out_of_textbook": false,
+  "sources": [
+   {
+    "type": "guide",
+    "page": "239"
+   }
+  ],
+  "sources_text": "지도서 239 임진왜란으로 양안과 호적이 대부분 없어져 나라 운영에 차질",
+  "learn": "임진왜란의 피해",
+  "fx": {
+   "note": "관아 책상에 새 장부가 쌓인다."
+  }
+ },
+ {
   "id": "D130",
   "kind": "daily",
   "stages": [
@@ -2259,6 +3108,52 @@
   "learn": "《향약집성방》",
   "fx": {
    "note": "약초밭 팻말에 두 가지 이름이 걸린다."
+  }
+ },
+ {
+  "id": "D133",
+  "kind": "daily",
+  "stages": [
+   "seonjo"
+  ],
+  "conditions_text": "J07 뒤",
+  "rarity": "common",
+  "who": {
+   "name": "고을 수령",
+   "doll": "official_red"
+  },
+  "line": "전쟁 뒤 굶주림과 돌림병이 번지옵니다. 죽을 쑤어 나눌까요?",
+  "choice_type": "free",
+  "choices": {
+   "right": {
+    "label": "죽을 나눈다",
+    "effects": {
+     "people": 15,
+     "treasury": -15
+    },
+    "this_run": "관아 앞 가마솥에서 김이 피어올랐다."
+   },
+   "left": {
+    "label": "곳간을 지킨다",
+    "effects": {
+     "treasury": 10,
+     "people": -15
+    },
+    "this_run": "곳간 문은 굳게 닫혀 있었다."
+   }
+  },
+  "grain": "balance",
+  "out_of_textbook": true,
+  "sources": [
+   {
+    "type": "guide",
+    "page": "239"
+   }
+  ],
+  "sources_text": "[교과서 밖] 지도서 239 참고 자료(임진왜란 뒤 굶주림과 질병)",
+  "learn": "임진왜란의 피해",
+  "fx": {
+   "note": "관아 마당에 큰 가마솥과 줄 선 사람들."
   }
  }
 ]);

@@ -10,6 +10,7 @@ export default async function (t) {
   await t.eval(`(()=>{for(const m of document.querySelectorAll('.modal')) m.classList.add('hide'); JK.Game.newRun('${STAGE}','normal');})()`);
   await t.waitFor('JK.Cards.isReady()', 20000);
   await t.eval('__jk.G.debugBuildAll()');
+  if (process.env.PRE) await t.eval(process.env.PRE);
   await t.sleep(10000);
   await t.eval(`for (const s of ['#panel','#hud','#title','#debug']) document.querySelector(s).style.display='none'`);
   for (const k of KEYS) {

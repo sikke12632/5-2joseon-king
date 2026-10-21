@@ -589,6 +589,8 @@ body.over #devBar { opacity: 0; }
 #devTicks i.on { background: linear-gradient(#ffe39a, #d8a83a); box-shadow: 0 0 8px rgba(255,200,80,.8); }
 #devTicks i.mark::after { content: '★'; position: absolute; left: 0; right: 0; top: -13px; text-align: center; font-size: 10px; font-style: normal; color: #a0741a; }
 #devNum { font-size: 14px; font-weight: 700; min-width: 2.4em; }
+#devBar.text { background: linear-gradient(#f4e2da, #e6c8bc); border-color: #9a3d3a; }
+#devBar.text #devNum { color: #9a3d3a; white-space: nowrap; }
 #devDelta { position: absolute; right: -6px; top: -14px; font: 700 20px/1 'JKTitle', serif; color: #2f7a3a; opacity: 0; }
 #devBar.down #devDelta { color: #b23b30; }
 #devBar.up, #devBar.down { animation: devPop .8s cubic-bezier(.2,1.6,.4,1); }

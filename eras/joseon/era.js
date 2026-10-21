@@ -22,6 +22,15 @@
     { t: 1.0, top: '#2a3170', hor: '#8c7fb8', bot: '#5d5f92', sun: '#c8d0ff', si: 1.3, hs: '#7f88c8', hg: '#6a6890', hi: 0.8, el: 0.12, az: -1.2, night: 1.0, ink: '#262a58' },
   ];
 
+  // 선조·인조(설계서 2-3): 맑은 봄(평화) → 잿빛 여름(임진왜란) → 겨울 저녁(병자호란, 눈)
+  const SKY_PEACE_WAR_SNOW = [
+    { t: 0.0, top: '#86b6e6', hor: '#fbeed6', bot: '#f2eee6', sun: '#fff1d8', si: 2.4, hs: '#d4e4fb', hg: '#e4dcc0', hi: 1.05, el: 0.55, az: 1.1, night: 0.0, ink: '#3b4a66' },
+    { t: 0.14, top: '#8e98a6', hor: '#cfc6b6', bot: '#b9b2a6', sun: '#e6d8bc', si: 1.4, hs: '#b8c0cc', hg: '#a8a090', hi: 0.9, el: 0.75, az: 0.6, night: 0.0, ink: '#3a3f4a' },
+    { t: 0.6, top: '#8a93a2', hor: '#d2c8b6', bot: '#bdb5a8', sun: '#e8dcc0', si: 1.5, hs: '#bcc4d0', hg: '#aaa294', hi: 0.92, el: 0.6, az: -0.1, night: 0.0, ink: '#3a3f4a' },
+    { t: 0.72, top: '#a9b6c8', hor: '#e6e8ee', bot: '#d8dce4', sun: '#f2f4fa', si: 1.5, hs: '#d6dee8', hg: '#e8eaee', hi: 1.0, el: 0.35, az: -0.6, night: 0.05, ink: '#3c4458' },
+    { t: 1.0, top: '#4a5478', hor: '#b8bcd0', bot: '#8a8ea8', sun: '#d8dcf0', si: 1.2, hs: '#9aa2c4', hg: '#c8ccd8', hi: 0.85, el: 0.15, az: -1.1, night: 0.7, ink: '#2c3050' },
+  ];
+
   JK.era = {
     id: 'joseon',
     title: '조선의 왕',
@@ -77,7 +86,30 @@
         // 발명 진행도(설계서 2-2): 0~6. 장치 카드 문턱은 난이도표 stage.sejongTriggers, 6을 채우면 「과학 임금의 벗」
         device: { key: 'invention', name: '발명 진행도', max: 6, start: { invention: 0 }, triggers: 'sejongTriggers', triggersDefault: [2, 3, 5], title: 'invention6', hint: '학자·장인을 도우면 오르고, 혼천의·앙부일구·측우기가 일찍 나와요' },
       },
-      { id: 'seonjo', king: '선조·인조', seal: '宣祖', title: '전쟁 버티기', years: '1567~1649', ready: false },
+      {
+        id: 'seonjo',
+        king: '선조·인조',
+        // 한 판에 두 왕(설계서 2-3): 처음은 선조, J08(인조반정)이 뜨는 순간 인조로
+        kingFirst: '선조',
+        kingSwap: { at: 'J08', name: '인조', role: 'injo', text: '왕이 바뀌었다 — 이제부터 인조' },
+        seal: '宣祖',
+        title: '전쟁 버티기',
+        years: '1567~1649',
+        ready: true,
+        // 설계서 2-3 하늘: 평화로운 봄 → 잿빛 여름(전쟁) → 겨울 눈(병자호란)
+        sky: SKY_PEACE_WAR_SNOW,
+        tod: [0.04, 0.97],
+        // 시작 한양(10-12 ③): 서당·향교가 늘어난 평화로운 한양. 경복궁·종묘는 J02에 불탄다
+        prebuilt: { choga: 22, giwa: 18, gyeongbok: 1, jongmyo: 1, sajik: 1, wall: 1, heungin: 1, donui: 1, sungnye: 1, sukjeong: 1, seonggyun: 1, seodang: 1, hyanggyo: 1 },
+        kingRole: 'seonjo',
+        randomSlots: [6, 9],
+        slotsBefore: {},
+        realEnd: '실제로 선조는 1608년까지, 인조는 1649년까지 왕위에 있었다.',
+        scene: [],
+        // 전쟁 버티기(설계서 2-3): 숫자는 난이도표 stage 칸(warCost·food·starvePeople)
+        war: { from: 'J02', to: 'J07', cost: 'warCost', name: '⚔ 임진왜란', hint: '전쟁 중에는 카드마다 국고가 줄어요' },
+        siege: { from: 'J09', to: 'J11', food: 'food', starve: 'starvePeople', name: '남한산성 식량', hint: '식량이 바닥나면 카드마다 백성이 줄어요. 끝까지 버텨도 결국 항복해요(역사 그대로)' },
+      },
       { id: 'yeongjo', king: '영조·정조', seal: '英祖', title: '붕당 저울', years: '1724~1800', ready: false },
       { id: 'gojong', king: '고종', seal: '高宗', title: '개항 압력', years: '1863~1899', ready: false },
     ],

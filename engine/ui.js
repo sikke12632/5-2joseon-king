@@ -265,10 +265,20 @@
     if (!el) return;
     el.style.display = cfg ? '' : 'none';
     if (!cfg) return;
-    const v = vals[cfg.key] || 0;
-    const trig = JK.Game.deviceTriggers();
-    if (el.dataset.key !== cfg.key) {
+    // 글만 보이는 막대(전쟁 중 — 카드마다 국고 −1)
+    el.classList.toggle('text', !!cfg.text);
+    if (cfg.text) {
       el.dataset.key = cfg.key;
+      $('#devName').textContent = cfg.name;
+      $('#devTicks').innerHTML = '';
+      $('#devNum').textContent = cfg.text;
+      el.title = cfg.hint || cfg.name;
+      return;
+    }
+    const v = vals[cfg.key] || 0;
+    const trig = cfg.key === 'invention' ? JK.Game.deviceTriggers() : [];
+    if (el.dataset.key !== cfg.key + cfg.max) {
+      el.dataset.key = cfg.key + cfg.max;
       $('#devName').textContent = cfg.name;
       $('#devTicks').innerHTML = Array.from({ length: cfg.max }, (_, i) => `<i data-n="${i + 1}"></i>`).join('');
     }

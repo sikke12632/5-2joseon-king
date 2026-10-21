@@ -215,6 +215,50 @@
       }
       return mk(b);
     },
+    // 판옥선(설계서 7-2): 두 층 갑판의 배 + 돛 둘. 이름 없는 장식
+    panok() {
+      const b = new JK.Builder();
+      const hull = col('#4a3426'),
+        deck = col('#8a6440'),
+        house = col('#a07a52'),
+        sail = col('#efe6d0');
+      b.box(0, 0.05, 0, 0.24, 0.1, 0.66, hull, { top: deck });
+      b.box(0, 0.08, 0.35, 0.16, 0.08, 0.08, hull);
+      b.box(0, 0.14, 0, 0.3, 0.06, 0.56, house, { top: deck });
+      b.box(0, 0.2, -0.05, 0.16, 0.06, 0.2, house);
+      for (const [z, h] of [[0.14, 0.58], [-0.16, 0.48]]) {
+        b.cyl(0, 0.17, z, 0.011, 0.009, h, 4, hull, { noTop: true });
+        const y0 = 0.26,
+          y1 = h + 0.12;
+        b.quad([0.005, y0, z + 0.12], [0.005, y0, z - 0.12], [0.005, y1, z - 0.1], [0.005, y1, z + 0.1], sail);
+        b.quad([-0.005, y0, z - 0.12], [-0.005, y0, z + 0.12], [-0.005, y1, z + 0.1], [-0.005, y1, z - 0.1], sail);
+      }
+      b.cyl(0, 0.2, -0.3, 0.006, 0.006, 0.24, 3, hull, { noTop: true });
+      b.box(0.04, 0.4, -0.3, 0.07, 0.05, 0.004, col('#b23b30'));
+      return mk(b);
+    },
+    // 거북선(설계서 7-2 "확실한 것"만): 판옥선 위 덮개 · 덮개 위 칼과 송곳 · 뱃머리 용머리(입에서 포). 철갑·층수는 단정하지 않는다
+    turtle() {
+      const b = new JK.Builder();
+      const hull = col('#4a3426'),
+        cover = col('#6a5038'),
+        spike = col('#c8ccd2'),
+        head = col('#8a3a2a');
+      b.box(0, 0.05, 0, 0.26, 0.1, 0.7, hull, { top: col('#8a6440') });
+      b.box(0, 0.13, 0, 0.3, 0.06, 0.6, hull);
+      b.push().t(0, 0.16, -0.02).s(1, 0.5, 2.3);
+      b.ball(0, 0, 0, 0.15, 1, cover);
+      b.pop();
+      const rnd = JK.rng(1592);
+      for (let i = 0; i < 18; i++) {
+        const z = -0.26 + (i % 6) * 0.1,
+          x = ((i / 6) | 0) * 0.07 - 0.07;
+        b.cyl(x, 0.2 + (0.03 - Math.abs(x) * 0.3), z, 0.008, 0, 0.05 + rnd() * 0.01, 3, spike);
+      }
+      b.box(0, 0.2, 0.38, 0.07, 0.07, 0.09, head);
+      b.box(0, 0.19, 0.43, 0.04, 0.025, 0.02, col('#2a2420'));
+      return mk(b);
+    },
     jar() {
       const b = new JK.Builder();
       const c1 = col('#8d5a3a'),
@@ -652,6 +696,101 @@
       h.em.push(emit(5, () => ({ p: [x, H(x, z) + 0.68, z], v: [0, 0.02, 0, 0], life: 1.6, size: 1.3, kind: 0, color: col('#ffcf7a') })));
     },
   };
+  // 선조·인조 역사 카드 연출(설계서 3-3) — 연기·불빛·배만. 사람이 쓰러지는 장면은 없다
+  const riverAt = (s) => {
+    const rv = W.riverPts;
+    const f = Math.max(0, Math.min(0.999, s)) * (rv.length - 2),
+      k = Math.floor(f),
+      u = f - k;
+    const a = rv[k],
+      c = rv[k + 1];
+    return { x: lerp(a[0], c[0], u), z: lerp(a[1], c[1], u), ry: Math.atan2(a[0] - c[0], a[1] - c[1]) };
+  };
+  function sail(h, model, s0, drift, scale, side) {
+    const m = MODELS[model]();
+    const th = addThing(
+      m,
+      (t, el) => {
+        const p = riverAt(s0 + Math.min(el, 6) * drift);
+        m.position.set(p.x + (side || 0) * Math.cos(p.ry), -0.08 + Math.sin(el * 2 + s0 * 9) * 0.012, p.z - (side || 0) * Math.sin(p.ry));
+        m.rotation.y = p.ry;
+        m.rotation.z = Math.sin(el * 1.6 + s0 * 5) * 0.04;
+        if (el < 0.6) pop(t, el / 0.6);
+      },
+      { scale }
+    );
+    m.scale.setScalar(0.0001);
+    h.things.push(th);
+  }
+  Object.assign(SCENES, {
+    // J01: 바다 건너 먹구름이 몰려오고 물결이 높아진다
+    stormSea(h) {
+      weather('gloom');
+      h.em.push(emit(10, () => {
+        const p = riverAt(R());
+        return { p: [p.x + (R() - 0.5) * 0.6, 0.0, p.z + (R() - 0.5) * 0.6], v: [0, 0.5, 0, -1.2], life: 0.9, size: 0.22, kind: 4, color: col('#e8f2ff') };
+      }));
+      h.em.push(emit(4, () => {
+        const [x, z] = around(0, 9, 4);
+        return { p: [x, 3 + R(), z], v: [0, 0.05, -0.6, 0], life: 6, size: 2.6, kind: 0, color: col('#5a5e6a') };
+      }));
+    },
+    // J02: 궁궐·종묘에서 연기가 오르고 불티가 날린다(불빛만)
+    warSmoke(h) {
+      weather('gloom');
+      for (const k of ['gyeongbok', 'jongmyo']) {
+        const p = W.buildingPos(k) || W.buildingPos(k + 'Ruin');
+        if (!p) continue;
+        h.em.push(steam(p[0], p[1], 9, '#4a4644', 0.9));
+        h.em.push(emit(14, () => ({ p: [p[0] + (R() - 0.5) * 1.6, H(p[0], p[1]) + 0.3, p[1] + (R() - 0.5) * 1.2], v: [(R() - 0.5) * 0.4, 1.2 + R(), (R() - 0.5) * 0.4, -0.4], life: 1.4, size: 0.12, kind: 4, color: col('#ffa040') })));
+      }
+    },
+    // J03 한산도: 거북선 하나와 판옥선들이 학 날개처럼 펼쳐 강을 지난다
+    fleet(h) {
+      sail(h, 'turtle', 0.32, 0.02, 2.4, 0);
+      for (const [d, side] of [[0.05, 0.5], [0.05, -0.5], [0.1, 0.9], [0.1, -0.9], [0.15, 1.2]]) sail(h, 'panok', 0.32 - d, 0.02, 2.0, side);
+      h.em.push(emit(8, () => {
+        const p = riverAt(0.2 + R() * 0.2);
+        return { p: [p.x, 0.05, p.z], v: [0, 0.4, 0, -0.8], life: 0.8, size: 0.2, kind: 4, color: col('#f2f6ff') };
+      }));
+    },
+    // J06 명량: 좁은 물목에 물살이 소용돌이치고, 배 열세 척이 한 줄로 버틴다
+    fleet13(h) {
+      for (let i = 0; i < 13; i++) sail(h, i === 6 ? 'turtle' : 'panok', 0.18 + i * 0.035, 0, 1.6, 0);
+      h.em.push(emit(24, () => {
+        const p = riverAt(0.25 + R() * 0.4);
+        const a = R() * 6.283;
+        return { p: [p.x + Math.cos(a) * 0.4, 0.02, p.z + Math.sin(a) * 0.4], v: [-Math.sin(a) * 0.8, 0.1, Math.cos(a) * 0.8, 0], life: 1.2, size: 0.18, kind: 4, color: col('#dfeeff') };
+      }));
+    },
+    // J04 의병: 산골 마을에 흰 옷 사람들이 깃발을 들고 모이고, 붉은 옷 한 사람이 앞장선다
+    militia(h) {
+      const x = -6.4,
+        z = 2.6;
+      W.eventScene({
+        crowds: [
+          { at: [x, z], n: 10, flags: 3, flag: '#f4f0e4', clothes: ['#ece4d2', '#e3dccb'], face: [x + 3, z - 1] },
+          { at: [x + 0.6, z - 0.2], n: 1, flags: 1, flag: '#b23b30', clothes: ['#b23b30'], face: [x + 3, z - 1], mode: 'stand' },
+        ],
+      });
+      sparkleAt(x + 0.6, H(x, z) + 0.6, z - 0.2, 14, '#ffb0a0', 0.5, 0.8);
+    },
+  });
+  // 계속 내리는 눈(병자호란 J09부터 그 생 끝까지) — X.ambient('snow', true)
+  let snowEm = null;
+  X.ambient = function (name, on) {
+    ensure();
+    if (name !== 'snow') return;
+    if (on && !snowEm)
+      snowEm = emit(26, () => {
+        const [x, z] = around(0, 0, 10);
+        return { p: [x, 5 + R() * 3, z], v: [0.15, -0.9 - R() * 0.3, 0.05, 0], life: 6, size: 0.18 + R() * 0.08, kind: 0, color: col('#ffffff') };
+      });
+    if (!on && snowEm) {
+      snowEm.until = 0;
+      snowEm = null;
+    }
+  };
   // 세종 돌발(events_S.py) — 모두 점 입자(삼각형 0)
   Object.assign(SCENES, {
     // 별똥별 비(ES09·ES11): 밤하늘에 흰 줄이 비스듬히 그어지고, 가끔 반짝 터진다
@@ -851,6 +990,7 @@
     if (!W) W = JK.World;
     if (cur) X.stop(true);
     emitters.length = 0;
+    snowEm = null;
     for (const t of things) {
       W.island.remove(t.mesh);
       if (t.mesh.geometry) t.mesh.geometry.dispose();

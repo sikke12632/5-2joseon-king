@@ -42,6 +42,13 @@
     // 세종(설계서 7-3): 왕은 익선관·붉은 곤룡포, 세자는 같은 옷을 작게(세부는 확인 전이라 색만 조금 다르게), 장영실은 장인 차림
     sejong: { name: '세종', tag: '임금', cloth: '#c3322c', trim: '#e2b64c', hat: 'ikseongwan', items: ['bo', 'okdae'], bg: '#f3dc8f' },
     seja: { name: '세자', tag: '왕자', cloth: '#b5403a', trim: '#d8b64e', hat: 'ikseongwan', items: ['okdae'], bg: '#ead7b0' },
+    // 선조·인조(설계서 7-3): 왕 둘은 같은 익선관·곤룡포(색만 조금 다르게) · 이순신 투구와 갑옷 · 곽재우 갓에 붉은 옷 · 청 사람은 "다른 나라 옷" 실루엣만(세부 확인 전)
+    seonjo: { name: '선조', tag: '임금', cloth: '#c3322c', trim: '#e2b64c', hat: 'ikseongwan', items: ['bo', 'okdae'], bg: '#e6d2a4' },
+    injo: { name: '인조', tag: '임금', cloth: '#b8342e', trim: '#d8b64e', hat: 'ikseongwan', items: ['bo', 'okdae'], bg: '#d6dce6' },
+    yuseongryong: { name: '유성룡', tag: '관리', cloth: '#3f6a8a', trim: '#26303e', hat: 'samo', items: ['gakdae', 'book'], bg: '#c6d8e4' },
+    yisunsin: { name: '이순신', tag: '장수', cloth: '#3a4a5e', trim: '#c99a2e', hat: 'helmet', items: ['armor', 'bow'], bg: '#bcd0e0' },
+    gwakjaewoo: { name: '곽재우', tag: '의병장', cloth: '#b23b30', trim: '#3a2a20', hat: 'gat', items: ['belt'], bg: '#ecd0c0' },
+    qing: { name: '청 사신', tag: '이웃', cloth: '#6a5a3a', trim: '#2a2a2a', hat: 'furhat', items: ['furcoat'], bg: '#dcd2c0' },
     jangyeongsil: { name: '장영실', tag: '장인', cloth: '#d2c4a4', trim: '#7a5a38', hat: 'paeraengi', items: ['belt', 'hammer'], bg: '#cfe0d6' },
   });
 })();
