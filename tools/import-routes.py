@@ -31,7 +31,7 @@ def effects(s):
 
 
 # 설계서 10-14-1 "엔진 조건 식" 표
-doc = open(os.path.join(HERE, '설계서.md'), encoding='utf-8').read()
+doc = open(os.path.join(HERE, '작업', '설계서.md'), encoding='utf-8').read()
 sec = doc[doc.index('**엔진 조건 식** (`engine/cond.js` 문법)'):doc.index('#### 10-14-2')]
 EXPR = dict(re.findall(r'^\|\s*(T\d\da\d)\s*\|\s*`([^`]+)`\s*\|', sec, re.M))
 for cid, alts in ALTS.items():

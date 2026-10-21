@@ -6,7 +6,7 @@
 
 설계서의 글을 손으로 옮기지 않고 이 스크립트로 옮긴다. 글을 고칠 일이 생기면 설계서를 고치고 다시 돌린다.
 화면 연출(세워지는 건물·건물 상태·하늘 글씨 등)처럼 설계서 표에 기계로 읽을 칸이 없는 것은 아래 STAGE_FX에 적는다.
-만든 뒤: node tools/check-data.mjs → python tools/subset-fonts.py tools/fonts-src
+만든 뒤: node tools/check-data.mjs → python tools/subset-fonts.py 작업/fonts-src
 """
 import json
 import os
@@ -14,7 +14,7 @@ import re
 import sys
 
 HERE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-DESIGN = os.path.join(HERE, '설계서.md')
+DESIGN = os.path.join(HERE, '작업', '설계서.md')
 OUT = os.path.join(HERE, 'eras', 'joseon', 'data')
 STAGES = sys.argv[1:] or ['taejo']
 

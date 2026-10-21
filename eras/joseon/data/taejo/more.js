@@ -5218,7 +5218,7 @@
     "tb": "74"
    }
   ],
-  "sources_text": "지도서 232(교과서 74) 유교 사상을 기본 원리로 삼음 · 이번 판 전용 장면(정몽주가 살아 있는 판)",
+  "sources_text": "지도서 232(교과서 74) 유교 사상을 기본 원리로 삼음 · 이번 생 전용 장면(정몽주가 살아 있는 생)",
   "learn": "조선 건국과 유교 통치 원리",
   "fx": {
    "note": "섬 한가운데 왕기가 꽂히고, 그 옆에 고려식 관복을 입은 인형 하나가 팔짱을 끼고 선다."
@@ -5275,7 +5275,7 @@
   "grain": "balance",
   "out_of_textbook": false,
   "sources": [],
-  "sources_text": "이번 판 전용 장면(개경에 머문 판)",
+  "sources_text": "이번 생 전용 장면(개경에 머문 생)",
   "learn": "실제로는 한양에 경복궁을 지었다",
   "fx": {
    "note": "섬 뒤 산자락의 옛 궁궐(이름표 없음)에 새 단청이 칠해진다."
@@ -5332,7 +5332,7 @@
   "grain": "balance",
   "out_of_textbook": false,
   "sources": [],
-  "sources_text": "이번 판 전용 장면(개경에 머문 판)",
+  "sources_text": "이번 생 전용 장면(개경에 머문 생)",
   "learn": "실제로는 한양에 종묘와 사직단을 지었다",
   "fx": {
    "note": "옛 궁궐 옆 빈터에 이름 없는 제단이 선다."
@@ -5390,7 +5390,7 @@
   "grain": "complex",
   "out_of_textbook": false,
   "sources": [],
-  "sources_text": "이번 판 전용 장면(개경에 머문 판, 네 큰 문 이름 연출 없음)",
+  "sources_text": "이번 생 전용 장면(개경에 머문 생, 네 큰 문 이름 연출 없음)",
   "learn": "실제로는 한양 도성을 쌓았다",
   "fx": {
    "note": "섬 뒤 산자락에 낡은 성벽이 이어진다(문 현판 글자 빛 없음)."
@@ -5447,7 +5447,7 @@
   "grain": "balance",
   "out_of_textbook": false,
   "sources": [],
-  "sources_text": "이번 판 전용 장면(불교와 함께 다스린 판)",
+  "sources_text": "이번 생 전용 장면(불교와 함께 다스린 판)",
   "learn": "실제로는 성균관을 세워 유교 교육을 했다",
   "fx": {
    "note": "도성 북쪽에 강당 하나만 작게 솟는다."
@@ -5494,7 +5494,7 @@
   "grain": "mire",
   "out_of_textbook": false,
   "sources": [],
-  "sources_text": "이번 판 전용 장면(정몽주가 살아 있는 판)",
+  "sources_text": "이번 생 전용 장면(정몽주가 살아 있는 생)",
   "learn": "새 나라를 반대한 사람도 있었다",
   "fx": {
    "note": "궁궐 앞에 붉은 관복 인형 하나가 상소 두루마리를 들고 선다."
@@ -5545,7 +5545,7 @@
   },
   "out_of_textbook": false,
   "sources": [],
-  "sources_text": "이번 판 전용 장면(정몽주가 살아 있는 판)",
+  "sources_text": "이번 생 전용 장면(정몽주가 살아 있는 생)",
   "learn": "나라가 바뀌어도 배움은 이어진다",
   "fx": {
    "note": "산속 초가에서 갓 쓴 인형들이 고을로 내려온다."
@@ -5590,7 +5590,7 @@
   "grain": "gift",
   "out_of_textbook": false,
   "sources": [],
-  "sources_text": "이번 판 전용 장면(정몽주가 살아 있는 판)",
+  "sources_text": "이번 생 전용 장면(정몽주가 살아 있는 생)",
   "learn": "배움이 다음 세대로 이어짐",
   "fx": {
    "note": "고을 글방에서 아이 인형들이 두루마리를 들고 뛰어나온다."
@@ -5607,7 +5607,7 @@
   "conditions": [
    "flag(F_개경) && seen(T05v1)"
   ],
-  "conditions_text": "개경에 머문 판, T05v1 뒤",
+  "conditions_text": "개경에 머문 생, T05v1 뒤",
   "who": {
    "name": "승지",
    "doll": "official_green"
@@ -5635,7 +5635,7 @@
   "grain": "balance",
   "out_of_textbook": false,
   "sources": [],
-  "sources_text": "이번 판 전용 장면(개경에 머문 판)",
+  "sources_text": "이번 생 전용 장면(개경에 머문 생)",
   "learn": "한양 천도의 까닭(물자를 나르기 좋은 곳)",
   "fx": {
    "note": "개경 섬 큰길에 새 깃발이 줄지어 걸린다."
@@ -5683,7 +5683,7 @@
   "grain": "mire",
   "out_of_textbook": false,
   "sources": [],
-  "sources_text": "이번 판 전용 장면(성 없이 문만 세운 판)",
+  "sources_text": "이번 생 전용 장면(성 없이 문만 세운 판)",
   "learn": "도성은 성벽과 문이 함께 있어야 했다",
   "fx": {
    "note": "산등성이에 성벽 없이 문만 덩그러니 서 있고, 인형들이 문 옆으로 돌아간다."

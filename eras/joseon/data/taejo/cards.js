@@ -84,7 +84,7 @@
      },
      "lock_reason": "고려를 따르는 신하들의 힘이 모자란다",
      "set_flag": "F_정몽주",
-     "merge_text": "정몽주는 끝내 새 나라의 벼슬을 받지 않고 물러났다(이번 판).",
+     "merge_text": "정몽주는 끝내 새 나라의 벼슬을 받지 않고 물러났다(이번 생).",
      "unlock": {
       "sprout": "gauge(nobles) >= 52 && gauge(army) <= 55",
       "normal": "gauge(nobles) >= 56 && gauge(army) <= 50",
@@ -178,7 +178,7 @@
      },
      "lock_reason": "백성들의 지지가 더 필요하다",
      "set_flag": "F_불교",
-     "merge_text": "그래도 나라를 다스리는 뼈대는 점점 유교로 바뀌어 갔다(이번 판).",
+     "merge_text": "그래도 나라를 다스리는 뼈대는 점점 유교로 바뀌어 갔다(이번 생).",
      "unlock": {
       "sprout": "gauge(people) >= 55",
       "normal": "gauge(people) >= 57",
@@ -277,7 +277,7 @@
      },
      "lock_reason": "옛 신하들의 바람이 모자란다",
      "set_flag": "F_국호",
-     "merge_text": "다음 임금 때 나라 이름을 조선으로 고쳤다(이번 판).",
+     "merge_text": "정종 때 나라 이름을 조선으로 고쳤다(이번 생).",
      "unlock": "gauge(nobles) >= 55",
      "this_run": "태조 동안 깃발이 고려."
     }
@@ -379,7 +379,7 @@
      },
      "lock_reason": "개경에 남자는 목소리가 아직 작다",
      "set_flag": "F_개경",
-     "merge_text": "이번 판에서는 도읍이 개경에 머물렀다.",
+     "merge_text": "이번 생에서는 도읍이 개경에 머물렀다.",
      "merge_real": {
       "text": "도읍은 1399년 정종 때 개경으로 돌아갔다가 1405년 태종 때 다시 한양으로 옮겨졌다",
       "sources": [
@@ -504,7 +504,7 @@
      },
      "lock_reason": "아직 새 궁궐을 지을 힘이 있다",
      "set_flag": "F_궁궐",
-     "merge_text": "다음 임금 때에야 경복궁이 세워졌다(이번 판).",
+     "merge_text": "정종 때에야 경복궁이 세워졌다(이번 생).",
      "unlock": "gauge(treasury) <= 30 || gauge(people) <= 30",
      "build": [
       "altPalace"
@@ -611,7 +611,7 @@
      },
      "lock_reason": "예법을 따지는 신하들이 아직 많다",
      "set_flag": "F_종묘",
-     "merge_text": "종묘와 사직단은 다음 임금 때 세워졌다(이번 판).",
+     "merge_text": "종묘와 사직단은 정종 때 세워졌다(이번 생).",
      "unlock": "gauge(nobles) <= 35",
      "crisis_mult": {
       "nobles:low": 1.3
@@ -721,7 +721,7 @@
      },
      "lock_reason": "성 없이 지킬 만큼 군사가 강하지 않다",
      "set_flag": "F_성곽",
-     "merge_text": "다음 임금 때 도성을 쌓았다(이번 판).",
+     "merge_text": "정종 때 도성을 쌓았다(이번 생).",
      "unlock": "gauge(army) >= 70",
      "build": [
       "heungin",
@@ -847,7 +847,7 @@
      },
      "lock_reason": "지방 백성들의 바람이 아직 작다",
      "set_flag": "F_향교",
-     "merge_text": "성균관은 다음 임금 때 세워졌다(이번 판).",
+     "merge_text": "성균관은 정종 때 세워졌다(이번 생).",
      "unlock": "gauge(people) >= 55",
      "build": [
       "altHyanggyo"
@@ -930,7 +930,7 @@
      },
      "lock_reason": "형제들 사이의 믿음이 모자란다",
      "set_flag": "F_양위",
-     "merge_text": "태조는 다툼 없이 왕위를 물려주었다(이번 판).",
+     "merge_text": "태조는 다툼 없이 왕위를 물려주었다(이번 생).",
      "unlock": "gauge(nobles) >= 45 && gauge(army) >= 45 && gauge(army) <= 65 && !flag(F_정몽주)",
      "this_run": "왕자의 난 없이 왕위를 물려준다."
     }
@@ -1790,7 +1790,7 @@
      "nobles": -20,
      "treasury": -20
     },
-    "this_run": "공신들이 맡던 일 몇 가지가 임금 곁으로 돌아왔다."
+    "this_run": "공신들이 맡던 일 몇 가지가 태조 곁으로 돌아왔다."
    },
    "left": {
     "label": "상소를 돌려보낸다",

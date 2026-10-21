@@ -404,7 +404,7 @@ if (existsSync(csPath)) {
   walk(D.titles);
   walk(D.falls);
   walk(D.roles);
-  if (missing.size) err('글꼴', `글꼴에 없는 글자 ${missing.size}개: ${[...missing].join('')} → python tools/subset-fonts.py tools/fonts-src`);
+  if (missing.size) err('글꼴', `글꼴에 없는 글자 ${missing.size}개: ${[...missing].join('')} → python tools/subset-fonts.py 작업/fonts-src`);
 } else warn('글꼴', 'engine/fonts/charset.txt 없음 — subset-fonts.py를 돌리면 생긴다');
 
 /* ---------- 결과 ---------- */
