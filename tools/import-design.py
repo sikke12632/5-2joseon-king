@@ -688,8 +688,8 @@ CRISIS_ORDER = [('people', 'low'), ('people', 'high'), ('nobles', 'low'), ('nobl
 # 수습하면 손상되는 건물(10-8-5 아래 줄). 지도에 없는 곳(관아·곳간·공신 집)은 비워 두면 엔진이 지어진 건물 하나를 고른다
 CRISIS_DAMAGE = {'04': ['gyeongbok'], '07': ['wall'], '08': ['sungnye', 'heungin', 'donui', 'sukjeong']}
 # 왕별로 다른 곳(세종 KS07 → 4군 6진 진). 없으면 위 표
-CRISIS_DAMAGE_BY = {'S': {'07': ['jin'], '04': [], '08': []}, 'J': {'04': [], '07': ['wall'], '08': []}, 'Y': {'04': [], '07': ['wall'], '08': []}}
-CRISIS_DOLL = {'고을에서 올라온 관리': 'official_green', '호조 판서': 'official_red', '호조 관리': 'official_blue', '승지': 'official_red', '내관': 'naegwan', '장터를 돌아본 내관': 'naegwan', '곳간지기': 'farmer', '바닷가 군관': 'official_green', '병조 관리': 'official_blue', '병조 판서': 'official_red', '북방 군관': 'general', '성을 지키는 군관': 'general', '장시를 돌아본 관리': 'official_green'}
+CRISIS_DAMAGE_BY = {'S': {'07': ['jin'], '04': [], '08': []}, 'J': {'04': [], '07': ['wall'], '08': []}, 'Y': {'04': [], '07': ['wall'], '08': []}, 'G': {'04': [], '07': ['wall'], '08': []}}
+CRISIS_DOLL = {'고을에서 올라온 관리': 'official_green', '호조 판서': 'official_red', '호조 관리': 'official_blue', '승지': 'official_red', '내관': 'naegwan', '장터를 돌아본 내관': 'naegwan', '곳간지기': 'farmer', '바닷가 군관': 'official_green', '병조 관리': 'official_blue', '병조 판서': 'official_red', '북방 군관': 'general', '성을 지키는 군관': 'general', '장시를 돌아본 관리': 'official_green', '강화도 군관': 'general'}
 
 
 def crisis_side(cell):

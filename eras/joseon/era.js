@@ -150,8 +150,8 @@
         seal: '高宗',
         title: '개항 압력',
         years: '1863~1899',
-        // 완성·시험 전까지 왕 고르기에 보이지 않게(2026-10-22 야간 — N4에서 true)
-        ready: false,
+        // 1단계(엔진·한 생) 끝나 로컬에서 고를 수 있게(2026-10-22 아침, 배포 안 함)
+        ready: true,
         // 설계서 2-5 하늘: 저녁 → 밤(전등·전차 불빛)
         sky: SKY_DAWN_TO_DUSK,
         tod: [0.3, 1.0],
@@ -299,7 +299,7 @@
       firstCards: 3,
       chainAfter: [3, 6],
       chainDepth: 3,
-      mindBoost: { ET16: 3, ES17: 3, EJ17: 3, EY17: 3 },
+      mindBoost: { ET16: 3, ES17: 3, EJ17: 3, EY17: 3, EG19: 3 },
       names: { bad: '흉', good: '길', guest: '손님', box: '상자', mind: '마음', chain: '연쇄' },
     },
     // 왕의 마음 (설계서 10-13-2) — [게임 속 일]. 0~100, 숫자는 보이지 않고 붓에 먹이 차오른다

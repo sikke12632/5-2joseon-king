@@ -54,7 +54,7 @@ export default async function (t) {
   if (b.state !== 'fall') ok('진행도가 낮으면 장치 카드가 S08 바로 앞에 반드시', idb.indexOf('SX3') >= 0 && idb.indexOf('SX3') < idb.indexOf('S08'), b.log.map(([id, v]) => `${id}(${v})`).join(' '));
   else ok('(왼쪽만 고른 생은 실각 — 창 끝 시험 건너뜀)', true);
   // 3) 위기·돌발 카드가 세종 판에 있다
-  const kinds = JSON.parse(await t.eval(`JSON.stringify({crisis: JK.era.data.cards.filter(c=>c.kind==='crisis'&&c.stages.includes('sejong')).length, events: JK.era.data.cards.filter(c=>c.kind==='event'&&c.stages.includes('sejong')).length, device: JK.era.data.cards.filter(c=>c.kind==='device').length})`));
+  const kinds = JSON.parse(await t.eval(`JSON.stringify({crisis: JK.era.data.cards.filter(c=>c.kind==='crisis'&&c.stages.includes('sejong')).length, events: JK.era.data.cards.filter(c=>c.kind==='event'&&c.stages.includes('sejong')).length, device: JK.era.data.cards.filter(c=>c.kind==='device'&&c.stages.includes('sejong')).length})`));
   ok('세종 위기 24 · 돌발 18 · 장치 3', kinds.crisis === 24 && kinds.events === 18 && kinds.device === 3, JSON.stringify(kinds));
   // 4) 칭호: 진행도 6
   const title = await t.eval(`(()=>{ const r=__jk.G.run; JK.Game.newRun('sejong','normal'); __jk.G.run.device.invention=5; return 1; })()`);

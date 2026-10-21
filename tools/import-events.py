@@ -29,7 +29,9 @@ DOLL = {'고을 수령': 'official_green', '도성 문지기': 'general', '한�
         '호위 군관': 'general', '성을 지키는 군관': 'general', '바닷가 군관': 'official_green', '역참 관리': 'official_blue',
         # 영조·정조(events_Y.py)
         '세책점 주인': 'merchant', '행차를 준비하는 신하': 'official_red', '배다리를 맡은 관리': 'official_green', '장시를 돌아본 관리': 'official_green',
-        '장터 상인': 'merchant', '역관': 'jungin', '어느 집안 어른': 'yangban', '도화서 화원': 'jungin', '마을 이장': 'farmer'}
+        '장터 상인': 'merchant', '역관': 'jungin', '어느 집안 어른': 'yangban', '도화서 화원': 'jungin', '마을 이장': 'farmer',
+        # 고종(events_G.py)
+        '개항장 관리': 'official_green', '학교 선생': 'yangban', '궁궐 장인': 'craftsman'}
 # 세계 연출(engine/evfx.js의 장면 이름)
 SCENE = {'ET01': 'drought', 'ET02': 'locust', 'ET03': 'hungry', 'ET06': 'flood', 'ET07': 'fever', 'ET08': 'fire', 'ET18': 'thief',
          'ET04': 'rain', 'ET05': 'harvest', 'ET09': 'deer', 'ET10': 'market', 'ET11': 'ship', 'ET12': 'envoy',
@@ -45,7 +47,11 @@ SCENE = {'ET01': 'drought', 'ET02': 'locust', 'ET03': 'hungry', 'ET06': 'flood',
          # 영조·정조: 모두 있는 장면
          'EY01': 'fire', 'EY02': 'thief', 'EY03': 'flood', 'EY04': 'flood', 'EY05': 'envoy', 'EY06': 'fever', 'EY07': 'drought', 'EY08': 'hungry',
          'EY09': 'jar', 'EY10': 'market', 'EY11': 'harvest', 'EY12': 'market', 'EY13': 'market', 'EY14': 'envoy', 'EY15': 'chest', 'EY16': 'map',
-         'EY17': 'plum', 'EY18': 'night'}
+         'EY17': 'plum', 'EY18': 'night',
+         # 고종: 모두 있는 장면
+         'EG01': 'fire', 'EG02': 'fever', 'EG03': 'hungry', 'EG04': 'drought', 'EG05': 'stormSea', 'EG06': 'envoy', 'EG07': 'ship', 'EG08': 'hungry',
+         'EG09': 'market', 'EG10': 'meteor', 'EG11': 'plum', 'EG12': 'market', 'EG13': 'envoy', 'EG14': 'ship', 'EG15': 'chest', 'EG16': 'chest',
+         'EG17': 'map', 'EG18': 'night', 'EG19': 'lotus'}
 # 설계서 표에 적힌 '대사만 바꿈'(ET06: 개경에 머문 판은 개경 앞 개울)
 LINE_IF = {'ET06': [{'when': 'flag(F_개경)', 'who': '개경 관리', 'line': '장맛비에 개경 앞 개울이 넘쳐 나루 마을이 잠겼사옵니다.'}]}
 COND = {'ET06': 'seen(T04) && !flag(F_계룡)'}  # 개경 판은 대사만 바꾸고(LINE_IF), 계룡산 판에는 한강이 없으니 뺀다

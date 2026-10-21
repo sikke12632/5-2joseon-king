@@ -39,7 +39,8 @@ export default async function (t) {
   ok('G04 앞: 막대 이름 「개항 압력」', pre.every((x) => x.name === '개항 압력'), [...new Set(pre.map((x) => x.name))].join(','));
   ok('G04 뒤: 막대 이름 「개화 진행도」', a.state === 'fall' || a.log.slice(at('G04') + 1).every((x) => x.name === '개화 진행도'), [...new Set(a.log.slice(at('G04') + 1).map((x) => x.name))].join(','));
   const ps = pre.map((x) => x.p);
-  ok('압력이 카드마다 오름(10이면 5로)', ps.length > 2 && ps.every((p, i) => i === 0 || p === ps[i - 1] + 1 || p === ps[i - 1] + 3 || p === ps[i - 1] || (ps[i - 1] >= 9 && p <= 6) || p === ps[i - 1] - 0), ps.join(','));
+  // 카드마다 +1에 카드 효과(척화비 +2·말림 −1, 낯선 배 ±1)가 더해진다. 10에 닿으면 5로
+  ok('압력이 카드마다 오름(10이면 5로)', ps.length > 2 && ps[ps.length - 1] > ps[0] && ps.every((p, i) => i === 0 || (p - ps[i - 1] >= -3 && p - ps[i - 1] <= 3) || (ps[i - 1] >= 7 && p <= 7)), ps.join(','));
   ok('GX1~GX3: G05 뒤 G06 앞', a.state === 'fall' || ['GX1', 'GX2', 'GX3'].every((id) => at(id) > at('G05') && at(id) < at('G06')), ['GX1', 'GX2', 'GX3'].map(at).join(','));
   ok('GX4: G10 뒤', a.state === 'fall' || at('GX4') > at('G10'), at('GX4'));
   ok('마지막 두 장면 GX5 · GX6', a.state === 'fall' || (ids[ids.length - 2] === 'GX5' && ids[ids.length - 1] === 'GX6'), ids.slice(-3).join(' '));

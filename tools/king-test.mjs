@@ -68,7 +68,9 @@ export default async function (t) {
   await t.eval(`document.querySelector('#btnFallKings').click()`);
   await t.sleep(400);
   const kp = await t.eval(`[...document.querySelectorAll('.kp-card')].map(b=>b.textContent+(b.disabled?'(잠김)':'')).join(' | ')`);
-  ok('왕 고르기: 태조 기록(별·진엔딩) · 세종~고종 준비 중', (await vis('#kingPick')) && /준비 중\(잠김\)/.test(kp) && /⭐/.test(kp), kp.slice(0, 160));
+  // ready 아닌 왕이 있으면 '준비 중(잠김)'으로 보인다(2026-10-22 다섯 왕이 모두 ready가 되어 없을 수 있음)
+  const notReady = await t.eval(`JK.era.stages.filter((s)=>!s.ready).length`);
+  ok('왕 고르기: 태조 기록(별·진엔딩) · 준비 안 된 왕은 준비 중', (await vis('#kingPick')) && (notReady ? /준비 중\(잠김\)/.test(kp) : !/준비 중/.test(kp)) && /⭐/.test(kp), kp.slice(0, 160));
   await t.shot(`${OUT}/king-3-kings.png`);
   await t.eval(`document.querySelector('.kp-card:not(.locked)').click()`);
   await t.sleep(300);
