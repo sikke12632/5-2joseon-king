@@ -753,8 +753,11 @@
   // 갈래 엔딩(10-14-2): ① 성균관 마당에 두 대감과 임금 · ② 개경 장터가 들썩 · ③ 역참 길을 달리는 말. 금빛 대신 푸른 빛
   X.branchEnd = function (b) {
     ensure();
-    const at = { '①': W.buildingPos('seonggyun') || [4.0, -4.45], '②': W.buildingPos('altPalace') || [0, -3.1], '③': W.buildingPos('gyeryongPalace') || [-0.9, 4.9] }[b.id] || [0, 0];
-    if (b.id === '①') X.play('debate', null, { at, king: true });
+    // 갈래 데이터에 end_fx { scene, at(건물 키) }가 있으면 그것을 쓴다(세종부터). 없으면 태조 갈래 셋
+    const ef = b.end_fx || null;
+    const at = ef ? W.buildingPos(ef.at) || [0, 0] : { '①': W.buildingPos('seonggyun') || [4.0, -4.45], '②': W.buildingPos('altPalace') || [0, -3.1], '③': W.buildingPos('gyeryongPalace') || [-0.9, 4.9] }[b.id] || [0, 0];
+    if (ef) X.play(ef.scene, null, { at });
+    else if (b.id === '①') X.play('debate', null, { at, king: true });
     else if (b.id === '②') X.play('market', null);
     else X.play('relay', null);
     for (let i = 0; i < 4; i++) setTimeout(() => sparkleAt(at[0], H(at[0], at[1]) + 1.2, at[1], 40, i % 2 ? '#bfe2ff' : '#8fc4ff', 1.8, 2), i * 700);
