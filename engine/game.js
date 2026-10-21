@@ -64,7 +64,14 @@
     // 무작위 칸은 '*' 자리표만 둔다. 어떤 카드가 올지는 그 자리에 왔을 때 게이지 상태·결 규칙으로 뽑는다(10-9-3)
     const [mn, mx] = stage.randomSlots || [5, 8];
     const n = mn + Math.floor(rnd() * (mx - mn + 1));
-    for (let k = 0; k < n && k < optional.length; k++) slots[Math.floor(rnd() * gaps)].push('*');
+    // 어떤 사건 앞에는 무작위 칸을 꼭 둔다(slotsBefore — 담임 제보: T01이 판 맨 처음이라 게이지를 움직일 기회가 없었음)
+    let placed = 0;
+    for (const id in stage.slotsBefore || {}) {
+      const gi = hist.findIndex((c) => c.id === id) - 1;
+      if (gi < 0) continue;
+      for (let k = 0; k < stage.slotsBefore[id] && placed < n && placed < optional.length; k++, placed++) slots[gi].push('*');
+    }
+    for (let k = placed; k < n && k < optional.length; k++) slots[Math.floor(rnd() * gaps)].push('*');
     G.lastPool = optional.map((c) => c.id);
     for (const s of slots) shuffle(s, rnd);
     const deck = [];
@@ -387,7 +394,9 @@
       flavor.right = flavor.left = real.require_reason || '';
     }
     const alts = c.paths.alt || [];
-    let ai = realShut ? 0 : alts.findIndex((a) => JK.Cond.test(a.unlock, cctx(run)));
+    // 다른 길 열림 조건은 난이도별일 수 있다({ sprout, normal, sage, annals })
+    const unlockOf = (a) => (a.unlock && typeof a.unlock === 'object' ? a.unlock[G.diffId()] : a.unlock);
+    let ai = realShut ? 0 : alts.findIndex((a) => JK.Cond.test(unlockOf(a), cctx(run)));
     const full = run.altCards.length >= (branchCfg().maxPerStage || 3);
     const open = ai >= 0 && !full;
     if (ai < 0) ai = 0;
@@ -401,7 +410,7 @@
     const out = { lock, flavor, need: realShut ? missingGauges(run, need) : [] };
     if (a) {
       const fullWhy = `${branchCfg().fullReason || '이미 나라가 많이 흔들렸다'} (한 왕에 다른 길은 ${branchCfg().maxPerStage || 3}번까지)`;
-      out.alt = { label: a.label, locked: !open, reason: open ? '' : full ? fullWhy : needText(run, a.unlock) || a.lock_reason || '', flavor: open || full ? '' : a.lock_reason || '' };
+      out.alt = { label: a.label, locked: !open, reason: open ? '' : full ? fullWhy : needText(run, unlockOf(a)) || a.lock_reason || '', flavor: open || full ? '' : a.lock_reason || '' };
     }
     if (a && open) out.fxAlt = ((s) => s)(Object.fromEntries(Object.entries(a.effects || {}).map(([k, x]) => [k, G.effect(k, x, run.vals)])));
     return out;

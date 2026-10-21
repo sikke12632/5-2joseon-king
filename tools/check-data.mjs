@@ -104,7 +104,7 @@ for (const c of D.cards) {
       if (!a.label) err(id, '다른 길 버튼 글 없음');
       else if (a.label.length > LABEL_MAX) err(id, `다른 길 버튼 글 ${a.label.length}자: ${a.label}`);
       if (!a.unlock) warn(id, `다른 길 ${a.label}: 열림 조건 없음(늘 열림)`);
-      checkCond(id, `다른 길 ${a.label} unlock`, a.unlock);
+      checkCond(id, `다른 길 ${a.label} unlock`, a.unlock && typeof a.unlock === 'object' ? Object.values(a.unlock) : a.unlock);
       if (!a.this_run) err(id, `다른 길 ${a.label}: 「이번 판에서」 없음`);
       for (const k in a.effects || {}) if (!gaugeKeys.includes(k)) err(id, `다른 길 효과에 없는 게이지: ${k}`);
       for (const b of a.build || []) if (!era.map.buildings[b]) err(id, `다른 길 build에 없는 건물: ${b}`);
@@ -176,6 +176,77 @@ for (const st of stageIds) {
 for (const id in era.difficulty || {}) {
   const d = era.difficulty[id];
   for (const k of ['mult', 'warn', 'preview', 'carry', 'quizOptions', 'quizBonus', 'afterFall', 'hint']) if (d[k] === undefined) err('난이도 ' + id, `${k} 없음`);
+}
+
+/* ---------- 잠금 조건이 실제로 열릴 수 있는지 (담임 제보 2026-10-21: T01 다른 길이 절대 안 열림) ----------
+ * 그 사건 칸 전까지 "반드시 놓이는" 카드만으로 게이지를 최대한 올리거나 내린 범위를 셈한다.
+ *  - 시작 50, 앞의 역사·사관 카드는 그 게이지에 가장 좋은 쪽을 골랐다고 본다
+ *  - 무작위 칸은 era 스테이지 slotsBefore(그 사건 앞에 꼭 두는 칸 수)만큼만 센다. 한 칸이 한 게이지를 SLOT(10)까지 움직인다고 본다
+ *  - 난이도 배율(mult)을 곱해 반올림. 게이지마다 따로 본다(여러 게이지 조건은 각각 닿으면 통과)
+ *  - flag(F)는 F를 세우는 다른 길이 앞 사건에 있어야, real(T)는 T가 앞에 있어야 한다
+ * 열 수 없는 조건 = 오류. 실제 경로 잠김(lock_*)은 "피할 수 있는지"를 본다. */
+{
+  const SLOT = 10;
+  const diffs = Object.keys(era.difficulty);
+  for (const st of era.stages.filter((x) => x.ready)) {
+    const hist = D.cards.filter((c) => (c.kind === 'history' || c.kind === 'sagwan') && !c.variant_of && c.stages.includes(st.id)).sort((a, b) => a.order - b.order);
+    const before = st.slotsBefore || {};
+    for (const dId of diffs) {
+      const mult = era.difficulty[dId].mult;
+      const eff = (v) => Math.round(v * mult);
+      const range = {};
+      for (const k of gaugeKeys) range[k] = [50, 50];
+      const flagsBefore = new Set();
+      const seenBefore = new Set();
+      let slots = 0;
+      for (const c of hist) {
+        // 이 카드 앞에 꼭 두는 무작위 칸
+        const n = before[c.id] || 0;
+        slots += n;
+        for (const k of gaugeKeys) range[k] = [Math.max(0, range[k][0] - eff(SLOT) * n), Math.min(100, range[k][1] + eff(SLOT) * n)];
+        const lo = (k) => range[k][0],
+          hi = (k) => range[k][1];
+        const termOk = (t, invert) => {
+          let m = t.match(/^gauge\((\w+)\)\s*(>=|<=|>|<)\s*(\d+)$/);
+          if (m) {
+            let op = m[2];
+            if (invert) op = { '<': '>=', '<=': '>', '>': '<=', '>=': '<' }[op];
+            const n = +m[3];
+            return { '>=': hi(m[1]) >= n, '>': hi(m[1]) > n, '<=': lo(m[1]) <= n, '<': lo(m[1]) < n }[op];
+          }
+          if ((m = t.match(/^flag\((\S+)\)$/))) return flagsBefore.has(m[1]);
+          if ((m = t.match(/^real\((\w+)\)$/))) return seenBefore.has(m[1]);
+          return true;
+        };
+        const exprOk = (e, invert) => {
+          if (!e) return true;
+          if (invert) return !/&&|\|\|/.test(e) ? termOk(e.trim(), true) : true;
+          return String(e)
+            .split('||')
+            .some((alt) => alt.split('&&').every((t) => termOk(t.trim().replace(/^\((.*)\)$/, '$1'), false)));
+        };
+        const show = (e) => `${e} — 이 칸까지 닿는 범위 ${gaugeKeys.map((k) => `${k} ${lo(k)}~${hi(k)}`).join(', ')}`;
+        if (c.paths) {
+          const real = c.paths.real || {};
+          const need = real.require && real.require[dId];
+          if (need && !exprOk(need)) err(c.id, `[${dId}] 실제 경로 요구를 채울 수 없음: ${show(need)}`);
+          for (const sk of ['lock_right', 'lock_left']) if (real[sk] && !exprOk(real[sk].when, true)) err(c.id, `[${dId}] ${sk} 잠김을 피할 수 없음: ${show(real[sk].when)}`);
+          for (const a of c.paths.alt || []) {
+            const u = a.unlock && typeof a.unlock === 'object' ? a.unlock[dId] : a.unlock;
+            if (u && !exprOk(u)) err(c.id, `[${dId}] 다른 길 「${a.label}」 열림 조건을 채울 수 없음: ${show(u)}`);
+          }
+        }
+        // 이 카드를 지나며 고를 수 있는 최대·최소
+        if (c.choices)
+          for (const k of gaugeKeys) {
+            const vals = ['right', 'left'].map((sk) => eff((c.choices[sk].effects || {})[k] || 0));
+            range[k] = [Math.max(0, range[k][0] + Math.min(0, ...vals)), Math.min(100, range[k][1] + Math.max(0, ...vals))];
+          }
+        for (const a of (c.paths && c.paths.alt) || []) if (a.set_flag) flagsBefore.add(a.set_flag);
+        seenBefore.add(c.id);
+      }
+    }
+  }
 }
 
 /* ---------- 퀴즈 ---------- */

@@ -85,7 +85,12 @@
      "lock_reason": "고려를 따르는 신하들의 힘이 모자란다",
      "set_flag": "F_정몽주",
      "merge_text": "정몽주는 끝내 새 나라의 벼슬을 받지 않고 물러났다(이번 판).",
-     "unlock": "gauge(nobles) >= 60 && gauge(army) <= 50",
+     "unlock": {
+      "sprout": "gauge(nobles) >= 52 && gauge(army) <= 55",
+      "normal": "gauge(nobles) >= 56 && gauge(army) <= 50",
+      "sage": "gauge(nobles) >= 58 && gauge(army) <= 50",
+      "annals": "gauge(nobles) >= 60 && gauge(army) <= 50"
+     },
      "variants": {
       "T02": "T02v1"
      },
@@ -171,7 +176,12 @@
      "lock_reason": "백성들의 지지가 더 필요하다",
      "set_flag": "F_불교",
      "merge_text": "그래도 나라를 다스리는 뼈대는 점점 유교로 바뀌어 갔다(이번 판).",
-     "unlock": "gauge(people) >= 60",
+     "unlock": {
+      "sprout": "gauge(people) >= 55",
+      "normal": "gauge(people) >= 57",
+      "sage": "gauge(people) >= 60",
+      "annals": "gauge(people) >= 60"
+     },
      "build": [
       "altTemple"
      ],

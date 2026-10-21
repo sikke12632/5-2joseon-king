@@ -471,8 +471,12 @@ def to105(c):
 # 표의 글(버튼·이유·이번 판·플래그·합류 문장)은 아래 alt_paths()가 설계서에서 직접 읽는다.
 #  reason_auto: 설계서에 잠김 이유 문장이 없어 엔진 화면용으로 지은 짧은 문장(담임 확인 필요)
 ALT_FX = {
-    'T01': {'unlock': 'gauge(nobles) >= 60 && gauge(army) <= 50', 'variants': {'T02': 'T02v1'}},
-    'T02': {'unlock': 'gauge(people) >= 60', 'build': ['altTemple'], 'variants': {'T08': 'T08v1'}},
+    # T01·T02는 판 맨 앞이라 앞에 놓이는 카드가 적다 → 난이도별로 낮춘다(담임 제보 2026-10-21, 새싹은 도움 되는 카드 한 장이면 열림).
+    # T01 앞에는 T00 뒤 무작위 칸 2개가 꼭 놓인다(era.js slotsBefore). 실록 도전은 설계서 원래 값
+    'T01': {'unlock': {'sprout': 'gauge(nobles) >= 52 && gauge(army) <= 55', 'normal': 'gauge(nobles) >= 56 && gauge(army) <= 50',
+                       'sage': 'gauge(nobles) >= 58 && gauge(army) <= 50', 'annals': 'gauge(nobles) >= 60 && gauge(army) <= 50'}, 'variants': {'T02': 'T02v1'}},
+    'T02': {'unlock': {'sprout': 'gauge(people) >= 55', 'normal': 'gauge(people) >= 57', 'sage': 'gauge(people) >= 60', 'annals': 'gauge(people) >= 60'},
+            'build': ['altTemple'], 'variants': {'T08': 'T08v1'}},
     'T03': {'unlock': 'gauge(nobles) >= 55'},
     'T04': {'unlock': 'gauge(treasury) <= 35 || gauge(nobles) >= 65', 'build': ['altPalace'],
             'lock_right': {'when': 'gauge(treasury) < 20', 'reason': '곳간이 비어 도읍을 옮길 수 없다'},
