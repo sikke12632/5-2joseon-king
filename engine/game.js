@@ -76,7 +76,10 @@
     const rnd = JK.rng(seed);
     const cards = era.data.cards;
     const si = stageIndex(stage.id);
-    const hist = cards.filter((c) => isFixed(c) && !c.variant_of && c.stages.includes(stage.id)).sort((a, b) => a.order - b.order);
+    const fixedAll = cards.filter((c) => isFixed(c) && !c.variant_of && c.stages.includes(stage.id)).sort((a, b) => a.order - b.order);
+    // 마지막 장면으로 고정한 장치 카드(고종 GX5·GX6)는 사이에 무작위 칸 없이 맨 끝에 차례로
+    const tail = fixedAll.filter((c) => c.kind === 'device').map((c) => c.id);
+    const hist = fixedAll.filter((c) => c.kind !== 'device');
     // 무작위 후보(10-2): 일상·희귀·전설과 사슬의 첫 카드. 사슬의 다음 카드·씨앗 열매·다른 길 카드·꼭 끼울 카드는 따로 들어온다
     const followers = new Set(cards.filter((c) => c.chain_next).map((c) => c.chain_next.card).concat(cards.filter((c) => c.seed && c.seed.fruit_id).map((c) => c.seed.fruit_id)));
     const daily = cards.filter(
@@ -108,6 +111,7 @@
       if (i < slots.length) deck.push(...slots[i]);
     });
     if (!hist.length) for (const s of slots) deck.push(...s);
+    deck.push(...tail);
     fixRequiredGrain(deck, new Set(required.map((c) => c.id)), rnd);
     return deck;
   };

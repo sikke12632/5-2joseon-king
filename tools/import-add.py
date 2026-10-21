@@ -51,7 +51,7 @@ for i in range(111, 121):
     ADD_FX.setdefault(f'DT{i}', {})['build'] = ['workyard']   # 공사장(비계·가마·돌산·흙더미): 공사철에만, T08에서 치움
 SIDE_BUILD = {('AT04', 'R'): ['gateFence']}              # 성 없는 문 옆 울타리
 # 새 인물 인형(DOLL_T) — 이름으로 고른다
-DOLL = [('권율', 'general'), ('이순신', 'yisunsin'), ('유성룡', 'yuseongryong'), ('오희문', 'yangban'), ('하륜', 'haryun'), ('권근', 'gwongeun'), ('배극렴', 'baegeuk'), ('조준', 'jojun'), ('이두란', 'idoran'),
+DOLL = [('베 짜는 아낙', 'courtlady'), ('천민이었던 사람', 'farmer'), ('동학 농민 대표', 'farmer'), ('편지 배달부', 'farmer'), ('권율', 'general'), ('이순신', 'yisunsin'), ('유성룡', 'yuseongryong'), ('오희문', 'yangban'), ('하륜', 'haryun'), ('권근', 'gwongeun'), ('배극렴', 'baegeuk'), ('조준', 'jojun'), ('이두란', 'idoran'),
         ('정몽주', 'jeongmongju'), ('무학', 'muhak'), ('여진 추장', 'jurchen'),
         ('이성계 곁의 장수', 'general'), ('이성계 부대의 군관', 'general')]
 CRAFT = ['사공', '석수', '기와장이', '목수', '나무꾼', '대목장', '장인', '일꾼', '석수 우두머리']
