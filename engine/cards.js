@@ -42,7 +42,7 @@
     $('#crisisName').style.display = v.crisisName ? '' : 'none';
     $('#runBox').style.display = v.run ? '' : 'none';
     $('#runBox').classList.toggle('against', !!v.against);
-    $('#runLabel').textContent = v.against ? '이번 판에서 — 거스른 대가' : '이번 판에서';
+    $('#runLabel').textContent = v.against ? '이번 생에서 — 거스른 대가' : '이번 생에서';
     const stamp = $('#stamp');
     stamp.classList.remove('show');
     if (v.against) {

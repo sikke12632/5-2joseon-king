@@ -102,7 +102,7 @@ export default async function (t) {
   await t.eval(`(()=>{const r=__jk.G.run; r.trait=null; r.mind=95; JK.Events.addMind(r, 10);})()`);
   const s4 = await J(`{trait:__jk.G.run.trait, mind:__jk.G.run.mind, chip:getComputedStyle(document.querySelector('.km-trait')).display, name:document.querySelector('.kt-name').textContent, cls:document.querySelector('#kingMind').className}`);
   ok('기질이 붙고 마음은 50으로', !!s4.trait && s4.mind === 50, JSON.stringify(s4.trait));
-  ok('기질 띠 "이번 판의 임금은 · …"', s4.chip !== 'none' && /^이번 판의 임금은 · /.test(s4.name), s4.name);
+  ok('기질 띠 "이번 생의 태조는 · …"', s4.chip !== 'none' && /^이번 생의 태조는 · /.test(s4.name), s4.name);
   ok('메달에 기질 모양', new RegExp('t-' + s4.trait.key).test(s4.cls), s4.cls);
   const eff = await J(`(()=>{const r=__jk.G.run; const v={people:50,nobles:50,treasury:50,army:50}; const o={}; for(const k of ['suspicious','hasty','generous','tired']){ r.trait={key:k,left:12}; o[k]={nob:__jk.G.effect('nobles',10,v), ppl:__jk.G.effect('people',-10,v), hide:JK.Events.previewHidden(r)}; } r.trait=null; o.none={nob:__jk.G.effect('nobles',10,v), ppl:__jk.G.effect('people',-10,v)}; return o;})()`);
   ok('의심 많은 왕: 양반 오름 절반', eff.suspicious.nob === Math.round(eff.none.nob / 2), JSON.stringify(eff.suspicious) + ' / ' + JSON.stringify(eff.none));

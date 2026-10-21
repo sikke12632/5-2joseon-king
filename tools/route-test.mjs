@@ -11,7 +11,7 @@ export default async function (t) {
     await t.waitFor('window.__jk && __jk.W.stats.frames > 5', 60000);
   };
   const ready = () => t.waitFor('JK.Cards.isReady()', 15000);
-  const quiet = () => t.eval(`JK.era.crisis.chance={warn:0,danger:0,cliff:0,end:0,cap:0}; JK.era.events.chance={}; document.querySelector('#warnFirst').classList.add('hide')`);
+  const quiet = () => t.eval(`JK.era.crisis.chance={warn:0,danger:0,cliff:0,end:0,cap:0}; JK.era.events.chance={sprout:0,normal:0,sage:0,annals:0}; document.querySelector('#warnFirst').classList.add('hide')`);
   const setVals = (o) => t.eval(`(()=>{const r=__jk.G.run;Object.assign(r.vals,{people:50,nobles:50,treasury:50,army:50},${JSON.stringify(o)});r.zones={};JK.Cards.setGauges(r.vals,true);JK.Crisis.apply(r,true);})()`);
   const show = async (id, vals) => {
     await ready();

@@ -23,7 +23,7 @@ export default async function (t) {
   await (async () => { await t.waitFor(`JK.Cards.isReady() || !document.querySelector('#intro').classList.contains('hide')`, 15000); if (await t.eval(`!document.querySelector('#intro').classList.contains('hide')`)) { await t.eval(`document.querySelector('#inGo').click()`); await t.waitFor('JK.Cards.isReady()', 15000); } })();
   await t.sleep(1400);
   const r1 = JSON.parse(await t.eval(`JSON.stringify({diff:__jk.G.run.diff, toast:document.querySelector('#result').textContent})`));
-  ok('새싹 + 안내', r1.diff === 'sprout' && /첫 판은 🌱 새싹/.test(r1.toast), JSON.stringify(r1));
+  ok('새싹 + 안내', r1.diff === 'sprout' && /첫 생은 🌱 새싹/.test(r1.toast), JSON.stringify(r1));
   await t.shot(`${OUT}/diff-1-first.png`);
 
   console.log('② 두 번째 판(아직 클리어 없음)');

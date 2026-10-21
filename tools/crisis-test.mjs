@@ -8,7 +8,7 @@ export default async function (t) {
     await t.goto('http://127.0.0.1:8643/index.html?idle=0&pick=normal');
     await t.waitFor('window.__jk && __jk.W.stats.frames > 20');
     // 위기 시험은 돌발 이벤트(10-13)와 왕의 마음 없이 — 무작위 돌발이 게이지·마음을 흔들지 않게
-    await t.eval(`JK.era.events.chance = {}; JK.Events.addMind = () => {}`);
+    await t.eval(`JK.era.events.chance={sprout:0,normal:0,sage:0,annals:0}; JK.Events.addMind = () => {}`);
   };
   await fresh();
   await t.eval('localStorage.clear()');

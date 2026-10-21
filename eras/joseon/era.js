@@ -215,16 +215,17 @@
         good: ['드물게, 하늘이 웃었다.', '오늘만은 사관도 붓을 가볍게 놀렸다.'],
         box: ['열지 말았어야 했을까, 열기를 잘했을까.'],
         brink: ['이 장이 마지막 장이 될지도 모른다.'],
-        night: ['임금의 방에 밤새 등불이 꺼지지 않았다.'],
+        night: ['{왕의} 방에 밤새 등불이 꺼지지 않았다.'],
       },
       // 기질이 붙을 때(설계서 표의 두 줄 + 나머지 넷은 같은 말투로 엔진 세션이 씀 — 담임 확인 필요)
+      //  {왕은}·{왕의}: 그 생의 왕 이름 + 맞는 조사(engine/terms.js, 담임 결정: '임금' 대신 왕 이름)
       trait: {
-        suspicious: '이번 판의 임금은 요즘 사람을 잘 믿지 못한다.',
-        steadfast: '임금의 눈빛이 달라졌다. 굳센 빛이다.',
-        tired: '이번 판의 임금은 요즘 몹시 지쳐 있다.',
-        hasty: '이번 판의 임금은 요즘 마음이 급하다.',
-        fearful: '이번 판의 임금은 요즘 자꾸 성벽 쪽을 돌아본다.',
-        generous: '이번 판의 임금은 요즘 마음이 넉넉하다.',
+        suspicious: '이번 생의 {왕은} 요즘 사람을 잘 믿지 못한다.',
+        steadfast: '{왕의} 눈빛이 달라졌다. 굳센 빛이다.',
+        tired: '이번 생의 {왕은} 요즘 몹시 지쳐 있다.',
+        hasty: '이번 생의 {왕은} 요즘 마음이 급하다.',
+        fearful: '이번 생의 {왕은} 요즘 자꾸 성벽 쪽을 돌아본다.',
+        generous: '이번 생의 {왕은} 요즘 마음이 넉넉하다.',
       },
     },
     // 역사 분기 (설계서 10-10-2): 한 왕에서 다른 길은 최대 3개. 넘으면 남은 다른 길은 잠긴다
@@ -234,7 +235,7 @@
     trueEnding: {
       totalEvents: 46,
       needHint: { sprout: 'number', normal: 'gauge', sage: 'none', annals: 'none' },
-      brokenText: '이번 판의 진엔딩은 멀어졌어요',
+      brokenText: '이번 생의 진엔딩은 멀어졌어요',
       otherEndingAlts: 5,
     },
     // 난이도 (설계서 10-7). 역사·카드 순서·「실제 역사」는 난이도와 무관하고, 숫자와 도움말만 바뀐다.
@@ -270,7 +271,7 @@
 unlock: { rule: 'clearAny', text: '왕 하나를 클리어하면 열려요' },
       },
       annals: {
-        name: '실록 도전', icon: '📜', desc: '미리보기·경고 없음. 실각하면 판 전체를 처음부터',
+        name: '실록 도전', icon: '📜', desc: '미리보기·경고 없음. 실각하면 생 전체를 처음부터',
         mult: 1.5, safe: null, warn: 0, preview: 'none', carry: 0.75,
         quizOptions: 4, quizRetry: false, quizBonus: 3, afterFall: 'same', hint: 'none', rareMult: 1.5, scoreMult: 1.6, crisisMult: 1.5,
         stage: { warCost: -2, food: 5, starvePeople: -8, scaleFall: 4, shipThreat: -20, sejongTriggers: [2, 4, 6] },

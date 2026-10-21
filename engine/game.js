@@ -19,6 +19,8 @@
     Cards.init({ gauges: era.gauges, onCommit: commit });
     JK.Crisis.init();
     JK.Events.init();
+    // 아이에게 보이는 말 맞추기(담임 결정): 데이터의 '판' → '생'
+    JK.Terms.applyEra(era);
   };
   G.card = (id) => cardsById[id];
   const stageOf = (id) => era.stages.find((s) => s.id === id);
@@ -570,7 +572,7 @@
         }
         if ((m = t.match(/^(!?)flag\((\S+)\)$/)) && !JK.Cond.test(t, cctx(run))) {
           const l = altLabel(m[2]);
-          other.push(m[1] ? `앞에서 「${l}」${josa(l, '을', '를').slice(-1)} 고르지 않은 판에서만` : `앞에서 「${l}」${josa(l, '을', '를').slice(-1)} 골라야 열림`);
+          other.push(m[1] ? `앞에서 「${l}」${josa(l, '을', '를').slice(-1)} 고르지 않은 생에서만` : `앞에서 「${l}」${josa(l, '을', '를').slice(-1)} 골라야 열림`);
         }
       }
       let s = '';
@@ -704,7 +706,7 @@
       run.route[run.stage][c.variant_of || c.id] = et === 'life' ? 'life' : isAlt || et === 'variant' ? 'diff' : et === 'judge' ? 'open' : 'same';
       if (!before && routeSummary(run).broken) {
         JK.UI.setSeal && JK.UI.setSeal(routeSummary(run), true);
-        setTimeout(() => Cards.toast((era.trueEnding || {}).brokenText || '이번 판의 진엔딩은 멀어졌어요', 2600), 3000);
+        setTimeout(() => Cards.toast((era.trueEnding || {}).brokenText || '이번 생의 진엔딩은 멀어졌어요', 2600), 3000);
       }
     }
     if (c.paths) {
@@ -1041,7 +1043,7 @@
   // 위기 칭호는 이룬 그 자리에서 준다(10-8-7)
   function titleNow(rules) {
     const got = awardTitles(rules);
-    if (got.length) setTimeout(() => Cards.toast(`새 칭호 「${got[0].name}」`, 2800), 2600);
+    if (got.length) setTimeout(() => Cards.toast(`새 칭호 「${JK.Terms.kingify(got[0].name)}」`, 2800), 2600);
   }
   // 실각 뒤 (10-7): 새싹 = 시작 게이지 50 + 처음 3장 큰 미리보기 / 보통·성군 = 시작 게이지 그대로 / 실록 도전 = 판 전체 처음부터
   G.retryStage = function () {
@@ -1174,7 +1176,11 @@
   // 칭호: 시대팩 칭호 가운데 rule이 이번에 이룬 것과 같은 것
   function awardTitles(rules) {
     const out = [];
-    for (const t of era.data.titles) if (rules.includes(t.rule) && S.addTitle(t.id)) out.push(t);
+    for (const t of era.data.titles)
+      if (rules.includes(t.rule) && S.addTitle(t.id)) {
+        if (G.run) (S.meta.titleKing = S.meta.titleKing || {})[t.id] = G.run.stage;
+        out.push(t);
+      }
     return out;
   }
 

@@ -138,7 +138,8 @@ def block_cards():
                 if dev:
                     c[side]['dev'] = dev
                 cur = c[side]
-            elif s.startswith('이번 판에서:') and cur is not None:
+            # 칸 이름: 예전 '이번 판에서:' · 담임 용어 결정(2026-10-21) 뒤 '이번 생에서:' 둘 다 읽는다
+            elif (s.startswith('이번 판에서:') or s.startswith('이번 생에서:')) and cur is not None:
                 cur['result'] = s[len('이번 판에서:'):].strip().strip('"“”')
             elif s.startswith('건물 상태:') and cur is not None:
                 for k, v in STATE.items():
@@ -156,7 +157,7 @@ def block_cards():
             elif s.startswith('주의:'):
                 c['note'] = s[3:].strip()
             elif s.startswith('↑ 다른 길'):
-                am = re.match(r'↑ 다른 길 \[([^\]]+)\].*?이번 판에서:\s*(.*?)\s*→\s*실제 역사와 달라졌어요', s)
+                am = re.match(r'↑ 다른 길 \[([^\]]+)\].*?이번 [판생]에서:\s*(.*?)\s*→\s*실제 역사와 달라졌어요', s)
                 if am:
                     c['altLine'] = {'label': am.group(1).strip(), 'this_run': am.group(2).strip().rstrip('.') + '.'}
             elif s.startswith('결:'):
@@ -280,7 +281,7 @@ def records():
                     rule = 'flag:' + ALT_TITLES[name]
                 if not rule:
                     continue
-                titles.append({'id': 'path-' + rule.replace(':', '-'), 'name': name, 'hint': ahint.get(rule, '이번 판의 다른 길'), 'cond': r[1], 'rule': rule})
+                titles.append({'id': 'path-' + rule.replace(':', '-'), 'name': name, 'hint': ahint.get(rule, '이번 생의 다른 길'), 'cond': r[1], 'rule': rule})
     # 진엔딩 칭호(난이도별, 10-11-3) · 다른 역사 칭호(10-11-6)
     if '#### 10-11-3.' in src:
         for r in table_after('#### 10-11-3.'):
@@ -597,7 +598,7 @@ CRISIS_DOLL = {'고을에서 올라온 관리': 'official_green', '호조 판서
 
 
 def crisis_side(cell):
-    lm = re.match(r'\*\*\[([^\]]+)\]\*\*\s*(.*?)\s+—\s+(?:이번 판에서:\s*)?(.*)$', cell)
+    lm = re.match(r'\*\*\[([^\]]+)\]\*\*\s*(.*?)\s+—\s+(?:이번 [판생]에서:\s*)?(.*)$', cell)
     if not lm:
         raise SystemExit('위기 카드 칸을 못 읽음: ' + cell)
     fx, _ = effects(lm.group(2))

@@ -23,12 +23,12 @@
     };
     // 새 판(담임 결정 2026-10-21): 생애 첫 판은 고르지 않고 새싹으로, 두 번째 판부터는 난이도 고르기 화면
     $('#btnNew').onclick = () => {
-      if (JK.Game.hasRun() && !confirm('이어 하던 판이 지워지고 처음부터 시작해요. 괜찮나요?')) return;
+      if (JK.Game.hasRun() && !confirm('이어 하던 생이 지워지고 처음부터 시작해요. 괜찮나요?')) return;
       // 시험 도구용: ?pick=normal 이면 고르기 화면 없이 첫 왕을 그 난이도로
       const pick = new URLSearchParams(location.search).get('pick');
       if (pick && era.difficulty[pick]) return startWith(era.stages[0].id, pick);
       // 생애 첫 판: 태조 + 새싹(고르기 없이). 그 뒤로는 왕 고르기 → 난이도 고르기
-      if (UI.firstEver()) return startWith(era.stages[0].id, 'sprout', '첫 판은 🌱 새싹으로 시작해요');
+      if (UI.firstEver()) return startWith(era.stages[0].id, 'sprout', '첫 생은 🌱 새싹으로 시작해요');
       showKingPick();
     };
     $('#btnRecords').onclick = () => UI.showRecords();
@@ -264,7 +264,7 @@
   /* ---------- 실각 ---------- */
   UI.showFall = function (o) {
     $('#fallPortrait').src = o.img || '';
-    $('#fallName').textContent = o.rec.name;
+    $('#fallName').textContent = JK.Terms.kingify(o.rec.name);
     // 어떤 위기에서 무너졌는지: 위기 이름, 게이지와 그때 값, 고른 대응, 그때의 실각 확률 (4-2, 10-8-3 ④)
     const fc = $('#fallCrisis');
     fc.style.display = o.crisis ? '' : 'none';
@@ -272,7 +272,7 @@
       const c = o.crisis;
       fc.innerHTML = `<b>${esc(c.name)}</b> — ${esc(c.gauge)} ${c.value}, ${esc(c.choice)}, 무너질 확률 ${Math.round(c.p * 100)}%`;
     }
-    $('#fallMsg').textContent = (o.preview ? '(미리 보기) ' : '') + o.rec.text;
+    $('#fallMsg').textContent = (o.preview ? '(미리 보기) ' : '') + JK.Terms.kingify(o.rec.text);
     $('#fallReal').textContent = o.real || '';
     $('#fallHint').textContent = o.hint || '';
     $('#fallHint').style.display = o.hint ? '' : 'none';
@@ -298,7 +298,7 @@
       }
       if (alt) mine = { path: '다른 길', label: alt.label, text: alt.this_run };
       else if (sk) mine = { path: '실제 경로', label: c.choices[sk].label, text: firstStep(c.choices[sk].this_run), state: entry.bs[c.id] };
-      else mine = { path: '', label: '', text: '이번 판에서 만나지 못했어요' };
+      else mine = { path: '', label: '', text: '이번 생에서 만나지 못했어요' };
       // same: 같은 길 true / 다른 길 false / 만나지 못함 null
       return { c, ev: c.event || c.learn || c.id, mine, same: sk ? sk !== 'alt' : null, alt, real: { year: c.year || '', text: c.real_history || '', src: JK.Quiz.sourceLine(c.sources) } };
     });
@@ -312,7 +312,7 @@
     const el = $('#trueSeal');
     if (!el) return;
     el.classList.toggle('broken', !!r.broken);
-    el.title = r.broken ? '이번 판의 진엔딩은 멀어졌어요' : `실제 역사와 같은 사건 ${r.same} / ${r.counted}`;
+    el.title = r.broken ? '이번 생의 진엔딩은 멀어졌어요' : `실제 역사와 같은 사건 ${r.same} / ${r.counted}`;
     if (crackNow) {
       el.classList.remove('crack');
       void el.offsetWidth;
@@ -333,7 +333,7 @@
       const toOther = Math.max(0, ((era.trueEnding || {}).otherEndingAlts || 5) - (entry.alts || 0));
       $('#cmpTrueN').textContent = `${tr.same} / ${tr.counted}`;
       $('#cmpTrueLeft').textContent = tr.broken
-        ? `이번 판은 진엔딩이 멀어졌어요. 대신 다른 역사 칭호를 노려 보세요${toOther ? `: 「다른 조선」까지 다른 길 ${toOther}개 더` : ''}.`
+        ? `이번 생은 진엔딩이 멀어졌어요. 대신 다른 역사 칭호를 노려 보세요${toOther ? `: 「다른 조선」까지 다른 길 ${toOther}개 더` : ''}.`
         : `진엔딩까지: 남은 사건 ${tr.left}개를 실제대로.${nst ? ` 다음 왕은 ${nst.king}.` : ''}`;
       $('#cmpTrue').classList.toggle('broken', !!tr.broken);
     }
@@ -387,7 +387,7 @@
     $('#endKind').textContent = kind === 'true' ? '진엔딩' : kind === 'branch' ? `갈래 엔딩 · ${br.name || ''}` : '다른 조선의 한양';
     $('#endTitle').textContent = kind === 'true' ? (t ? `「${t.name}」` : '') : kind === 'branch' ? `「${br.title || ''}」` : '';
     $('#endDiff').textContent = `${d.icon || ''} ${d.name || ''}`;
-    $('#endLine').textContent = kind === 'true' ? '이 임금의 실록은 실제와 같았다.' : kind === 'branch' ? br.sagwan || '' : '이 실록은 실제와 달랐지만, 이 또한 한 임금의 길이었다.';
+    $('#endLine').textContent = JK.Terms.withKing(kind === 'true' ? '{왕의} 실록은 실제와 같았다.' : kind === 'branch' ? br.sagwan || '' : '이 실록은 실제와 달랐지만, 이 또한 {왕의} 길이었다.');
     $('#endCount').textContent = o.route ? `실제 역사와 같은 사건 ${o.route.same} / ${o.route.counted}` : '';
     $('#endPreview').style.display = o.preview ? '' : 'none';
     W.setOrbit(true);
@@ -442,7 +442,7 @@
     // 갈래 엔딩(10-14-2): 푸른 실록
     if (w.branch) $('#soonTrue').innerHTML = `📘 <b>갈래 엔딩</b> 「${esc(w.branch.title)}」 — ${esc(w.branch.name)}, 푸른 실록에 꽂혔어요`;
     $('#soonTrue').classList.toggle('blue', !!w.branch);
-    $('#soonTitles').textContent = (w.titles && w.titles.length ? `새 칭호: ${w.titles.map((t) => `「${t.name}」`).join(' ')}` : '') + (w.unlockedAll ? `${w.titles && w.titles.length ? ' · ' : ''}🔓 모든 난이도가 열렸어요!` : '');
+    $('#soonTitles').textContent = (w.titles && w.titles.length ? `새 칭호: ${w.titles.map((t) => `「${JK.Terms.kingify(t.name, w.from)}」`).join(' ')}` : '') + (w.unlockedAll ? `${w.titles && w.titles.length ? ' · ' : ''}🔓 모든 난이도가 열렸어요!` : '');
     const others = era.stages.filter((s) => s.ready && s.id !== w.from).length;
     $('#soonNext').textContent = others ? '' : '다른 왕(세종~고종)은 준비 중이에요.';
     $('#soonVals').textContent = era.gauges.map((g) => `${g.name} ${w.vals[g.key]}`).join(' · ');
@@ -462,7 +462,7 @@
     const seenN = D.cards.filter((c) => m.seen[c.id]).length;
     const codexOpen = (x) => x.opens.some((id) => m.seen[id]);
     const codexN = D.codex.filter(codexOpen).length;
-    $('#recSummary').textContent = `만난 카드 ${seenN}/${D.cards.length} · 도감 ${codexN}/${D.codex.length} · 실각 기록 ${D.falls.filter((f) => m.falls[f.id]).length}/${D.falls.length} · 칭호 ${D.titles.filter((t) => m.titles[t.id]).length}/${D.titles.length} · 지금까지 ${m.plays}판, 넘긴 카드 ${m.cardsPlayed}장`;
+    $('#recSummary').textContent = `만난 카드 ${seenN}/${D.cards.length} · 도감 ${codexN}/${D.codex.length} · 실각 기록 ${D.falls.filter((f) => m.falls[f.id]).length}/${D.falls.length} · 칭호 ${D.titles.filter((t) => m.titles[t.id]).length}/${D.titles.length} · 지금까지 ${m.plays}번의 생, 넘긴 카드 ${m.cardsPlayed}장`;
     const list = (el, items, isOpen, label, hint) => {
       el.innerHTML = '';
       for (const it of items) {
@@ -495,7 +495,7 @@
       li.innerHTML = `<b>${cat} ${on.length}/${all.length}</b>` + (on.length ? '<br>' + on.map((x) => `${x.name}${x.outside ? ' <span class="tag-out">교과서 밖</span>' : ''}${stateBand(x)}`).join(' · ') : '');
       cx.appendChild(li);
     }
-    list($('#recFalls'), D.falls, (f) => m.falls[f.id], (f) => `${f.name} (${m.falls[f.id]}번)${(m.fallCrisis || {})[f.id] ? ' — ' + m.fallCrisis[f.id].map((n) => `「${n}」 위기에서 무너짐`).join(', ') : ''}`, () => '？？？');
+    list($('#recFalls'), D.falls, (f) => m.falls[f.id], (f) => `${JK.Terms.kingify(f.name)} (${m.falls[f.id]}번)${(m.fallCrisis || {})[f.id] ? ' — ' + m.fallCrisis[f.id].map((n) => `「${n}」 위기에서 무너짐`).join(', ') : ''}`, () => '？？？');
     // 위기 도감(10-8-7): 위기 8종 × 왕. 처음 수습하면 칸이 열림, 그 위기로 무너진 적이 있으면 회색 도장
     const cr = m.crisis || { held: {}, fell: {} };
     const rc = $('#recCrisis');
@@ -574,7 +574,8 @@
       shelf.push(`<span class="book branch" title="${en.branch[id]}">푸른 실록 · ${esc(b ? b.title : id)}</span>`);
     }
     $('#recShelf').innerHTML = shelf.length ? shelf.join('') : '<span class="off">아직 엔딩을 본 실록이 없어요.</span>';
-    list($('#recTitles'), D.titles, (t) => m.titles[t.id], (t) => `「${t.name}」`, (t) => `？？？ — ${t.hint}`);
+    // 칭호의 '임금'은 그 칭호를 받은 왕의 이름으로(모르면 첫 왕)
+    list($('#recTitles'), D.titles, (t) => m.titles[t.id], (t) => `「${JK.Terms.kingify(t.name, (m.titleKing || {})[t.id])}」`, (t) => `？？？ — ${t.hint}`);
     open('#records');
   };
 })();

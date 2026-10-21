@@ -283,6 +283,7 @@
   E.showNarr = function (line) {
     const el = $('#sagwanLine');
     if (!el) return;
+    line = JK.Terms.withKing(line);
     el.querySelector('.sl-text').textContent = line;
     el.classList.remove('show');
     void el.offsetWidth;
@@ -317,7 +318,7 @@
     chip.style.display = t ? '' : 'none';
     if (t) {
       chip.querySelector('.kt-icon').textContent = t.icon || '';
-      chip.querySelector('.kt-name').textContent = '이번 판의 임금은 · ' + t.name;
+      chip.querySelector('.kt-name').textContent = JK.Terms.withKing('이번 생의 {왕은} · ', run.stage) + t.name;
       chip.querySelector('.kt-tip').textContent = `${t.tip} (${run.trait.left}장 남음)`;
       chip.classList.toggle('good', !t.bad);
     }
@@ -347,8 +348,8 @@
     box.classList.add('pop');
     const t = traitDef(p.key);
     if (p.type === 'trait' && JK.EvFx) JK.EvFx.trait(p.key);
-    if (p.type === 'trait') JK.Cards.toast(`${t.icon} 이번 판의 임금은 「${t.name}」 — ${t.tip}`, 3600, t.bad ? '왕의 마음이 지쳤어요' : '왕의 마음이 단단해졌어요');
-    else if (p.type === 'clear') JK.Cards.toast(p.byCard ? `${t.icon} 임금의 마음이 풀렸다 — 「${t.name}」이 사라졌어요` : `「${t.name}」이 지나갔어요`, 2600);
+    if (p.type === 'trait') JK.Cards.toast(`${t.icon} ${JK.Terms.withKing('이번 생의 {왕은}')} 「${t.name}」 — ${t.tip}`, 3600, t.bad ? '왕의 마음이 지쳤어요' : '왕의 마음이 단단해졌어요');
+    else if (p.type === 'clear') JK.Cards.toast(p.byCard ? `${t.icon} ${JK.Terms.withKing('{왕의}')} 마음이 풀렸다 — 「${t.name}」이 사라졌어요` : `「${t.name}」이 지나갔어요`, 2600);
     else if (p.type === 'night') JK.Cards.toast('🕯 무너질 듯한 밤 — 다음 3장 동안 가장 나쁜 게이지의 위기가 두 배로 잦아요', 3600, '왕의 마음');
   };
 

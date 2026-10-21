@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>조선의 왕</title>
 <!-- 배포할 때마다 ?v= 숫자를 올린다(캐시) -->
-<link rel="stylesheet" href="engine/engine.css?v=35">
+<link rel="stylesheet" href="engine/engine.css?v=36">
 </head>
 <body>
 <div id="app">
@@ -21,7 +21,7 @@
   <div id="hud">
     <div id="stage"><span class="seal" id="stageSeal"></span><span id="stageName"></span><span id="trueSeal" title="진엔딩: 실제 역사대로">實錄</span></div>
     <!-- 왕의 마음(10-13-2, 게임 속 일): 임금 메달 옆 붓에 먹이 차오른다. 기질이 붙으면 그 아래 -->
-    <div id="kingMind" style="display:none"><div class="km-medal"><div class="km-mask"><img class="km-face" alt=""></div><span class="km-cap">왕의 마음</span></div><div class="km-brush" title="임금의 마음 (게임 속 일)"><div class="km-ink"></div><span class="km-tip"></span></div><div class="km-trait" style="display:none"><span class="kt-icon"></span><span class="kt-text"><span class="kt-name"></span><span class="kt-tip"></span></span></div></div>
+    <div id="kingMind" style="display:none"><div class="km-medal"><div class="km-mask"><img class="km-face" alt=""></div><span class="km-cap">왕의 마음</span></div><div class="km-brush" title="왕의 마음 (게임 속 일)"><div class="km-ink"></div><span class="km-tip"></span></div><div class="km-trait" style="display:none"><span class="kt-icon"></span><span class="kt-text"><span class="kt-name"></span><span class="kt-tip"></span></span></div></div>
     <div class="topbtns">
       <button id="btnHome" class="ibtn" aria-label="첫 화면" title="첫 화면으로">
         <svg viewBox="0 0 24 24"><path d="M12 3.5L2.5 11.5h2.8V20h5v-5.2h3.4V20h5v-8.5h2.8z"/></svg>
@@ -47,7 +47,7 @@
         <div id="chainTag"></div>
         <div class="por-wrap"><img id="portrait" alt="" draggable="false"></div>
         <div class="who-line"><span id="who"></span><span id="whoTitle"></span></div>
-        <div id="runBox"><span class="run-label" id="runLabel">이번 판에서</span><span id="runText"></span></div>
+        <div id="runBox"><span class="run-label" id="runLabel">이번 생에서</span><span id="runText"></span></div>
         <div id="stamp" aria-hidden="true">그래도<br>역사는<br>흘렀다</div>
         <div id="realLabel">📜 실제 역사</div>
         <div id="crisisName"></div>
@@ -198,7 +198,7 @@
       <div class="row"><label><input type="checkbox" id="optSound">효과음</label><label><input type="checkbox" id="optMusic">음악</label></div>
       <div class="row"><span>난이도</span><select id="optDiff"></select></div>
       <div class="row small" id="diffNote"></div>
-      <div class="row"><label><input type="checkbox" id="optShort">짧은 판 (꼭 나올 카드만)</label></div>
+      <div class="row"><label><input type="checkbox" id="optShort">짧은 생 (꼭 나올 카드만)</label></div>
       <h4>기록 코드</h4>
       <div class="row small">다른 기기에서 이어 하려면 코드를 복사해 두었다가 그 기기에서 붙여 넣으세요.</div>
       <textarea id="codeBox" rows="3" spellcheck="false" placeholder="여기에 기록 코드가 나와요 / 붙여 넣어요"></textarea>
@@ -213,35 +213,36 @@
   <div id="lost" class="hide"><p>그래픽을 다시 불러오는 중…</p></div>
   <div id="loading"><p>섬을 띄우는 중…</p></div>
 </div>
-<script src="engine/lib/three.min.js?v=35"></script>
-<script src="engine/toy.js?v=35"></script>
-<script src="engine/props.js?v=35"></script>
-<script src="eras/joseon/map.js?v=35"></script>
-<script src="eras/joseon/models.js?v=35"></script>
-<script src="eras/joseon/models-taejo.js?v=35"></script>
-<script src="eras/joseon/era.js?v=35"></script>
+<script src="engine/lib/three.min.js?v=36"></script>
+<script src="engine/toy.js?v=36"></script>
+<script src="engine/props.js?v=36"></script>
+<script src="eras/joseon/map.js?v=36"></script>
+<script src="eras/joseon/models.js?v=36"></script>
+<script src="eras/joseon/models-taejo.js?v=36"></script>
+<script src="eras/joseon/era.js?v=36"></script>
 <!-- 데이터: 공통 + 왕별 (왕이 늘면 그 왕 폴더의 두 줄을 더한다) -->
-<script src="eras/joseon/data/common/roles.js?v=35"></script>
-<script src="eras/joseon/data/common/records.js?v=35"></script>
-<script src="eras/joseon/data/common/stages.js?v=35"></script>
-<script src="eras/joseon/data/common/daily.js?v=35"></script>
-<script src="eras/joseon/data/taejo/cards.js?v=35"></script>
-<script src="eras/joseon/data/taejo/quizzes.js?v=35"></script>
-<script src="eras/joseon/data/taejo/more.js?v=35"></script>
-<script src="eras/joseon/data/taejo/quizzes-more.js?v=35"></script>
-<script src="eras/joseon/data/taejo/events.js?v=35"></script>
-<script src="eras/joseon/data/taejo/routes.js?v=35"></script>
-<script src="engine/save.js?v=35"></script>
-<script src="engine/world.js?v=35"></script>
-<script src="engine/audio.js?v=35"></script>
-<script src="engine/cards.js?v=35"></script>
-<script src="engine/quiz.js?v=35"></script>
-<script src="engine/cond.js?v=35"></script>
-<script src="engine/crisis.js?v=35"></script>
-<script src="engine/events.js?v=35"></script>
-<script src="engine/evfx.js?v=35"></script>
-<script src="engine/game.js?v=35"></script>
-<script src="engine/ui.js?v=35"></script>
-<script src="engine/main.js?v=35"></script>
+<script src="eras/joseon/data/common/roles.js?v=36"></script>
+<script src="eras/joseon/data/common/records.js?v=36"></script>
+<script src="eras/joseon/data/common/stages.js?v=36"></script>
+<script src="eras/joseon/data/common/daily.js?v=36"></script>
+<script src="eras/joseon/data/taejo/cards.js?v=36"></script>
+<script src="eras/joseon/data/taejo/quizzes.js?v=36"></script>
+<script src="eras/joseon/data/taejo/more.js?v=36"></script>
+<script src="eras/joseon/data/taejo/quizzes-more.js?v=36"></script>
+<script src="eras/joseon/data/taejo/events.js?v=36"></script>
+<script src="eras/joseon/data/taejo/routes.js?v=36"></script>
+<script src="engine/terms.js?v=36"></script>
+<script src="engine/save.js?v=36"></script>
+<script src="engine/world.js?v=36"></script>
+<script src="engine/audio.js?v=36"></script>
+<script src="engine/cards.js?v=36"></script>
+<script src="engine/quiz.js?v=36"></script>
+<script src="engine/cond.js?v=36"></script>
+<script src="engine/crisis.js?v=36"></script>
+<script src="engine/events.js?v=36"></script>
+<script src="engine/evfx.js?v=36"></script>
+<script src="engine/game.js?v=36"></script>
+<script src="engine/ui.js?v=36"></script>
+<script src="engine/main.js?v=36"></script>
 </body>
 </html>
