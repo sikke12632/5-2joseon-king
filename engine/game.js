@@ -1069,6 +1069,9 @@
     keys.forEach((k, idx) => {
       if (G.run.built.includes(k)) return;
       const def = era.map.buildings[k] || {};
+      // 처음부터 서 있는 한 채짜리 건물(선조 판의 향교 등)은 다시 짓지 않는다(치운 뒤라면 다시 지음)
+      const pre = stageOf(G.run.stage).prebuilt || {};
+      if (def.kind === 'single' && k in pre && !(G.run.unscene || []).includes(k)) return;
       // 같은 자리를 쓰는 건물: conflicts가 서 있으면 짓지 않고, replaces는 치우고 짓는다
       if ((def.conflicts || []).some((x) => G.run.built.includes(x))) return;
       for (const r of def.replaces || []) {

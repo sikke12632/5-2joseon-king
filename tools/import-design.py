@@ -640,7 +640,7 @@ CRISIS_ORDER = [('people', 'low'), ('people', 'high'), ('nobles', 'low'), ('nobl
 CRISIS_DAMAGE = {'04': ['gyeongbok'], '07': ['wall'], '08': ['sungnye', 'heungin', 'donui', 'sukjeong']}
 # 왕별로 다른 곳(세종 KS07 → 4군 6진 진). 없으면 위 표
 CRISIS_DAMAGE_BY = {'S': {'07': ['jin'], '04': [], '08': []}, 'J': {'04': [], '07': ['wall'], '08': []}}
-CRISIS_DOLL = {'고을에서 올라온 관리': 'official_green', '호조 판서': 'official_red', '호조 관리': 'official_blue', '승지': 'official_red', '내관': 'naegwan', '장터를 돌아본 내관': 'naegwan', '곳간지기': 'farmer', '바닷가 군관': 'official_green', '병조 관리': 'official_blue', '병조 판서': 'official_red', '북방 군관': 'general'}
+CRISIS_DOLL = {'고을에서 올라온 관리': 'official_green', '호조 판서': 'official_red', '호조 관리': 'official_blue', '승지': 'official_red', '내관': 'naegwan', '장터를 돌아본 내관': 'naegwan', '곳간지기': 'farmer', '바닷가 군관': 'official_green', '병조 관리': 'official_blue', '병조 판서': 'official_red', '북방 군관': 'general', '성을 지키는 군관': 'general'}
 
 
 def crisis_side(cell):

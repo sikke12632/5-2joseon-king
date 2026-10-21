@@ -775,6 +775,32 @@
       });
       sparkleAt(x + 0.6, H(x, z) + 0.6, z - 0.2, 14, '#ffb0a0', 0.5, 0.8);
     },
+    // 바다 안개(EJ10): 하늘이 흐려지고 강 위로 흰 안개가 낮게 깔려 흘러간다
+    seaFog(h) {
+      weather('gloom');
+      h.em.push(emit(16, () => {
+        const p = riverAt(R());
+        return { p: [p.x + (R() - 0.5) * 1.4, 0.15 + R() * 0.3, p.z + (R() - 0.5) * 1.4], v: [0.25, 0.04, -0.1, 0], life: 5, size: 2.4 + R(), kind: 0, color: col('#eef1f4') };
+      }));
+    },
+    // 얼어붙은 강(EJ08): 잿빛 하늘에서 눈송이가 날리고 강 위에 흰 김이 낮게 깔린다
+    frost(h) {
+      weather('gloom');
+      h.em.push(emit(30, () => {
+        const [x, z] = around(0, 2, 9);
+        return { p: [x, 4.5 + R() * 2.5, z], v: [0.2, -0.8 - R() * 0.3, 0.05, 0], life: 6, size: 0.2 + R() * 0.08, kind: 0, color: col('#ffffff') };
+      }));
+      h.em.push(emit(6, () => {
+        const p = riverAt(R());
+        return { p: [p.x, 0.08, p.z], v: [0.05, 0.03, 0, 0], life: 4, size: 1.6, kind: 0, color: col('#f2f6fa') };
+      }));
+    },
+    // 산성 우물(EJ09·EJ11): 남한산성(없으면 남쪽 들판) 가운데서 맑은 물이 반짝이며 솟는다
+    wellSpring(h) {
+      const s = W.buildingPos('namhansan') || [1.2, 4.2];
+      h.em.push(emit(22, () => ({ p: [s[0] + (R() - 0.5) * 0.1, H(s[0], s[1]) + 0.12, s[1] + (R() - 0.5) * 0.1], v: [(R() - 0.5) * 0.5, 1.1 + R() * 0.4, (R() - 0.5) * 0.5, -2.4], life: 1.1, size: 0.16, kind: 4, color: col(R() < 0.6 ? '#bfe4ff' : '#ffffff') })));
+      setTimeout(() => sparkleAt(s[0], H(s[0], s[1]) + 0.3, s[1], 24, '#d6efff', 0.5, 1), 300);
+    },
   });
   // 계속 내리는 눈(병자호란 J09부터 그 생 끝까지) — X.ambient('snow', true)
   let snowEm = null;

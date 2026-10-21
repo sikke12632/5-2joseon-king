@@ -103,7 +103,8 @@
         prebuilt: { choga: 22, giwa: 18, gyeongbok: 1, jongmyo: 1, sajik: 1, wall: 1, heungin: 1, donui: 1, sungnye: 1, sukjeong: 1, seonggyun: 1, seodang: 1, hyanggyo: 1 },
         kingRole: 'seonjo',
         randomSlots: [6, 9],
-        slotsBefore: {},
+        // 남한산성(J09~J11)이 두세 장으로 끝나면 식량 눈금이 의미가 없다 — 사이에 무작위 칸을 꼭 둔다(보통 식량 6이면 J11에서 바닥)
+        slotsBefore: { J10: 2, J11: 2 },
         realEnd: '실제로 선조는 1608년까지, 인조는 1649년까지 왕위에 있었다.',
         scene: [],
         // 전쟁 버티기(설계서 2-3): 숫자는 난이도표 stage 칸(warCost·food·starvePeople)
@@ -239,7 +240,7 @@
       firstCards: 3,
       chainAfter: [3, 6],
       chainDepth: 3,
-      mindBoost: { ET16: 3, ES17: 3 },
+      mindBoost: { ET16: 3, ES17: 3, EJ17: 3 },
       names: { bad: '흉', good: '길', guest: '손님', box: '상자', mind: '마음', chain: '연쇄' },
     },
     // 왕의 마음 (설계서 10-13-2) — [게임 속 일]. 0~100, 숫자는 보이지 않고 붓에 먹이 차오른다

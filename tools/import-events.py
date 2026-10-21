@@ -24,7 +24,9 @@ DOLL = {'고을 수령': 'official_green', '도성 문지기': 'general', '한�
         '공사 감독관': 'official_blue', '곳간지기': 'farmer', '농민 대표': 'farmer', '내관': 'naegwan', '나루 관리': 'official_green',
         '예조 관리': 'official_red', '서리(관청 아전)': 'official_blue', '떠돌이 장사꾼': 'merchant',
         # 세종(events_S.py)
-        '집현전 학자': 'yusaeng', '공방 장인': 'craftsman', '서운관 관리': 'official_blue', '북방 군관': 'general'}
+        '집현전 학자': 'yusaeng', '공방 장인': 'craftsman', '서운관 관리': 'official_blue', '북방 군관': 'general',
+        # 선조·인조(events_J.py)
+        '호위 군관': 'general', '성을 지키는 군관': 'general', '바닷가 군관': 'official_green', '역참 관리': 'official_blue'}
 # 세계 연출(engine/evfx.js의 장면 이름)
 SCENE = {'ET01': 'drought', 'ET02': 'locust', 'ET03': 'hungry', 'ET06': 'flood', 'ET07': 'fever', 'ET08': 'fire', 'ET18': 'thief',
          'ET04': 'rain', 'ET05': 'harvest', 'ET09': 'deer', 'ET10': 'market', 'ET11': 'ship', 'ET12': 'envoy',
@@ -32,7 +34,11 @@ SCENE = {'ET01': 'drought', 'ET02': 'locust', 'ET03': 'hungry', 'ET06': 'flood',
          # 세종: 지금 있는 장면을 다시 쓴다(새 장면은 따로 — 별똥별·금빛 잉어는 밤·봄 하늘 장면으로)
          'ES01': 'drought', 'ES02': 'flood', 'ES03': 'flood', 'ES04': 'harvest', 'ES05': 'night', 'ES06': 'flood', 'ES07': 'hungry', 'ES08': 'fire',
          'ES09': 'meteor', 'ES10': 'rain', 'ES11': 'meteor', 'ES12': 'carp', 'ES13': 'envoy', 'ES14': 'chest', 'ES15': 'jar', 'ES16': 'map',
-         'ES17': 'lotus', 'ES18': 'night'}
+         'ES17': 'lotus', 'ES18': 'night',
+         # 선조·인조: 안개·얼음·산성 우물만 새 장면(seaFog·frost·wellSpring), 나머지는 있는 장면(EJ07 산길 소문은 성문 앞에 모인 사람들)
+         'EJ01': 'flood', 'EJ02': 'thief', 'EJ03': 'fever', 'EJ04': 'flood', 'EJ05': 'drought', 'EJ06': 'thief', 'EJ07': 'hungry', 'EJ08': 'frost',
+         'EJ09': 'wellSpring', 'EJ10': 'seaFog', 'EJ11': 'wellSpring', 'EJ12': 'harvest', 'EJ13': 'ship', 'EJ14': 'jar', 'EJ15': 'chest', 'EJ16': 'map',
+         'EJ17': 'plum', 'EJ18': 'night'}
 # 설계서 표에 적힌 '대사만 바꿈'(ET06: 개경에 머문 판은 개경 앞 개울)
 LINE_IF = {'ET06': [{'when': 'flag(F_개경)', 'who': '개경 관리', 'line': '장맛비에 개경 앞 개울이 넘쳐 나루 마을이 잠겼사옵니다.'}]}
 COND = {'ET06': 'seen(T04) && !flag(F_계룡)'}  # 개경 판은 대사만 바꾸고(LINE_IF), 계룡산 판에는 한강이 없으니 뺀다

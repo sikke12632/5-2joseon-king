@@ -34,15 +34,23 @@ export default async function (t) {
     await t.eval(`__jk.G.commit(${i % 2 ? 1 : -1})`);
     await t.sleep(400);
   }
-  const grains = seq.filter((x) => x !== '(기록)').map((x) => x.split(':')[1]).filter((g) => g !== '-');
+  const cards = seq.filter((x) => x !== '(기록)').map((x) => x.split(':')).filter(([, g]) => g !== '-');
+  const grains = cards.map(([, g]) => g);
+  // 어긴 곳은 무작위 칸에서 뽑힌 카드(일상 D····시험 Z··)에서만 센다 — 고정 카드끼리 붙은 것(역사 T·사슬 C)은 뽑기가 바꿀 수 없다
+  const isRandom = (id) => /^(D\d|Z)/.test(id);
   let breaks = 0;
+  const where = [];
   const maxRun = { balance: 3, complex: 2, gift: 1, mire: 1, seed: 1, gamble: 1 };
   for (let i = 0; i < grains.length; i++) {
+    if (!isRandom(cards[i][0])) continue;
     let k = 1;
     while (i - k >= 0 && grains[i - k] === grains[i]) k++;
-    if (k > maxRun[grains[i]]) breaks++;
-    if (i && grains[i - 1] === 'mire' && grains[i] === 'gamble') breaks++;
+    if (k > maxRun[grains[i]] || (i && grains[i - 1] === 'mire' && grains[i] === 'gamble')) {
+      breaks++;
+      where.push(cards.slice(Math.max(0, i - 3), i + 1).map((c) => c.join(':')).join(' → '));
+    }
   }
+  if (where.length) console.log('    어긴 곳:', where.join(' | '));
   console.log('   ', seq.join(' → '));
   ok('같은 결 연속·수렁→도박 없음(무작위 칸 기준)', breaks === 0, `어긴 곳 ${breaks}`);
   ok('시험 카드가 실제로 뽑혔다', seq.some((x) => /^Z/.test(x)));
