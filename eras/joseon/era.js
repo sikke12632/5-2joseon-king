@@ -14,6 +14,14 @@
     { t: 1.0, top: '#40447f', hor: '#f49b6c', bot: '#e8aa92', sun: '#ff9960', si: 1.6, hs: '#9496d6', hg: '#cf9f80', hi: 0.85, el: 0.13, az: -1.1, night: 1.0, ink: '#2f2f55' },
   ];
 
+  // 세종(설계서 2-2): 맑은 봄 아침 → 여름 한낮 → 저녁 → 별이 뚜렷한 밤
+  const SKY_SPRING_TO_STARS = [
+    { t: 0.0, top: '#7fb4e8', hor: '#fdeed2', bot: '#f2eee4', sun: '#fff1d6', si: 2.4, hs: '#d4e6ff', hg: '#e6dcbc', hi: 1.05, el: 0.5, az: 1.1, night: 0.0, ink: '#3b4a66' },
+    { t: 0.45, top: '#68a6e4', hor: '#fff2d4', bot: '#f4f1e6', sun: '#fff6e2', si: 2.6, hs: '#d0e4ff', hg: '#e8e0bc', hi: 1.08, el: 0.95, az: 0.2, night: 0.0, ink: '#3b4a66' },
+    { t: 0.78, top: '#5f86c8', hor: '#ffd7a2', bot: '#f2dcc4', sun: '#ffc888', si: 2.1, hs: '#c4d0f0', hg: '#dcc6a0', hi: 0.95, el: 0.28, az: -0.8, night: 0.15, ink: '#3d4266' },
+    { t: 1.0, top: '#2a3170', hor: '#8c7fb8', bot: '#5d5f92', sun: '#c8d0ff', si: 1.3, hs: '#7f88c8', hg: '#6a6890', hi: 0.8, el: 0.12, az: -1.2, night: 1.0, ink: '#262a58' },
+  ];
+
   JK.era = {
     id: 'joseon',
     title: '조선의 왕',
@@ -49,7 +57,26 @@
         //  고려 깃발은 T01에서 실제 경로를 고르면 천천히 내려간다(T01 연출). 시작 게이지·보정·소개 글은 data/common/stages.js(10-12)
         scene: ['kaesongHills', 'goryeoFlag', 'newFlag'],
       },
-      { id: 'sejong', king: '세종', seal: '世宗', title: '발명 진행도', years: '1418~1450', ready: false },
+      {
+        id: 'sejong',
+        king: '세종',
+        seal: '世宗',
+        title: '발명 진행도',
+        years: '1418~1450',
+        ready: true,
+        // 설계서 2-2 하늘: 화창한 봄~여름, 밤에는 별이 뚜렷하다(혼천의와 연결)
+        sky: SKY_SPRING_TO_STARS,
+        tod: [0.04, 0.97],
+        // 시작 한양(설계서 1장·10-12 ③): 경복궁·종묘·사직단·도성과 네 큰 문·성균관이 다 선 한양(태조 때 실제 모습)
+        prebuilt: { choga: 18, giwa: 14, gyeongbok: 1, jongmyo: 1, sajik: 1, wall: 1, heungin: 1, donui: 1, sungnye: 1, sukjeong: 1, seonggyun: 1 },
+        kingRole: 'sejong',
+        randomSlots: [6, 9],
+        slotsBefore: {},
+        realEnd: '실제로 세종은 1450년까지 32년 동안 나라를 다스렸다.',
+        scene: [],
+        // 발명 진행도(설계서 2-2): 0~6. 장치 카드 문턱은 난이도표 stage.sejongTriggers, 6을 채우면 「과학 임금의 벗」
+        device: { key: 'invention', name: '발명 진행도', max: 6, start: { invention: 0 }, triggers: 'sejongTriggers', triggersDefault: [2, 3, 5], title: 'invention6', hint: '학자·장인을 도우면 오르고, 혼천의·앙부일구·측우기가 일찍 나와요' },
+      },
       { id: 'seonjo', king: '선조·인조', seal: '宣祖', title: '전쟁 버티기', years: '1567~1649', ready: false },
       { id: 'yeongjo', king: '영조·정조', seal: '英祖', title: '붕당 저울', years: '1724~1800', ready: false },
       { id: 'gojong', king: '고종', seal: '高宗', title: '개항 압력', years: '1863~1899', ready: false },
@@ -180,7 +207,7 @@
       firstCards: 3,
       chainAfter: [3, 6],
       chainDepth: 3,
-      mindBoost: { ET16: 3 },
+      mindBoost: { ET16: 3, ES17: 3 },
       names: { bad: '흉', good: '길', guest: '손님', box: '상자', mind: '마음', chain: '연쇄' },
     },
     // 왕의 마음 (설계서 10-13-2) — [게임 속 일]. 0~100, 숫자는 보이지 않고 붓에 먹이 차오른다

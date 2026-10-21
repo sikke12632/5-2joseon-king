@@ -36,8 +36,8 @@ export default async function (t) {
   await t.eval(`JK.era.crisis.chance={warn:0,danger:0,cliff:0,end:0,cap:0}`);
 
   console.log('1) 돌발 카드 18장 · 판 시작 때 마음 0');
-  const base = await J(`{n:JK.era.data.cards.filter(c=>c.kind==='event').length, mind:__jk.G.run.mind, ev:__jk.G.run.ev, hud:getComputedStyle(document.querySelector('#kingMind')).display}`);
-  ok('돌발 카드 18장', base.n === 18, base.n);
+  const base = await J(`{n:JK.era.data.cards.filter(c=>c.kind==='event'&&c.stages.includes('taejo')).length, mind:__jk.G.run.mind, ev:__jk.G.run.ev, hud:getComputedStyle(document.querySelector('#kingMind')).display}`);
+  ok('돌발 카드 18장(태조)', base.n === 18, base.n);
   ok('마음 0 · 돌발 기록 시작', base.mind === 0 && base.ev && base.ev.count === 0);
   ok('임금 메달·마음 붓 보임', base.hud !== 'none');
 
@@ -163,7 +163,7 @@ export default async function (t) {
   await t.eval(`document.querySelector('#btnRecords').click()`);
   await t.sleep(500);
   const rec = await t.eval(`document.querySelector('#recEvents').textContent`);
-  ok('만난 돌발 수와 이름', /만난 돌발 \d+ \/ 18/.test(rec) && /가뭄/.test(rec), rec.slice(0, 80));
+  ok('만난 돌발 수와 이름', /만난 돌발 \d+ \/ \d+/.test(rec) && /가뭄/.test(rec), rec.slice(0, 80));
   if (OUT) {
     await t.eval(`document.querySelector('#recEvents').scrollIntoView()`);
     await t.shot(`${OUT}/ev-6-codex.png`);

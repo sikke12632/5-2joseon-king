@@ -54,6 +54,15 @@
     return Math.round(v);
   };
 
+  // trigger가 가리키는 카드 id → 불려 올 카드들 [{ id, side, after_n, stages }]
+  let trigMap = null;
+  function triggersOf(id) {
+    if (!trigMap) {
+      trigMap = {};
+      for (const x of era.data.cards) if (x.trigger) (trigMap[x.trigger.card] = trigMap[x.trigger.card] || []).push({ id: x.id, side: x.trigger.side, after_n: x.trigger.after_n, stages: x.stages });
+    }
+    return trigMap[id] || [];
+  }
   /* ---------- 덱 만들기 (설계서 10-2) ---------- */
   function shuffle(a, rnd) {
     for (let i = a.length - 1; i > 0; i--) {
@@ -70,7 +79,7 @@
     // 무작위 후보(10-2): 일상·희귀·전설과 사슬의 첫 카드. 사슬의 다음 카드·씨앗 열매·다른 길 카드·꼭 끼울 카드는 따로 들어온다
     const followers = new Set(cards.filter((c) => c.chain_next).map((c) => c.chain_next.card).concat(cards.filter((c) => c.seed && c.seed.fruit_id).map((c) => c.seed.fruit_id)));
     const daily = cards.filter(
-      (c) => ['daily', 'rare', 'legend', 'chain'].includes(c.kind) && !c.force && !c.alt_only && !followers.has(c.id) && c.stages.includes(stage.id) && !used.includes(c.id),
+      (c) => ['daily', 'rare', 'legend', 'chain'].includes(c.kind) && !c.force && !c.alt_only && !c.trigger && !followers.has(c.id) && c.stages.includes(stage.id) && !used.includes(c.id),
     );
     // 필수(★)는 이 왕에서 꼭 한 번. 다른 왕의 필수 카드는 그 왕보다 앞선 왕에서 뽑지 않는다.
     const required = daily.filter((c) => c.required_in === stage.id);
@@ -186,6 +195,8 @@
     run.flagsRun = Object.assign({}, run.flagsRunBefore || {});
     // 돌발 이벤트·왕의 마음(10-13): 판마다 처음부터(선조·인조·고종은 마음 20에서, 10-12)
     run.lastShown = '';
+    // 왕별 장치(설계서 2장, 세종 발명 진행도): 왕을 시작할 때마다 처음 값
+    run.device = Object.assign({}, (st.device && st.device.start) || {});
     JK.Events.reset(run, G.stageInfo(stageId));
     G.state = 'play';
     setupWorld(st, false);
@@ -234,6 +245,7 @@
     refreshSeal();
     JK.Events.setKing(pics[st.kingRole || st.id], st.name);
     JK.Events.refresh(G.run, true);
+    JK.UI.setDevice(st.device || null, G.run.device || {}, true);
     if (JK.EvFx) JK.EvFx.reset();
   }
   function setTOD(instant) {
@@ -801,6 +813,8 @@
           Cards.shake();
         }
       }
+      // 왕별 장치(세종 발명 진행도 ±): 게이지 뒤에 눈금이 움직인다
+      if (!isAlt && sideEff.device) applyDevice(run, sideEff.device);
       if (sideEff.this_run && (!c.real_history || isAlt)) setTimeout(() => Cards.toast(sideEff.this_run, Math.max(2600, sideEff.this_run.length * 70), isAlt ? '실제 역사와 달라졌어요 📜' : ''), bres ? 1500 : gres ? 1100 : 0);
       // 큰 변화: 사관 한 줄 후보
       if (big >= 15) JK.Events.say(run, 'big');
@@ -847,6 +861,10 @@
     if (c.seed && c.seed.fruit_id && side && (!c.seed.side || c.seed.side === sideKey) && cardsById[c.seed.fruit_id]) run.reserve.push({ card: c.seed.fruit_id, at: run.pos + 1 + (c.seed.after_n || 5), from: c.id });
     // 사건 사슬(10-2 ⑤): 다음 카드를 n장 뒤에 예약(무작위 칸을 대신 쓰는 셈)
     if (c.chain_next && cardsById[c.chain_next.card]) run.reserve.push({ card: c.chain_next.card, at: run.pos + 1 + (c.chain_next.after_n || 3), from: c.id });
+    // 앞 카드의 선택이 부르는 사슬(설계서 3-7 "…를 고르면 n장 뒤"): 불려 오는 카드 쪽에 trigger { card, side, after_n }
+    if (!isAlt)
+      for (const t of triggersOf(c.variant_of || c.id))
+        if ((!t.side || t.side === sideKey) && t.stages.includes(run.stage) && !run.seenRun.includes(t.id)) run.reserve.push({ card: t.id, at: run.pos + 1 + (t.after_n || 0), from: c.id });
     run.calmRun = Object.values(run.zones || {}).every((z) => z.level === 'stable') ? (run.calmRun || 0) + 1 : 0;
     S.meta.cardsPlayed++;
     W.cardPassed();
@@ -885,10 +903,13 @@
       // 끼워도 결 연속 규칙(10-9-3)을 어기지 않을 때만 — 어기면 한 장 더 기다린다
       const fits = (id) => !cardsById[id] || !cardsById[id].grain || !grainBreaks(run.grainHist.concat(cardsById[id].grain));
       const due = run.reserve.find((r) => r.at <= run.pos && fits(r.card) && JK.Cond.test((cardsById[r.card] || {}).conditions, ctx));
+      // 사슬이 장치 카드보다 먼저("바로 다음"을 지키게). 장치 카드는 한 장 뒤에도 창 안이다
+      const devId = due ? null : deviceDue(run);
       if (due) {
         run.reserve = run.reserve.filter((r) => r !== due);
         run.deck.splice(run.pos, 0, due.card);
-      } else {
+      } else if (devId) run.deck.splice(run.pos, 0, devId);
+      else {
         // 꼭 나와야 하는 카드(사슬 시작 '반드시'·다른 길 전용 카드): 조건이 맞는 순간 한 번
         const f = era.data.cards.find((x) => x.force && x.stages.includes(run.stage) && !run.seenRun.includes(x.id) && !run.deck.slice(run.pos).includes(x.id) && fits(x.id) && JK.Cond.test(x.conditions, ctx));
         if (f) run.deck.splice(run.pos, 0, f.id);
@@ -906,6 +927,44 @@
     save();
     S.saveMeta();
     setTimeout(showCurrent, Math.max(wait, c.single ? 500 : 900));
+  }
+  /* ---------- 왕별 장치 (설계서 2장) — 세종 발명 진행도 0~6 ----------
+   * stage.device = { key, name, max, start, triggers(난이도표 stage 칸 이름), title(끝까지 채우면 칭호 rule) }
+   * 장치 카드(kind 'device', device_card { key, step, after, before }): 창(after를 본 뒤 ~ before 앞)이 열린 동안
+   * 진행도가 그 카드의 문턱(난이도별)에 닿으면 바로 다음 자리에, 끝까지 못 닿으면 창 마지막(before 바로 앞)에 반드시 나온다 */
+  const devCfg = (run) => (stageOf(run.stage) || {}).device || null;
+  function applyDevice(run, dv) {
+    const cfg = devCfg(run);
+    if (!cfg) return;
+    const v = dv[cfg.key];
+    if (!v) return;
+    const before = run.device[cfg.key] || 0;
+    run.device[cfg.key] = JK.clamp(before + v, 0, cfg.max);
+    if (run.device[cfg.key] === before) return;
+    setTimeout(() => JK.UI.setDevice(cfg, run.device, false, run.device[cfg.key] - before), 500);
+    if (cfg.title && run.device[cfg.key] >= cfg.max) titleNow([cfg.title]);
+  }
+  G.deviceTriggers = function (run) {
+    const cfg = devCfg(run || G.run);
+    if (!cfg) return [];
+    return ((G.diff().stage || {})[cfg.triggers] || cfg.triggersDefault || []).slice();
+  };
+  function deviceDue(run) {
+    const cfg = devCfg(run);
+    if (!cfg) return null;
+    const trig = G.deviceTriggers(run);
+    const next = cardsById[run.deck[run.pos]];
+    const nextBase = next && (next.variant_of || next.id);
+    const val = run.device[cfg.key] || 0;
+    const cards = era.data.cards.filter((x) => x.kind === 'device' && x.stages.includes(run.stage) && x.device_card).sort((a, b) => a.device_card.step - b.device_card.step);
+    for (const c of cards) {
+      const dc = c.device_card;
+      if (run.seenRun.includes(c.id) || run.deck.slice(run.pos).includes(c.id)) continue;
+      if (dc.after && !run.seenRun.includes(dc.after)) continue;
+      const atEnd = !!dc.before && nextBase === dc.before;
+      if (atEnd || val >= (trig[dc.step] !== undefined ? trig[dc.step] : Infinity)) return c.id;
+    }
+    return null;
   }
   // 건물을 차례로 세우고, 다 설 때까지 걸리는 시간(ms)을 돌려준다
   function doBuilds(keys, delay, stateIn) {
@@ -1188,7 +1247,8 @@
   // 점검: 실제 경로로 설 수 있는 건물을 모두 세운다(다른 길 장식은 실제 건물과 같은 자리라 빼고)
   G.debugBuildAll = function () {
     for (const c of era.data.cards) {
-      if (c.alt_only || c.variant_of) continue;
+      // 이번 왕의 카드만(세종 건물이 태조 판에 서지 않게)
+      if (c.alt_only || c.variant_of || !c.stages.includes(G.run.stage)) continue;
       const b = ((c.choices && c.choices.right.build) || []).concat((c.fx && c.fx.build) || []).filter((k) => !(era.map.buildings[k] || {}).alt);
       for (const k of b) if (!G.run.built.includes(k)) doBuilds([k], 0, c.choices && c.choices.left.build_state);
     }

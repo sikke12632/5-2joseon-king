@@ -165,6 +165,15 @@
       palisade: { kind: 'single', name: '', model: 'palisade', at: { x: 0, z: -0.4 }, label: 0, shadowR: [0, 0], alt: true },
       wonchal: { kind: 'single', name: '', model: 'wonchal', at: { x: 6.95, z: -2.3 }, label: 0, shadowR: [0.4, 0.35], alt: true },
       altOffice: { kind: 'single', name: '', model: 'altOffice', at: { site: 'gyeongbok' }, label: 0, shadowR: [0.8, 0.6], alt: true },
+      // 세종(설계서 7-1·7-2). 경복궁 바깥 담 안 서쪽 뜰(집현전·자격루)·동쪽 뜰(혼천의)은 터라서 집·나무가 들지 않는다
+      //  해시계·측우기는 좌표 자리(points)라 마을 집 자리를 바꾸지 않는다. 이름표는 설계서 근거가 있는 것만
+      jiphyeon: { kind: 'single', name: '집현전', model: 'jiphyeon', at: { x: -1.86, z: -3.75 }, rot: Math.PI / 2, label: 0.7, shadowR: [0.22, 0.4] },
+      jagyeok: { kind: 'single', name: '자격루', model: 'jagyeok', at: { x: -1.86, z: -2.25 }, rot: Math.PI / 2, label: 0.75, shadowR: [0.25, 0.3] },
+      honcheon: { kind: 'single', name: '혼천의', model: 'honcheon', at: { x: 1.86, z: -3.6 }, label: 0.95, shadowR: [0.25, 0.25] },
+      angbu: { kind: 'spots', name: '앙부일구', model: 'angbu', points: [[2.0, 1.66], [3.72, -0.06]], label: 0.45 },
+      cheugu: { kind: 'spots', name: '측우기', model: 'cheugu', points: [[-4.7, 6.05], [-1.3, 7.05], [-7.25, 2.1], [1.86, -2.3]], label: 0.4 },
+      jin: { kind: 'single', name: '4군 6진', model: 'jin', at: { x: -4.9, z: -6.75 }, rot: 0.62, label: 1.0, shadowR: [1.1, 0.25] },
+      kiln: { kind: 'single', name: '백자 가마', model: 'kiln', at: { x: 6.25, z: 4.55 }, rot: -0.5, label: 0.6, shadowR: [0.5, 0.2] },
       // 초가 마을은 이름 없는 장식 무리(연출표 7-1): 처음 몇 채에서 카드마다 조금씩 늘어난다
       choga: { kind: 'village', name: '', grow: 2, model: 'choga', max: 40, focus: [-1.5, 2.6], extra: [[-4.6, 7.0], [-5.6, 6.2], [-1.2, 7.4], [0.6, 7.3], [-7.8, 1.4], [-7.6, 0.3]] },
       giwa: { kind: 'village', name: '기와집 마을', model: 'giwa', max: 30, focus: [1.0, 0.8] },

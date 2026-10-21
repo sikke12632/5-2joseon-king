@@ -30,7 +30,7 @@ export default async function (t) {
   await go();
   await t.eval("document.querySelector('#btnNew').click()");
   await t.sleep(400);
-  ok('왕 고르기 화면(태조만 열림, 나머지 준비 중)', await t.eval(`!document.querySelector('#kingPick').classList.contains('hide') && [...document.querySelectorAll('.kp-card')].filter(b=>b.disabled && /준비 중/.test(b.textContent)).length===4`));
+  ok('왕 고르기 화면(태조·세종 열림, 나머지 셋 준비 중)', await t.eval(`!document.querySelector('#kingPick').classList.contains('hide') && [...document.querySelectorAll('.kp-card')].filter(b=>b.disabled && /준비 중/.test(b.textContent)).length===3`));
   await t.shot(`${OUT}/diff-2a-kings.png`);
   await t.eval(`document.querySelector('.kp-card:not(.locked)').click()`);
   await t.sleep(400);

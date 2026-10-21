@@ -706,8 +706,9 @@
     for (const k in MAP.buildings) {
       const d = MAP.buildings[k];
       if (d.kind === 'spots') {
-        d.sites.forEach((sk, i) => {
-          const st = SITES[sk];
+        // 여러 자리에 같은 모형: 터 이름(sites) 또는 좌표(points [[x, z], …] — 터를 만들지 않아 마을 집 자리를 바꾸지 않는다)
+        (d.points ? d.points.map((p) => ({ x: p[0], z: p[1], hw: 0.2, hd: 0.2 })) : d.sites).forEach((sk, i) => {
+          const st = typeof sk === 'string' ? SITES[sk] : sk;
           BUILD_DEFS[`${k}:${i}`] = Object.assign({ key: `${k}:${i}`, rot: 0, label: 0.8, shadowR: [st.hw * 0.8, st.hd * 0.8] }, d, { x: st.x, z: st.z, name: i === 0 ? d.name : '' });
         });
         continue;
@@ -2289,6 +2290,12 @@
     }
     camT = 0;
     camDur = dur || 1.5;
+  };
+  // 점검·캡처용: 카메라가 바라보는 점을 옮긴다(인자 없으면 원래 자리로)
+  W.camLook = function (x, z) {
+    if (!W._camHome) W._camHome = cam.target.clone();
+    if (x === undefined) cam.target.copy(W._camHome);
+    else cam.target.set(x, W._camHome.y, z);
   };
   W.CAM_PLAY = { dist: 30.5, az: 0.3, el: 0.6, fov: 30 };
   W.CAM_TITLE = { dist: 38, az: -0.55, el: 0.24, fov: 34 };

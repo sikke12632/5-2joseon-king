@@ -22,6 +22,7 @@ KING = {'태조': 'taejo', '세종': 'sejong', '선조·인조': 'seonjo', '영�
 PREFIX = {'taejo': 'T', 'sejong': 'S', 'seonjo': 'J', 'yeongjo': 'Y', 'gojong': 'G'}
 GAUGE = {'백': 'people', '반': 'nobles', '고': 'treasury', '방': 'army'}
 DEVICE = {'발': 'invention', '저': 'scale', '개': 'open'}
+DEVICE_KEY = {'sejong': 'invention', 'yeongjo': 'scale', 'gojong': 'open'}
 STATE = {'순조롭게': 'smooth', '억지로': 'forced', '늦게': 'late'}
 # 결(10-9). 설계서에 "결:" 줄이 있으면 그것을, 없으면 10-9-2의 셈 방법으로 정한다
 GRAIN = {'저울형': 'balance', '복합형': 'complex', '선물형': 'gift', '수렁형': 'mire', '씨앗형': 'seed', '도박형': 'gamble'}
@@ -57,6 +58,16 @@ STAGE_FX = {
     'T07': {'build': ['wall', 'heungin', 'donui', 'sungnye', 'sukjeong'], 'fx': {'glyphs': {'heungin': '仁', 'donui': '義', 'sungnye': '禮'}}},
     'T08': {'build': ['seonggyun']},
     'T09': {'fx': {'dusk': True}},
+    # 세종(설계서 2-2·7-1·7-2): 집현전(경복궁 안) · 4군 6진 진·봉화대 · 자격루 누각 · 혼천의 · 앙부일구(종로·종묘 앞) · 고을 측우기
+    'S00': {'build': ['jiphyeon']},
+    'S01': {'fx': {'boats': True}},
+    'S04': {'build': ['jin']},
+    'S06': {'build': ['jagyeok']},
+    'S09': {'fx': {'skyText': 'ㄱ ㄴ ㄷ ㄹ ㅁ ㅂ ㅅ ㅇ'}},
+    'SX1': {'build': ['honcheon']},
+    'SX2': {'build': ['angbu']},
+    'SX3': {'build': ['cheugu']},
+    'D009': {'build': ['kiln']},
     'D001': {'build': ['seodang']},
     'D003': {'build': ['hyanggyo']},
     'D018': {'build': ['bridge']},
@@ -107,7 +118,8 @@ def sources(raw):
 
 def block_cards():
     cards = []
-    for m in re.finditer(r'\*\*([A-Z]\d{2})\*\* · ([^\n]+)\n```\n(.*?)\n```', src, re.S):
+    # 역사·사관 카드(S01) · 장치 카드(SX1: 세종 발명 진행도 등 — 정해진 창 안에서 진행도에 따라 나온다, 설계서 2장)
+    for m in re.finditer(r'\*\*([A-Z]X?\d{1,2})\*\* · ([^\n]+)\n```\n(.*?)\n```', src, re.S):
         cid, head, body = m.group(1), m.group(2), m.group(3)
         if cid[0] not in [PREFIX[s] for s in STAGES]:
             continue
@@ -115,7 +127,8 @@ def block_cards():
         kind = head.split('·')[0].strip()
         year = head.split('·')[1].strip() if '·' in head else ''
         year = re.sub(r'`\[교과서 밖\]`', '', year).strip()
-        c = {'id': cid, 'stage': stage, 'type': 'scroll' if kind == '사관' else 'history', 'order': int(cid[1:])}
+        typ = 'scroll' if kind == '사관' else 'device' if kind == '장치' else 'history'
+        c = {'id': cid, 'stage': stage, 'type': typ, 'order': int(re.sub(r'\D', '', cid[1:]))}
         if year:
             c['year'] = year
         if '[교과서 밖]' in head:
@@ -263,7 +276,7 @@ def records():
             falls.append({'id': gmap[m.group(1)] + str(at), 'gauge': gmap[m.group(1)], 'at': at, 'side': 'low' if at == 0 else 'high', 'name': r[1], 'text': r[2]})
         elif r[0].startswith('붕당'):
             falls.append({'id': 'faction', 'gauge': 'faction', 'at': 0, 'name': r[1], 'text': r[2], 'stages': ['yeongjo']})
-    rules = {'아슬아슬 줄타기': 'edgeClear', '위기를 넘긴 임금': 'held5', '벼랑 끝의 임금': 'heldAtEnd', '같은 위기는 두 번 없다': 'cancel3'}
+    rules = {'과학 임금의 벗': 'invention6', '아슬아슬 줄타기': 'edgeClear','위기를 넘긴 임금': 'held5', '벼랑 끝의 임금': 'heldAtEnd', '같은 위기는 두 번 없다': 'cancel3'}
     titles = []
     for r in table_after('### 4-2. 엔딩 칭호'):
         if not r[0].isdigit():
@@ -331,6 +344,10 @@ def role_of(name, cid):
     n = name
     if cid == 'T00' or n == '사관':
         return 'sagwan'
+    if '장영실' in n:
+        return 'jangyeongsil'
+    if n.startswith('세자'):
+        return 'seja'
     if n == '정도전':
         return 'jeong'
     if n.startswith('이방원'):
@@ -394,7 +411,14 @@ def against_side(c):
 
 def to105(c):
     o = {'id': c['id']}
-    o['kind'] = {'scroll': 'sagwan', 'history': 'history', 'daily': 'daily'}[c['type']]
+    o['kind'] = {'scroll': 'sagwan', 'history': 'history', 'daily': 'daily', 'device': 'device'}[c['type']]
+    # 장치 카드: 몇 번째 문턱(0부터)에 닿으면 나오는가 · 나오는 창(주의 칸 "나오는 창: S04 뒤 ~ S08 앞")
+    #  문턱 값은 난이도표(era.js difficulty.stage.sejongTriggers 등)에 있다. 창 끝까지 못 닿으면 창 마지막에 반드시 나온다
+    if c['type'] == 'device':
+        wm = re.search(r'나오는 창:\s*([A-Z]X?\d{1,2})\s*뒤\s*~\s*([A-Z]X?\d{1,2})\s*앞', c.get('note', ''))
+        o['device_card'] = {'key': DEVICE_KEY[c['stage']], 'step': c['order'] - 1}
+        if wm:
+            o['device_card']['after'], o['device_card']['before'] = wm.group(1), wm.group(2)
     o['stages'] = [c['stage']] if 'stage' in c else c['daily']['kings']
     if 'order' in c:
         o['order'] = c['order']
@@ -594,7 +618,9 @@ REQUIRE = real_requires()
 CRISIS_ORDER = [('people', 'low'), ('people', 'high'), ('nobles', 'low'), ('nobles', 'high'), ('treasury', 'low'), ('treasury', 'high'), ('army', 'low'), ('army', 'high')]
 # 수습하면 손상되는 건물(10-8-5 아래 줄). 지도에 없는 곳(관아·곳간·공신 집)은 비워 두면 엔진이 지어진 건물 하나를 고른다
 CRISIS_DAMAGE = {'04': ['gyeongbok'], '07': ['wall'], '08': ['sungnye', 'heungin', 'donui', 'sukjeong']}
-CRISIS_DOLL = {'고을에서 올라온 관리': 'official_green', '호조 판서': 'official_red', '호조 관리': 'official_blue', '승지': 'official_red', '내관': 'naegwan', '장터를 돌아본 내관': 'naegwan', '곳간지기': 'farmer', '바닷가 군관': 'official_green', '병조 관리': 'official_blue', '병조 판서': 'official_red'}
+# 왕별로 다른 곳(세종 KS07 → 4군 6진 진). 없으면 위 표
+CRISIS_DAMAGE_BY = {'S': {'07': ['jin'], '04': [], '08': []}}
+CRISIS_DOLL = {'고을에서 올라온 관리': 'official_green', '호조 판서': 'official_red', '호조 관리': 'official_blue', '승지': 'official_red', '내관': 'naegwan', '장터를 돌아본 내관': 'naegwan', '곳간지기': 'farmer', '바닷가 군관': 'official_green', '병조 관리': 'official_blue', '병조 판서': 'official_red', '북방 군관': 'general'}
 
 
 def crisis_side(cell):
@@ -607,7 +633,7 @@ def crisis_side(cell):
 
 def crisis_cards():
     out = []
-    for hm in re.finditer(r'^#### 10-8-\d+\. (\S+) 위기 카드', src, re.M):
+    for hm in re.finditer(r'^#### 10-8-[\d-]+\. (\S+) 위기 카드', src, re.M):
         stage = KING.get(hm.group(1))
         if stage not in STAGES:
             continue
@@ -645,8 +671,9 @@ def crisis_cards():
             if not sim.startswith('(비움'):
                 sm = re.match(r'["“](.*?)["”]\s*\((.*)\)$', sim)
                 c['similar'] = {'text': sm.group(1), 'sources_text': sm.group(2), 'sources': src105(sources(sm.group(2))), 'out_of_textbook': '[교과서 밖]' in sm.group(2)}
-            if n in CRISIS_DAMAGE:
-                c['damage'] = {'targets': CRISIS_DAMAGE[n]}
+            dmg = CRISIS_DAMAGE_BY.get(p, {}).get(n, CRISIS_DAMAGE.get(n))
+            if dmg:
+                c['damage'] = {'targets': dmg}
             out.append(c)
         for r in rows('**후속 위기'):
             n = r[0][-3:-1]
@@ -654,8 +681,9 @@ def crisis_cards():
             ev = next(x for x in out if x['id'] == 'K' + p + n)
             c = dict(base, id=r[0], gauge=g, side=side, level='followup', step=2, name=ev['name'], who=dict(ev['who']), line=r[1].strip('"“”'),
                      choices={'right': crisis_side(r[2]), 'left': crisis_side(r[3])}, sources=[], fx={})
-            if n in CRISIS_DAMAGE:
-                c['damage'] = {'targets': CRISIS_DAMAGE[n]}
+            dmg = CRISIS_DAMAGE_BY.get(p, {}).get(n, CRISIS_DAMAGE.get(n))
+            if dmg:
+                c['damage'] = {'targets': dmg}
             out.append(c)
     return out
 

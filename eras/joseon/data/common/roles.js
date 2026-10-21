@@ -39,5 +39,9 @@
     muhak: { name: '무학', tag: '승려', cloth: '#8b8a86', trim: '#a8382e', hat: 'shaved', items: ['kasaya', 'beads'], bg: '#dcd6c8' },
     jurchen: { name: '여진 추장', tag: '이웃', cloth: '#a07a52', trim: '#5b4130', hat: 'furhat', items: ['furcoat', 'belt'], bg: '#e2d0b4' },
     craftsman: { name: '장인', tag: '상민', cloth: '#d9cfb8', trim: '#8a6a48', hat: 'paeraengi', items: ['belt', 'hammer'], bg: '#d8c9a6' },
+    // 세종(설계서 7-3): 왕은 익선관·붉은 곤룡포, 세자는 같은 옷을 작게(세부는 확인 전이라 색만 조금 다르게), 장영실은 장인 차림
+    sejong: { name: '세종', tag: '임금', cloth: '#c3322c', trim: '#e2b64c', hat: 'ikseongwan', items: ['bo', 'okdae'], bg: '#f3dc8f' },
+    seja: { name: '세자', tag: '왕자', cloth: '#b5403a', trim: '#d8b64e', hat: 'ikseongwan', items: ['okdae'], bg: '#ead7b0' },
+    jangyeongsil: { name: '장영실', tag: '장인', cloth: '#d2c4a4', trim: '#7a5a38', hat: 'paeraengi', items: ['belt', 'hammer'], bg: '#cfe0d6' },
   });
 })();

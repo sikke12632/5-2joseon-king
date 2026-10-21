@@ -6,6 +6,7 @@ const N = Number(process.env.N || 20);
 const DIFFS = (process.env.DIFFS || 'sprout,normal,sage,annals').split(',');
 const STRAT = process.env.STRAT || 'keep';
 const CHANCE = Number(process.env.CHANCE || 1);
+const STAGE = process.env.STAGE || 'taejo';
 export default async function (t) {
   await t.goto('http://127.0.0.1:8643/index.html?idle=0&pick=normal');
   await t.waitFor('window.__jk && __jk.W.stats.frames > 5', 60000);
@@ -23,7 +24,7 @@ export default async function (t) {
   for (const d of DIFFS) {
     const rows = [];
     for (let i = 0; i < N; i++) {
-      await t.eval(`(()=>{for(const m of document.querySelectorAll('.modal')) m.classList.add('hide'); JK.Game.newRun('taejo','${d}');})()`);
+      await t.eval(`(()=>{for(const m of document.querySelectorAll('.modal')) m.classList.add('hide'); JK.Game.newRun('${STAGE}','${d}');})()`);
       const r = JSON.parse(
         await t.eval(`new Promise((res)=>{ const t0=performance.now(); let steps=0; const tm0=JSON.stringify(JK.Save.meta.traits||{});
           const tick=()=>{ const G=__jk.G, r=G.run;

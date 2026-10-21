@@ -3,6 +3,8 @@
 //   Q=normal,high  node tools/cdp.mjs tools/tris-max.mjs
 const BASE = process.env.BASE || 'http://127.0.0.1:8643/index.html';
 const QS = (process.env.Q || 'normal,high').split(',');
+// STAGE=sejong 이면 그 왕 판에서 잰다(기본은 첫 판 = 태조)
+const STAGE = process.env.STAGE || '';
 export const options = { width: 1366, height: 768 };
 export default async function (t) {
   for (const q of QS) {
@@ -10,6 +12,11 @@ export default async function (t) {
     await t.waitFor('window.__jk && __jk.W.stats.frames > 5', 60000);
     await t.eval("localStorage.clear(); document.querySelector('#btnNew').click()");
     await t.waitFor('JK.Cards.isReady()', 30000);
+    if (STAGE) {
+      await t.eval(`(()=>{for(const m of document.querySelectorAll('.modal')) m.classList.add('hide'); JK.Game.newRun('${STAGE}','normal');})()`);
+      await t.sleep(1500);
+      await t.waitFor('JK.Cards.isReady()', 30000);
+    }
     await t.eval(`window.__mx={c:0,t:0};(function f(){const s=__jk.W.stats;__mx.c=Math.max(__mx.c,s.calls);__mx.t=Math.max(__mx.t,s.tris);requestAnimationFrame(f)})()`);
     const start = await t.eval('JSON.stringify(__mx)');
     await t.eval('__jk.G.debugBuildAll()');

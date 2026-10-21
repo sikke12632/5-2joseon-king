@@ -120,7 +120,7 @@
   "name": "과학 임금의 벗",
   "hint": "집현전 등불이 꺼지지 않게",
   "cond": "세종 발명 진행도 6",
-  "rule": "later"
+  "rule": "invention6"
  },
  {
   "id": "title07",

@@ -259,6 +259,33 @@
     $('#stageSeal').textContent = st.seal;
     $('#stageName').textContent = `${st.king} · ${st.title}`;
   };
+  // 왕별 장치 눈금(설계서 2장, 세종 발명 진행도 0~6): 두루마리 눈금이 하나씩 금빛으로 찬다. 장치가 없는 왕은 숨긴다
+  UI.setDevice = function (cfg, vals, instant, delta) {
+    const el = $('#devBar');
+    if (!el) return;
+    el.style.display = cfg ? '' : 'none';
+    if (!cfg) return;
+    const v = vals[cfg.key] || 0;
+    const trig = JK.Game.deviceTriggers();
+    if (el.dataset.key !== cfg.key) {
+      el.dataset.key = cfg.key;
+      $('#devName').textContent = cfg.name;
+      $('#devTicks').innerHTML = Array.from({ length: cfg.max }, (_, i) => `<i data-n="${i + 1}"></i>`).join('');
+    }
+    el.title = `${cfg.name} ${v} / ${cfg.max}` + (cfg.hint ? ` — ${cfg.hint}` : '');
+    [...$('#devTicks').children].forEach((t, i) => {
+      t.classList.toggle('on', i < v);
+      // 장치 카드가 나오는 문턱(난이도별)에 작은 별
+      t.classList.toggle('mark', trig.includes(i + 1));
+    });
+    $('#devNum').textContent = `${v}/${cfg.max}`;
+    if (!instant && delta) {
+      el.classList.remove('up', 'down');
+      void el.offsetWidth;
+      el.classList.add(delta > 0 ? 'up' : 'down');
+      $('#devDelta').textContent = (delta > 0 ? '+' : '') + delta;
+    }
+  };
 
   const esc = (t) => String(t).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
   /* ---------- 실각 ---------- */

@@ -579,6 +579,23 @@ body.over #kingMind { opacity: 0; }
 #kingMind.night .km-medal { filter: brightness(.6) saturate(.6); border-color: #7f90c8; }
 #kingMind.night .km-brush { border-color: #7f90c8; }
 
+/* 왕별 장치 눈금(설계서 2장, 세종 발명 진행도): 왕의 마음 아래 두루마리 */
+#devBar { position: absolute; top: 146px; left: 14px; display: flex; align-items: center; gap: 7px; padding: 5px 10px 5px 12px; border-radius: 8px; background: linear-gradient(#f7eed8, #eadcb8); border: 2px solid #9a7a4a; box-shadow: 0 3px 10px rgba(60,40,20,.22); color: #3a2a1e; pointer-events: auto; opacity: 0; transition: opacity .8s; }
+body.playing #devBar { opacity: 1; }
+body.over #devBar { opacity: 0; }
+#devName { font-family: 'JKTitle', serif; font-size: 15px; white-space: nowrap; }
+#devTicks { display: flex; gap: 3px; }
+#devTicks i { position: relative; width: 15px; height: 20px; border-radius: 3px; background: #fffaf0; border: 1.5px solid #8a6a3a; transition: background .6s, box-shadow .6s; }
+#devTicks i.on { background: linear-gradient(#ffe39a, #d8a83a); box-shadow: 0 0 8px rgba(255,200,80,.8); }
+#devTicks i.mark::after { content: '★'; position: absolute; left: 0; right: 0; top: -13px; text-align: center; font-size: 10px; font-style: normal; color: #a0741a; }
+#devNum { font-size: 14px; font-weight: 700; min-width: 2.4em; }
+#devDelta { position: absolute; right: -6px; top: -14px; font: 700 20px/1 'JKTitle', serif; color: #2f7a3a; opacity: 0; }
+#devBar.down #devDelta { color: #b23b30; }
+#devBar.up, #devBar.down { animation: devPop .8s cubic-bezier(.2,1.6,.4,1); }
+#devBar.up #devDelta, #devBar.down #devDelta { animation: devDelta 1.8s ease-out; }
+@keyframes devPop { 35% { transform: scale(1.12); box-shadow: 0 0 0 6px rgba(240,207,134,.55), 0 0 26px rgba(240,207,134,.9); } }
+@keyframes devDelta { 0% { opacity: 0; transform: translateY(6px); } 15%, 70% { opacity: 1; transform: translateY(-4px); } 100% { opacity: 0; transform: translateY(-14px); } }
+
 /* 돌발이 터지는 순간: 섬 위 큰 붓글씨 */
 #evBanner { position: absolute; left: 0; right: calc(var(--panel-w) + 18px); top: 19vh; z-index: 5; pointer-events: none; text-align: center; opacity: 0; }
 #evBanner .eb-kind { display: inline-block; font-family: 'JKTitle', serif; font-size: 20px; padding: 4px 16px; border-radius: 999px; background: rgba(35,30,28,.82); color: #f6ead0; letter-spacing: .08em; }

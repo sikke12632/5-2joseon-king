@@ -38,7 +38,7 @@ export default async function (t) {
   console.log('1) 무작위 후보: 일상·희귀·전설·사슬 시작(다음 카드·열매·다른 길·꼭 끼울 카드는 빠짐)');
   const pool = JSON.parse(await t.eval(`JSON.stringify(__jk.G.run.pool)`));
   const kinds = JSON.parse(await t.eval(`JSON.stringify(${JSON.stringify(pool)}.reduce((o,id)=>{const k=__jk.G.card(id).kind;o[k]=(o[k]||0)+1;return o;},{}))`));
-  ok('후보 구성', kinds.rare === 9 && kinds.legend === 2 && kinds.chain === 7 && !pool.includes('CT01b') && !pool.includes('DT141f') && !pool.includes('AT01') && !pool.includes('CT01a'), JSON.stringify(kinds));
+  ok('후보 구성', kinds.rare === 13 && kinds.legend === 2 && kinds.chain === 7 && !pool.includes('C01a') && !pool.includes('CT01b') && !pool.includes('DT141f') && !pool.includes('AT01') && !pool.includes('CT01a'), JSON.stringify(kinds));
 
   console.log('2) 사슬: CT01a → 3장 뒤 CT01b → CT01c, 계룡산 공사터가 섰다가 사라짐');
   await show('CT01a');

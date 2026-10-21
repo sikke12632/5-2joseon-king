@@ -334,6 +334,165 @@
   }
  },
  {
+  "id": "D007",
+  "kind": "daily",
+  "stages": [
+   "sejong"
+  ],
+  "required_in": "sejong",
+  "rarity": "common",
+  "who": {
+   "name": "역관 (중인)",
+   "doll": "jungin"
+  },
+  "line": "명에서 사신이 오는데 통역할 역관이 모자라옵니다. 역관을 더 뽑아 주소서.",
+  "choice_type": "free",
+  "choices": {
+   "right": {
+    "label": "역관을 뽑는다",
+    "effects": {
+     "army": 10,
+     "treasury": -10
+    },
+    "this_run": "통역이 막힘없이 오갔다."
+   },
+   "left": {
+    "label": "있는 사람으로",
+    "effects": {
+     "treasury": 5,
+     "army": -5
+    },
+    "this_run": "역관 몇 명이 밤새 일했다."
+   }
+  },
+  "grain": "balance",
+  "out_of_textbook": false,
+  "sources": [
+   {
+    "type": "guide",
+    "page": "254~255",
+    "tb": "84~85"
+   },
+   {
+    "type": "guide",
+    "page": "248"
+   }
+  ],
+  "sources_text": "지도서 254~255(교과서 84~85) 중인: 통역 · 248 잡과(역과)",
+  "learn": "중인의 일",
+  "fx": {
+   "note": "궁궐 문 앞에 사신 행렬과 역관 인형."
+  }
+ },
+ {
+  "id": "D008",
+  "kind": "daily",
+  "stages": [
+   "sejong"
+  ],
+  "required_in": "sejong",
+  "rarity": "common",
+  "who": {
+   "name": "의원 (중인)",
+   "doll": "jungin"
+  },
+  "line": "우리 땅에서 나는 약초로 병을 고치는 법을 모아 책으로 엮으소서.",
+  "choice_type": "free",
+  "choices": {
+   "right": {
+    "label": "약초 책을 엮는다",
+    "effects": {
+     "people": 10,
+     "treasury": -10
+    },
+    "this_run": "《향약집성방》이 마을 의원들 손에 들렸다."
+   },
+   "left": {
+    "label": "중국 책을 쓴다",
+    "effects": {
+     "treasury": 5,
+     "people": -5
+    },
+    "this_run": "의원들은 중국 책을 계속 보았다."
+   }
+  },
+  "grain": "balance",
+  "out_of_textbook": false,
+  "sources": [
+   {
+    "type": "guide",
+    "page": "263",
+    "tb": "89"
+   },
+   {
+    "type": "guide",
+    "page": "255"
+   }
+  ],
+  "sources_text": "지도서 263(교과서 89) 《향약집성방》 · 255 의학은 중인의 일",
+  "learn": "《향약집성방》과 중인",
+  "fx": {
+   "note": "약초밭이 “뽕”, 의원 인형이 약봉지를 든다."
+  }
+ },
+ {
+  "id": "D009",
+  "kind": "daily",
+  "stages": [
+   "sejong"
+  ],
+  "required_in": "sejong",
+  "rarity": "common",
+  "who": {
+   "name": "도공",
+   "doll": "official_blue"
+  },
+  "line": "화려한 청자를 구워 바칠까 하옵니다.",
+  "choice_type": "free",
+  "choices": {
+   "right": {
+    "label": "청자를 받는다",
+    "effects": {
+     "treasury": -10,
+     "people": 5
+    },
+    "this_run": "청자는 아름다웠지만 값이 비쌌다.",
+    "build": [
+     "kiln"
+    ]
+   },
+   "left": {
+    "label": "백자를 쓴다",
+    "effects": {
+     "nobles": 5,
+     "treasury": 5,
+     "people": -5
+    },
+    "this_run": "전하는 검소한 분청사기와 백자를 쓰라 했다.",
+    "build": [
+     "kiln"
+    ]
+   }
+  },
+  "grain": "complex",
+  "out_of_textbook": false,
+  "sources": [
+   {
+    "type": "guide",
+    "page": "263",
+    "tb": "89"
+   }
+  ],
+  "sources_text": "지도서 263(교과서 89) 양반은 검소함을 강조해 청자 대신 분청사기·백자 사용",
+  "learn": "조선 전기 양반 문화",
+  "fx": {
+   "build": [
+    "kiln"
+   ],
+   "note": "가마에서 흰 백자 항아리가 나온다."
+  }
+ },
+ {
   "id": "D010",
   "kind": "daily",
   "stages": [
@@ -378,6 +537,57 @@
   "learn": "조선 전기 양반 문화",
   "fx": {
    "note": "궁궐 정자에 먹 향이 번진다."
+  }
+ },
+ {
+  "id": "D011",
+  "kind": "daily",
+  "stages": [
+   "sejong"
+  ],
+  "required_in": "sejong",
+  "rarity": "common",
+  "who": {
+   "name": "세자를 가르치는 스승",
+   "doll": "seja"
+  },
+  "line": "세자 저하가 승경도놀이로 벼슬 이름을 익히시옵니다. 놀이판을 새로 만들어 드릴까요?",
+  "choice_type": "free",
+  "choices": {
+   "right": {
+    "label": "놀이판을 준다",
+    "effects": {
+     "nobles": 5,
+     "treasury": -5
+    },
+    "this_run": "윤목이 ‘모’! 세자가 신나게 말을 옮겼다."
+   },
+   "left": {
+    "label": "책을 권한다",
+    "effects": {
+     "people": 5,
+     "nobles": -5
+    },
+    "this_run": "전하는 놀이보다 책이라 했다."
+   }
+  },
+  "grain": "balance",
+  "out_of_textbook": false,
+  "sources": [
+   {
+    "type": "guide",
+    "page": "256~257",
+    "tb": "87"
+   },
+   {
+    "type": "guide",
+    "page": "257"
+   }
+  ],
+  "sources_text": "지도서 256~257(교과서 87) 승경도놀이·윤목 · 257(하륜이 만들었다는 기록)",
+  "learn": "승경도놀이와 관직",
+  "fx": {
+   "note": "궁궐 마루에 승경도판이 펼쳐지고 윤목이 굴러간다."
   }
  },
  {
@@ -971,6 +1181,102 @@
   }
  },
  {
+  "id": "D025",
+  "kind": "daily",
+  "stages": [
+   "sejong"
+  ],
+  "rarity": "common",
+  "who": {
+   "name": "집현전 학자",
+   "doll": "official_blue"
+  },
+  "line": "집현전 학자들이 밤새 책을 읽다 잠들었사옵니다. 따뜻한 차와 이불을 보낼까요?",
+  "choice_type": "free",
+  "choices": {
+   "right": {
+    "label": "차와 이불을 보낸다",
+    "effects": {
+     "nobles": 10,
+     "treasury": -5
+    },
+    "device": {
+     "invention": 1
+    },
+    "this_run": "새벽까지 집현전 등불이 꺼지지 않았다."
+   },
+   "left": {
+    "label": "그냥 둔다",
+    "effects": {
+     "treasury": 5,
+     "nobles": -5
+    },
+    "this_run": "학자들은 새벽 찬 바람에 눈을 떴다."
+   }
+  },
+  "grain": "balance",
+  "out_of_textbook": false,
+  "sources": [
+   {
+    "type": "guide",
+    "page": "266"
+   }
+  ],
+  "sources_text": "지도서 266(집현전 젊은 학자들) / 일반 상황(특정 사실을 주장하지 않음)",
+  "learn": "집현전",
+  "fx": {
+   "note": "집현전 창에 등불이 오래 켜져 있다."
+  }
+ },
+ {
+  "id": "D026",
+  "kind": "daily",
+  "stages": [
+   "sejong"
+  ],
+  "rarity": "common",
+  "who": {
+   "name": "인쇄를 맡은 관리",
+   "doll": "official_green"
+  },
+  "line": "새로 만든 활자로 책을 찍으면 글자 사이가 넓어 읽기 좋사옵니다.",
+  "choice_type": "free",
+  "choices": {
+   "right": {
+    "label": "새 활자로 찍는다",
+    "effects": {
+     "nobles": 10,
+     "treasury": -10
+    },
+    "device": {
+     "invention": 1
+    },
+    "this_run": "또렷한 글자의 책이 쌓였다."
+   },
+   "left": {
+    "label": "옛 활자로 찍는다",
+    "effects": {
+     "treasury": 5,
+     "nobles": -5
+    },
+    "this_run": "예전 활자로 찍었다."
+   }
+  },
+  "grain": "balance",
+  "out_of_textbook": false,
+  "sources": [
+   {
+    "type": "guide",
+    "page": "263"
+   }
+  ],
+  "sources_text": "지도서 263 세종 때 갑인자 주조, 글자 사이가 여유 있어 읽기 쉬움",
+  "learn": "인쇄술 발달",
+  "fx": {
+   "note": "활자판에 먹이 칠해지고 책장이 넘어간다."
+  }
+ },
+ {
   "id": "D103",
   "kind": "daily",
   "stages": [
@@ -1033,7 +1339,7 @@
   "rarity": "common",
   "who": {
    "name": "세자를 가르치는 스승",
-   "doll": "official_red"
+   "doll": "seja"
   },
   "line": "세자 저하가 글공부보다 활쏘기를 하고 싶어 하시옵니다.",
   "choice_type": "free",
@@ -1461,6 +1767,102 @@
   }
  },
  {
+  "id": "D119",
+  "kind": "daily",
+  "stages": [
+   "sejong",
+   "seonjo",
+   "yeongjo"
+  ],
+  "conditions_text": "S는 SX3 뒤",
+  "rarity": "common",
+  "who": {
+   "name": "서운관 관리",
+   "doll": "official_red"
+  },
+  "line": "고을마다 잰 비의 양 기록이 올라왔사옵니다. 이를 보고 세금을 정할까요?",
+  "choice_type": "free",
+  "choices": {
+   "right": {
+    "label": "세금에 쓴다",
+    "effects": {
+     "people": 10,
+     "treasury": -5
+    },
+    "this_run": "비가 적은 고을의 세금이 줄었다."
+   },
+   "left": {
+    "label": "창고에 둔다",
+    "effects": {
+     "treasury": 5,
+     "people": -5
+    },
+    "this_run": "기록은 창고에 쌓였다."
+   }
+  },
+  "grain": "balance",
+  "out_of_textbook": false,
+  "sources": [
+   {
+    "type": "guide",
+    "page": "267"
+   }
+  ],
+  "sources_text": "지도서 267 지방 고을 수령이 강우량을 재 보고함",
+  "learn": "측우기와 농사",
+  "fx": {
+   "note": "고을 측우기 눈금이 반짝인다."
+  }
+ },
+ {
+  "id": "D120",
+  "kind": "daily",
+  "stages": [
+   "sejong",
+   "seonjo",
+   "yeongjo"
+  ],
+  "conditions_text": "S는 SX2 뒤",
+  "rarity": "common",
+  "who": {
+   "name": "종로 상인",
+   "doll": "merchant"
+  },
+  "line": "종로 해시계 앞에 시각을 보려는 사람이 몰려 길이 막혔사옵니다.",
+  "choice_type": "free",
+  "choices": {
+   "right": {
+    "label": "길을 넓힌다",
+    "effects": {
+     "people": 10,
+     "treasury": -10
+    },
+    "this_run": "해시계 앞길을 넓혔다."
+   },
+   "left": {
+    "label": "줄 서게 한다",
+    "effects": {
+     "treasury": 5,
+     "people": -5
+    },
+    "this_run": "사람들은 줄을 서서 기다렸다."
+   }
+  },
+  "grain": "balance",
+  "out_of_textbook": false,
+  "sources": [
+   {
+    "type": "guide",
+    "page": "267"
+   }
+  ],
+  "sources_text": "지도서 267 앙부일구를 사람이 많이 다니는 길가에 둠",
+  "learn": "앙부일구",
+  "fx": {
+   "note": "해시계 앞에 줄 선 사람 인형들."
+  }
+ },
+ {
   "id": "D121",
   "kind": "daily",
   "stages": [
@@ -1812,6 +2214,51 @@
     "hakdang"
    ],
    "note": "도성 안 네 곳에 작은 학당 지붕이 “뽕”."
+  }
+ },
+ {
+  "id": "D132",
+  "kind": "daily",
+  "stages": [
+   "sejong"
+  ],
+  "rarity": "common",
+  "who": {
+   "name": "향약 의원",
+   "doll": "jungin"
+  },
+  "line": "약초를 백성이 부르는 이름으로도 적어 두면 찾기 쉽사옵니다.",
+  "choice_type": "free",
+  "choices": {
+   "right": {
+    "label": "두 이름을 적는다",
+    "effects": {
+     "people": 10,
+     "nobles": -5
+    },
+    "this_run": "책 속 약초 옆에 마을 이름이 함께 적혔다."
+   },
+   "left": {
+    "label": "한자로만 적는다",
+    "effects": {
+     "nobles": 5,
+     "people": -5
+    },
+    "this_run": "약초 이름은 어려운 한자로만 적혔다."
+   }
+  },
+  "grain": "balance",
+  "out_of_textbook": false,
+  "sources": [
+   {
+    "type": "guide",
+    "page": "263"
+   }
+  ],
+  "sources_text": "지도서 263 자료 해설(《향약집성방》에 민간에서 부르는 약초 이름까지 기록)",
+  "learn": "《향약집성방》",
+  "fx": {
+   "note": "약초밭 팻말에 두 가지 이름이 걸린다."
   }
  }
 ]);
