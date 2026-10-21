@@ -17,6 +17,7 @@
     uTime: { value: 0 },
     uNight: { value: 0 }, // 0 낮 ~ 1 밤: 창 불빛
     uLights: { value: 1 }, // 창 불빛 세기(게이지 위기 때 줄어듦)
+    uDry: { value: 0 }, // 0 보통 ~ 1 가뭄: 초록(논·풀·잎)이 누렇게 바램 (돌발 10-13)
     uWater: { value: new T.Color('#5fb7c9') },
   });
 
@@ -25,6 +26,7 @@
     shader.uniforms.uTime = U.uTime;
     shader.uniforms.uNight = U.uNight;
     shader.uniforms.uLights = U.uLights;
+    shader.uniforms.uDry = U.uDry;
     shader.vertexShader = shader.vertexShader
       .replace(
         '#include <common>',
@@ -52,13 +54,19 @@
     shader.fragmentShader = shader.fragmentShader
       .replace(
         '#include <common>',
-        '#include <common>\nvarying vec3 vFx;\nuniform float uTime;\nuniform float uNight;\nuniform float uLights;'
+        '#include <common>\nvarying vec3 vFx;\nuniform float uTime;\nuniform float uNight;\nuniform float uLights;\nuniform float uDry;'
       )
       .replace(
         '#include <color_fragment>',
         [
           '#include <color_fragment>',
           'float kind = vFx.z;',
+          // 가뭄: 초록이 강한 곳(풀·논·잎)만 짚빛으로 바랜다
+          'if ( uDry > 0.001 ) {',
+          '  float gr = clamp( ( diffuseColor.g - max( diffuseColor.r, diffuseColor.b ) ) * 5.0, 0.0, 1.0 );',
+          '  float lum = dot( diffuseColor.rgb, vec3( 0.3, 0.55, 0.15 ) );',
+          '  diffuseColor.rgb = mix( diffuseColor.rgb, vec3( 1.05, 0.82, 0.45 ) * ( lum * 1.15 + 0.08 ), uDry * gr * 0.8 );',
+          '}',
           // 기와 골: 처마 방향으로 줄무늬
           'if ( kind > 0.5 && kind < 1.5 ) {',
           '  float g = abs( fract( vFx.x ) - 0.5 ) * 2.0;',

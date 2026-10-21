@@ -105,9 +105,13 @@
     // 희귀·전설(금빛 테두리)·사건 사슬 표시
     card.classList.toggle('rare', v.rarity === 'rare' || v.rarity === 'uncommon');
     card.classList.toggle('legend', v.rarity === 'legend');
-    $('#chainTag').textContent = v.chain ? `사슬 · ${v.chain}` : v.rarity === 'legend' ? '전설' : v.rarity === 'rare' ? '희귀' : v.rarity === 'uncommon' ? '드묾' : '';
+    $('#chainTag').textContent = v.evTag ? v.evTag : v.chain ? `사슬 · ${v.chain}` : v.rarity === 'legend' ? '전설' : v.rarity === 'rare' ? '희귀' : v.rarity === 'uncommon' ? '드묾' : '';
     $('#chainTag').style.display = $('#chainTag').textContent ? '' : 'none';
     card.classList.toggle('crisis-event', v.crisis === 'event' || v.crisis === 'followup');
+    // 돌발 이벤트(10-13): 종류별 테두리(흉 먹빛 붉음 · 길 금빛 · 손님 푸름 · 상자 보라 · 마음 분홍)
+    card.className = card.className.replace(/\bev-\w+/g, '').trim();
+    card.classList.toggle('event', !!v.evKind);
+    if (v.evKind) card.classList.add('ev-' + v.evKind);
     card.style.transition = 'none';
     card.style.transform = 'translate(0, 40px) rotateY(80deg) scale(0.96)';
     card.style.opacity = '0';

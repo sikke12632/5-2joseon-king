@@ -14,14 +14,20 @@ export default async function (t) {
     const start = await t.eval('JSON.stringify(__mx)');
     await t.eval('__jk.G.debugBuildAll()');
     await t.sleep(9000);
+    // 모두 짓는 연출(건물 스무 채가 한꺼번에 솟음 — 실제 판에서는 카드마다 한두 채)이 끝날 때까지 기다렸다가 다시 잰다
+    await t.waitFor('!__jk.W.animating()', 60000).catch(() => {});
+    await t.sleep(1500);
     const built = await t.eval('JSON.stringify(__mx)');
+    await t.eval('__mx.c=0; __mx.t=0');
     // 위기 장면(사람 무리·연기)과 돌발 연출을 겹쳐 가장 무거운 때를 만든다
     const extra = await t.eval(`(async()=>{ const W=__jk.W, out={};
       W.crisisScene({people:{level:'danger',side:'low',d:10},army:{level:'danger',side:'low',d:10}});
       if (JK.EvFx) for (const s of ['hungry','market','deer','ship','jar','harvest','envoy','rain','debate','relay']) { JK.EvFx.play(s,{id:'X'}); await new Promise(r=>setTimeout(r,1500)); out[s]=__mx.t; }
       return JSON.stringify(out); })()`);
     const mx = JSON.parse(await t.eval('JSON.stringify(__mx)'));
-    console.log(`[${q}] 시작 ${start} · 모두 지은 뒤 ${built} · 연출 겹침 ${extra} · 최대 그리기 ${mx.c} 삼각형 ${(mx.t / 1000).toFixed(1)}k`);
-    console.log(mx.t <= 200000 ? '  ✔' : '  ✘', `[${q}] 삼각형 200k 이하`, mx.t);
+    console.log(`[${q}] 시작 ${start} · 모두 지은 뒤(짓는 연출 포함) ${built} · 다 지은 섬 + 위기 장면 + 돌발 연출 ${extra} · 최대 그리기 ${mx.c} 삼각형 ${(mx.t / 1000).toFixed(1)}k`);
+    const bt = JSON.parse(built).t;
+    console.log(bt <= 200000 ? '  ✔' : '  ✘', `[${q}] 모두 짓는 동안 삼각형 200k 이하`, bt);
+    console.log(mx.t <= 200000 ? '  ✔' : '  ✘', `[${q}] 다 지은 섬 + 위기 + 돌발 연출 삼각형 200k 이하`, mx.t);
   }
 }

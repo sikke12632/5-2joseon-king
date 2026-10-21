@@ -58,7 +58,7 @@ const hasSource = (src) => Array.isArray(src) && src.some((s) => (s.type === 'gu
 
 /* ---------- 카드 (설계서 10-5 형식) ---------- */
 const ids = new Set();
-const KINDS = ['sagwan', 'history', 'device', 'daily', 'chain', 'rare', 'legend', 'crisis', 'alt'];
+const KINDS = ['sagwan', 'history', 'device', 'daily', 'chain', 'rare', 'legend', 'crisis', 'alt', 'event'];
 for (const c of D.cards) {
   const id = c.id || '(id 없음)';
   if (ids.has(id)) err(id, '카드 id 중복');
@@ -85,6 +85,30 @@ for (const c of D.cards) {
     if (c.similar && c.similar.out_of_textbook && !hasSource(c.similar.sources)) err(id, '비슷한 실제 일이 [교과서 밖]인데 출처 없음');
   }
   checkCond(id, 'conditions', c.conditions);
+  // 돌발 이벤트(10-13): [게임 속 일] · 종류 · 즉시·마음·연쇄 · 상자 세 결과
+  if (c.kind === 'event') {
+    if (!c.game_event) err(id, '돌발 카드인데 [게임 속 일](game_event) 표시가 없음');
+    if (!['bad', 'good', 'guest', 'box', 'mind', 'chain'].includes(c.ev)) err(id, `돌발 종류(ev) 이상: ${c.ev}`);
+    if (!c.name) err(id, '돌발 이름(name) 없음 — 큰 글씨·도감에 쓴다');
+    const e = c.event || {};
+    for (const k in e.now || {}) if (!gaugeKeys.includes(k)) err(id, `즉시 효과에 없는 게이지: ${k}`);
+    for (const k of ['show', 'right', 'left']) if (typeof (e.mind || {})[k] !== 'number') err(id, `마음 변화(event.mind.${k}) 없음`);
+    for (const ch of e.chains || []) {
+      const t = D.cards.find((x) => x.id === ch.card);
+      if (!t || t.kind !== 'event') err(id, `연쇄 대상 돌발 카드 없음: ${ch.card}`);
+      if (!(ch.p > 0 && ch.p <= 1)) err(id, `연쇄 확률 이상: ${ch.p}`);
+    }
+    if (c.ev === 'chain' && !D.cards.some((x) => ((x.event || {}).chains || []).some((ch) => ch.card === c.id))) err(id, '연쇄 카드인데 부르는 카드가 없음');
+    if (c.box) {
+      const ps = c.box.outcomes.map((o) => o.p);
+      if (Math.abs(ps.reduce((s, x) => s + x, 0) - 1) > 1e-6) err(id, `상자 확률 합이 1이 아님: ${ps.join('+')}`);
+      if (!['good', 'bad', 'empty'].every((k) => c.box.outcomes.some((o) => o.kind === k))) err(id, '상자 결과는 좋은·나쁜·빈 셋');
+      if (!['left', 'right'].includes(c.box.side)) err(id, `상자 쪽 이상: ${c.box.side}`);
+      for (const o of c.box.outcomes) for (const k in o.effects || {}) if (Math.abs(o.effects[k]) > 15) err(id, `상자 결과 효과가 15를 넘음: ${k}=${o.effects[k]}`);
+    }
+    for (const x of c.line_if || []) checkCond(id, 'line_if', x.when);
+    if (!(c.fx && c.fx.scene)) warn(id, '세계 연출(fx.scene) 없음');
+  }
   // 사슬 다음 카드 · 변형판 · 희귀도
   if (c.chain_next && !D.cards.some((x) => x.id === c.chain_next.card)) err(id, `사슬 다음 카드 없음: ${c.chain_next.card}`);
   if (c.variant_of && !D.cards.some((x) => x.id === c.variant_of)) err(id, `변형판의 원래 카드 없음: ${c.variant_of}`);
@@ -122,7 +146,8 @@ for (const c of D.cards) {
   if (c.kind === 'history' && c.grain === 'gamble') err(id, '역사 사건 카드에 도박형');
   if (c.grain === 'gamble') {
     const gm = c.gamble;
-    if (!gm || !['left', 'right'].includes(gm.side) || !gm.win || !gm.lose) err(id, '도박형인데 gamble{side, win, lose} 없음');
+    // 알 수 없는 상자(돌발, 10-13-4)는 결과가 셋이라 box{side, outcomes}로 둔다
+    if (!c.box && (!gm || !['left', 'right'].includes(gm.side) || !gm.win || !gm.lose)) err(id, '도박형인데 gamble{side, win, lose} 없음');
   }
   if (c.seed && c.seed.fruit_id && !D.cards.some((x) => x.id === c.seed.fruit_id)) warn(id, `씨앗의 열매 카드 없음: ${c.seed.fruit_id}`);
   if (c.kind === 'daily' && (!c.sources || !c.sources.length) && !c.general) warn(id, '일상 카드 근거 없음(일반 상황이면 general: true)');
@@ -250,6 +275,36 @@ for (const id in era.difficulty || {}) {
           }
         for (const a of (c.paths && c.paths.alt) || []) if (a.set_flag) flagsBefore.add(a.set_flag);
         seenBefore.add(c.id);
+      }
+    }
+  }
+}
+
+/* ---------- 돌발 조건이 열릴 수 있는지 (설계서 10-13-4) ----------
+ * 낱말마다: card >= N 은 그 왕의 판 길이 안, seen(X) 는 그 왕에 있는 카드, flag(F) 는 F를 세우는 다른 길이 있어야,
+ * chain(X) 는 X가 이 카드를 부르는 연쇄여야, mind() 는 0~100, gauge 는 0~100 안. '!낱말'은 늘 채울 수 있다고 본다. */
+{
+  for (const c of D.cards.filter((x) => x.kind === 'event')) {
+    for (const st of c.stages) {
+      const stage = era.stages.find((x) => x.id === st) || {};
+      const nHist = D.cards.filter((x) => (x.kind === 'history' || x.kind === 'sagwan') && !x.variant_of && x.stages.includes(st)).length;
+      const maxLen = nHist + ((stage.randomSlots || [5, 8])[1] || 8) + 8;
+      const flags = new Set(D.cards.flatMap((x) => ((x.paths && x.paths.alt) || []).map((a) => a.set_flag)).filter(Boolean));
+      const termOk = (t) => {
+        t = t.trim().replace(/^\((.*)\)$/, '$1').trim();
+        if (t.startsWith('!')) return true;
+        let m;
+        if ((m = t.match(/^card\s*(>=|>)\s*(\d+)$/))) return +m[2] < maxLen;
+        if ((m = t.match(/^seen\((\w+)\)$/))) return D.cards.some((x) => x.id === m[1] && x.stages.includes(st));
+        if ((m = t.match(/^flag\((\S+)\)$/))) return flags.has(m[1]);
+        if ((m = t.match(/^chain\((\w+)\)$/))) return D.cards.some((x) => x.id === m[1] && ((x.event || {}).chains || []).some((ch) => ch.card === c.id));
+        if ((m = t.match(/^mind\(\)\s*(>=|>)\s*(\d+)$/))) return +m[2] <= 100;
+        if ((m = t.match(/^gauge\((\w+)\)\s*(>=|>|<=|<)\s*(\d+)$/))) return +m[3] >= 0 && +m[3] <= 100;
+        return true;
+      };
+      for (const e of c.conditions || []) {
+        const ok = String(e).split('||').some((alt) => alt.split('&&').every((t) => termOk(t)));
+        if (!ok) err(c.id, `[${st}] 돌발 조건을 채울 수 없음: ${e}`);
       }
     }
   }

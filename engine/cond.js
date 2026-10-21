@@ -124,6 +124,8 @@
           return (c) => fn(c, ...args);
         }
         if (t.v === 'run_count') return (c) => (c.meta && c.meta.plays) || 0;
+        // 판의 몇 번째 카드인가(돌발 조건 'card >= 6', 설계서 10-13-4)
+        if (t.v === 'card') return (c) => (c.run && c.run.pos !== undefined ? c.run.pos + 1 : 0);
         // 기록관 권수 = 왕을 마친 기록 + 실각 기록(설계서 10-1)
         if (t.v === 'archive_count') return (c) => (JK.Game && JK.Game.archiveCount ? JK.Game.archiveCount() : 0);
         if (t.v === 'true') return () => true;
@@ -146,6 +148,15 @@
     stage: (c, id) => !!(c.run && c.run.stage === id),
     real: (c, id) => !!(c.run && c.run.choices && (c.run.choices[id] === 'right' || c.run.choices[id] === 'left')),
     diff: (c, id) => JK.Game && JK.Game.diffId() === id,
+    // 돌발 이벤트(10-13): 왕의 마음 0~100 · 지금 붙은 기질(suspicious·tired·hasty·fearful·steadfast·generous 또는 이름) · 이 판에서 그 돌발이 나왔는가(연쇄)
+    mind: (c) => (c.run && c.run.mind) || 0,
+    trait: (c, name) => {
+      const t = c.run && c.run.trait;
+      if (!t) return false;
+      const def = (JK.era && JK.era.mind && JK.era.mind.traits && JK.era.mind.traits[t.key]) || {};
+      return t.key === name || def.name === name;
+    },
+    chain: (c, id) => !!(c.run && c.run.seenRun && c.run.seenRun.includes(id)),
   };
   Cond.funcs = FUNCS;
   // 조건 하나(문자열) 또는 여러 개(배열, 모두 참) 검사. 문법이 틀리면 거짓(검사 도구가 따로 잡는다)

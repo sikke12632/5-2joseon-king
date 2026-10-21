@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>조선의 왕</title>
 <!-- 배포할 때마다 ?v= 숫자를 올린다(캐시) -->
-<link rel="stylesheet" href="engine/engine.css?v=33">
+<link rel="stylesheet" href="engine/engine.css?v=34">
 </head>
 <body>
 <div id="app">
@@ -13,9 +13,15 @@
   <div id="labels"></div>
   <div id="skyText" aria-hidden="true"></div>
   <div id="zoneAlert" role="status"></div>
+  <!-- 돌발 이벤트(10-13): 터지는 순간의 큰 글씨 · 사관의 한 줄 · 낡은 지도 -->
+  <div id="evBanner" aria-live="polite"><div class="eb-kind"></div><div class="eb-name"></div></div>
+  <div id="sagwanLine" aria-live="polite"><span class="sl-who">사관</span><span class="sl-text"></span></div>
+  <div id="evMap" aria-hidden="true"><svg viewBox="0 0 200 140"><path d="M8 14 Q60 4 100 12 T192 10 L188 128 Q130 136 96 128 T12 132 Z" fill="#efe0bc" stroke="#9a7a4a" stroke-width="3"/><path d="M30 100 L60 60 L80 82 L110 40 L140 78 L160 64 L176 96" fill="none" stroke="#6b5a3a" stroke-width="3" stroke-linejoin="round"/><path d="M40 112 Q80 98 120 110 T180 104" fill="none" stroke="#5fa6b8" stroke-width="3"/><path d="M50 120 C70 90 100 90 104 58" fill="none" stroke="#a33" stroke-width="2.5" stroke-dasharray="5 5"/><path d="M96 34 l16 16 M112 34 l-16 16" stroke="#c0392b" stroke-width="6" stroke-linecap="round"/></svg></div>
 
   <div id="hud">
     <div id="stage"><span class="seal" id="stageSeal"></span><span id="stageName"></span><span id="trueSeal" title="진엔딩: 실제 역사대로">實錄</span></div>
+    <!-- 왕의 마음(10-13-2, 게임 속 일): 임금 메달 옆 붓에 먹이 차오른다. 기질이 붙으면 그 아래 -->
+    <div id="kingMind" style="display:none"><div class="km-medal"><div class="km-mask"><img class="km-face" alt=""></div><span class="km-cap">왕의 마음</span></div><div class="km-brush" title="임금의 마음 (게임 속 일)"><div class="km-ink"></div><span class="km-tip"></span></div><div class="km-trait" style="display:none"><span class="kt-icon"></span><span class="kt-text"><span class="kt-name"></span><span class="kt-tip"></span></span></div></div>
     <div class="topbtns">
       <button id="btnHome" class="ibtn" aria-label="첫 화면" title="첫 화면으로">
         <svg viewBox="0 0 24 24"><path d="M12 3.5L2.5 11.5h2.8V20h5v-5.2h3.4V20h5v-8.5h2.8z"/></svg>
@@ -56,6 +62,7 @@
     <button id="altBtn" type="button"><span class="ab-up">↑ 다른 길</span><span id="altLabel"></span><span id="altWhy"></span></button>
     <div id="grainMark" aria-hidden="true"></div>
     <div id="luck" aria-live="polite"><div class="coin"><span>運</span></div><div id="luckText"></div></div>
+    <div id="boxReveal" aria-live="polite"><div class="br-box"></div><div class="br-res"></div><div class="br-word"></div></div>
     <div id="held" aria-live="polite"><div class="h-scroll"><div class="h-stamp">버팀</div><div id="heldName"></div><div id="heldLine"></div></div></div>
     <div id="result"></div>
   </section>
@@ -168,6 +175,7 @@
       <h4>칭호</h4><ul id="recTitles"></ul>
       <h4>실각 기록</h4><ul id="recFalls"></ul>
       <h4>위기 도감</h4><ul id="recCrisis" class="cx-crisis"></ul>
+      <h4>돌발 사건 <small>(게임 속 일)</small></h4><ul id="recEvents" class="rec-events"></ul>
       <h4>버틴 위기</h4><ul id="recHeld" class="rec-held"></ul>
       <h4>갈림길</h4><ul id="recPaths" class="rec-paths"></ul>
       <h4>서가</h4><div id="recShelf" class="rec-shelf"></div>
@@ -204,31 +212,34 @@
   <div id="lost" class="hide"><p>그래픽을 다시 불러오는 중…</p></div>
   <div id="loading"><p>섬을 띄우는 중…</p></div>
 </div>
-<script src="engine/lib/three.min.js?v=33"></script>
-<script src="engine/toy.js?v=33"></script>
-<script src="engine/props.js?v=33"></script>
-<script src="eras/joseon/map.js?v=33"></script>
-<script src="eras/joseon/models.js?v=33"></script>
-<script src="eras/joseon/models-taejo.js?v=33"></script>
-<script src="eras/joseon/era.js?v=33"></script>
+<script src="engine/lib/three.min.js?v=34"></script>
+<script src="engine/toy.js?v=34"></script>
+<script src="engine/props.js?v=34"></script>
+<script src="eras/joseon/map.js?v=34"></script>
+<script src="eras/joseon/models.js?v=34"></script>
+<script src="eras/joseon/models-taejo.js?v=34"></script>
+<script src="eras/joseon/era.js?v=34"></script>
 <!-- 데이터: 공통 + 왕별 (왕이 늘면 그 왕 폴더의 두 줄을 더한다) -->
-<script src="eras/joseon/data/common/roles.js?v=33"></script>
-<script src="eras/joseon/data/common/records.js?v=33"></script>
-<script src="eras/joseon/data/common/stages.js?v=33"></script>
-<script src="eras/joseon/data/common/daily.js?v=33"></script>
-<script src="eras/joseon/data/taejo/cards.js?v=33"></script>
-<script src="eras/joseon/data/taejo/quizzes.js?v=33"></script>
-<script src="eras/joseon/data/taejo/more.js?v=33"></script>
-<script src="eras/joseon/data/taejo/quizzes-more.js?v=33"></script>
-<script src="engine/save.js?v=33"></script>
-<script src="engine/world.js?v=33"></script>
-<script src="engine/audio.js?v=33"></script>
-<script src="engine/cards.js?v=33"></script>
-<script src="engine/quiz.js?v=33"></script>
-<script src="engine/cond.js?v=33"></script>
-<script src="engine/crisis.js?v=33"></script>
-<script src="engine/game.js?v=33"></script>
-<script src="engine/ui.js?v=33"></script>
-<script src="engine/main.js?v=33"></script>
+<script src="eras/joseon/data/common/roles.js?v=34"></script>
+<script src="eras/joseon/data/common/records.js?v=34"></script>
+<script src="eras/joseon/data/common/stages.js?v=34"></script>
+<script src="eras/joseon/data/common/daily.js?v=34"></script>
+<script src="eras/joseon/data/taejo/cards.js?v=34"></script>
+<script src="eras/joseon/data/taejo/quizzes.js?v=34"></script>
+<script src="eras/joseon/data/taejo/more.js?v=34"></script>
+<script src="eras/joseon/data/taejo/quizzes-more.js?v=34"></script>
+<script src="eras/joseon/data/taejo/events.js?v=34"></script>
+<script src="engine/save.js?v=34"></script>
+<script src="engine/world.js?v=34"></script>
+<script src="engine/audio.js?v=34"></script>
+<script src="engine/cards.js?v=34"></script>
+<script src="engine/quiz.js?v=34"></script>
+<script src="engine/cond.js?v=34"></script>
+<script src="engine/crisis.js?v=34"></script>
+<script src="engine/events.js?v=34"></script>
+<script src="engine/evfx.js?v=34"></script>
+<script src="engine/game.js?v=34"></script>
+<script src="engine/ui.js?v=34"></script>
+<script src="engine/main.js?v=34"></script>
 </body>
 </html>

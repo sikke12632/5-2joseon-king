@@ -583,7 +583,9 @@
     camTo = {};
   let camT = 1,
     camDur = 1;
-  W.state = { ink: 0, inkTarget: 0, tod: 0.1, todTarget: 0.1, people: 50, idle: false, title: true, gloom: 0 };
+  W.state = { ink: 0, inkTarget: 0, tod: 0.1, todTarget: 0.1, people: 50, idle: false, title: true, gloom: 0, wx: 0, wxTarget: 0, wxPal: null };
+  // 한 프레임마다 부를 것(engine/evfx.js 돌발 연출)
+  W.stepHooks = [];
 
   /* ================= 초기화 ================= */
   W.init = function (cv, opts) {
@@ -663,6 +665,9 @@
     const fall = new T.Mesh(water.fall, JK.MAT);
     W.island.add(fall);
     W._fallBottom = water.fallBottom;
+    W.riverMesh = river;
+    W.riverPts = RIVER;
+    W.mounts = MOUNTS;
 
     buildBuildings();
     buildWall();
@@ -1290,6 +1295,7 @@
     ring.visible = true;
     ringAnim = { t: 0, size };
   }
+  W.fx = { burst: (...a) => burst(...a), sparkle: (...a) => sparkle(...a), shock: (...a) => shock(...a) };
 
   /* ================= 짓기 ================= */
   const easeBack = (t) => {
@@ -1938,6 +1944,10 @@
     return [];
   };
   const anchorOf = (a) => anchorsOf(a)[0] || [0, 0];
+  W.anchor = anchorOf;
+  W.anchors = anchorsOf;
+  // 건물 자리(지었든 안 지었든) [x, z]
+  W.buildingPos = (k) => (BUILD_DEFS[k] ? [BUILD_DEFS[k].x, BUILD_DEFS[k].z] : null);
   // 무리: 자리 둘레에 줄지어 서서 한곳(face)을 바라본다
   function placeCrowd(at, n, clothes, hat, face, flags, flagColor, mode) {
     const [cx, cz] = anchorOf(at);
@@ -1963,9 +1973,17 @@
     for (let i = 0; i < n; i++) crowdList.push({ path: pts, s: i / n, ph: i, color: JK.col(clothes[i % clothes.length]), mode: 'walk' });
   }
   let sceneKey = '';
+  let evScene = null,
+    lastZones = {};
+  // 돌발 장면(10-13): 위기 장면 위에 사람 무리·행렬·연기·불을 더한다. null이면 치움
+  W.eventScene = function (sc) {
+    evScene = sc;
+    W.crisisScene(lastZones);
+  };
   W.crisisScene = function (zones) {
     const CS = (JK.era && JK.era.crisis && JK.era.crisis.scenes) || {};
-    const key = JSON.stringify(zones);
+    lastZones = zones;
+    const key = JSON.stringify(zones) + '|' + JSON.stringify(evScene);
     if (key === sceneKey) return;
     sceneKey = key;
     ensureCrisisMeshes();
@@ -1995,7 +2013,16 @@
       }
       if (sc.lights !== undefined) lights = Math.min(lights, sc.lights);
     }
-    W.state.lightsTarget = lights;
+    if (evScene) {
+      const sc = evScene;
+      for (const c of sc.crowds || []) placeCrowd(c.at, c.n, c.clothes || ['#ece4d2'], c.hat, c.face, c.flags || 0, c.flag || '#c0392b', c.mode || 'stand');
+      for (const p of sc.processions || []) placeProcession((MAP.crisis || {})[p.path] || p.path, p.n, p.clothes || ['#d7e8e0']);
+      for (const a of sc.smoke || []) for (const [x, zz] of anchorsOf(a)) smokeList.push({ x, z: zz, y: height(x, zz) });
+      for (const a of sc.fire || []) for (const [x, zz] of anchorsOf(a)) fireList.push({ x, z: zz, y: height(x, zz) });
+    }
+    // 밤 장면(돌발 '잠 못 드는 밤')이 끈 불빛은 그대로 둔다
+    W.state.lightsBase = lights;
+    W.state.lightsTarget = W.state.lightsHold !== undefined ? Math.min(lights, W.state.lightsHold) : lights;
     W.state.tensionTarget = tension;
   };
   function updateCrisis(dt, t) {
@@ -2347,10 +2374,43 @@
     sun.position.copy(_sunDir).multiplyScalar(40);
     sun.target.position.set(0, 0, 0);
     JK.U.uNight.value = lerp(A.night, B.night, f);
+    // 돌발 날씨(10-13): 가뭄·비·밤 등. wx 0~1 만큼 하늘·해·빛을 날씨 빛으로
+    const wx = W.state.wx || 0,
+      P = W.state.wxPal;
+    if (wx > 0.001 && P) {
+      u.uTop.value.lerp(P.top, wx);
+      u.uHor.value.lerp(P.hor, wx);
+      u.uBot.value.lerp(P.bot, wx);
+      sun.color.lerp(P.sun, wx);
+      sun.intensity *= 1 + (P.si - 1) * wx;
+      hemi.intensity *= 1 + (P.hi - 1) * wx;
+      if (P.night) JK.U.uNight.value = Math.max(JK.U.uNight.value, P.night * wx);
+    }
     _c1.copy(u.uHor.value).lerp(u.uBot.value, 0.55);
     scene.fog.color.copy(_c1);
     if (W.cloudMat) W.cloudMat.emissive.copy(u.uHor.value).lerp(u.uTop.value, 0.25);
   }
+  // 날씨가 이미 다른 빛이면 한 번 걷힌 뒤 새 빛으로(하늘이 한꺼번에 툭 바뀌지 않게)
+  W.setWeather = function (pal) {
+    const S = W.state;
+    if (!pal) {
+      S.wxNext = null;
+      S.wxTarget = 0;
+      return;
+    }
+    if ((S.wx || 0) > 0.05 && S.wxPal && S.wxPal !== pal) {
+      S.wxNext = pal;
+      S.wxTarget = 0;
+      return;
+    }
+    S.wxNext = null;
+    S.wxPal = pal;
+    S.wxTarget = 1;
+  };
+  // 큰비: 강물이 불어 오른다(0~0.3)
+  W.setWaterRise = function (h) {
+    W.state.waterTarget = h || 0;
+  };
   W.setTOD = function (t, instant) {
     W.state.todTarget = t;
     if (instant) {
@@ -2580,6 +2640,23 @@
       applyTOD(S.tod);
       if (frameNo % 6 === 0) shadowFrames = Math.max(shadowFrames, 1);
     }
+    // 돌발 날씨·강물·가뭄 빛
+    if (Math.abs(JK.U.uDry.value - (S.dryTarget || 0)) > 0.002) JK.U.uDry.value += clamp((S.dryTarget || 0) - JK.U.uDry.value, -dt * 0.35, dt * 0.45);
+    if (S.wxNext && (S.wx || 0) < 0.02) {
+      S.wxPal = S.wxNext;
+      S.wxNext = null;
+      S.wxTarget = 1;
+    }
+    if (Math.abs((S.wx || 0) - (S.wxTarget || 0)) > 0.002) {
+      S.wx = (S.wx || 0) + clamp((S.wxTarget || 0) - (S.wx || 0), -dt * (S.wxNext ? 1.6 : 0.5), dt * 0.7);
+      applyTOD(S.tod);
+      if (frameNo % 6 === 0) shadowFrames = Math.max(shadowFrames, 1);
+    }
+    if (W.riverMesh && Math.abs((S.water || 0) - (S.waterTarget || 0)) > 0.001) {
+      S.water = (S.water || 0) + clamp((S.waterTarget || 0) - (S.water || 0), -dt * 0.08, dt * 0.12);
+      W.riverMesh.position.y = S.water;
+      W.riverMesh.scale.set(1 + S.water * 0.6, 1, 1 + S.water * 0.6);
+    }
     // 수묵
     if (Math.abs(S.ink - S.inkTarget) > 0.0005) S.ink += clamp(S.inkTarget - S.ink, -dt * 0.4, dt * 0.32);
     // 실각: 섬이 기울고 가라앉는다
@@ -2617,6 +2694,7 @@
     updateStates(clock.t);
     updateCrisis(dt, clock.t);
     updateBoats(dt);
+    for (const h of W.stepHooks) h(dt, clock.t);
     stats.walkers = dollMesh.count;
     W.clouds.rotation.y += dt * 0.004;
     // 떠 있는 섬
@@ -2674,6 +2752,16 @@
     JK.U.uLights.value = 1;
     W.state.tension = W.state.tensionTarget = 0;
     W.state.alarm = 0;
+    evScene = null;
+    W.state.wx = W.state.wxTarget = 0;
+    W.state.wxNext = null;
+    W.state.water = W.state.waterTarget = 0;
+    W.state.dryTarget = 0;
+    JK.U.uDry.value = 0;
+    if (W.riverMesh) {
+      W.riverMesh.position.y = 0;
+      W.riverMesh.scale.set(1, 1, 1);
+    }
     W.fxBoats(false);
     W.fxFlag(false);
     W.state.ink = 0;

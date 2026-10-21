@@ -18,6 +18,7 @@
     for (const c of era.data.cards) cardsById[c.id] = c;
     Cards.init({ gauges: era.gauges, onCommit: commit });
     JK.Crisis.init();
+    JK.Events.init();
   };
   G.card = (id) => cardsById[id];
   const stageOf = (id) => era.stages.find((s) => s.id === id);
@@ -44,6 +45,8 @@
   G.effect = function (k, base, vals) {
     const D = G.diff();
     let v = base * D.mult * G.stageMult('mult');
+    // 왕의 기질(10-13-2): 의심 = 양반 오름 ½ · 성급 = ×1.25 · 너그러움 = 백성 내림 ½
+    if (JK.Events) v = JK.Events.effectMult(k, v);
     const cur = vals[k];
     if (D.safe && ((v < 0 && cur < D.safe.below) || (v > 0 && cur > 100 - D.safe.below))) v *= D.safe.k;
     return Math.round(v);
@@ -178,6 +181,9 @@
     run.altSkipped = [];
     run.crisisMult = {};
     run.flagsRun = Object.assign({}, run.flagsRunBefore || {});
+    // 돌발 이벤트·왕의 마음(10-13): 판마다 처음부터(선조·인조·고종은 마음 20에서, 10-12)
+    run.lastShown = '';
+    JK.Events.reset(run, G.stageInfo(stageId));
     G.state = 'play';
     setupWorld(st, false);
     save();
@@ -223,6 +229,9 @@
     for (const k in G.run.damaged || {}) W.setBuildState(k, 'damaged', 0);
     JK.UI.setStage(st);
     refreshSeal();
+    JK.Events.setKing(pics[st.kingRole || st.id], st.name);
+    JK.Events.refresh(G.run, true);
+    if (JK.EvFx) JK.EvFx.reset();
   }
   function setTOD(instant) {
     const st = stageOf(G.run.stage);
@@ -272,6 +281,18 @@
     return null;
   }
   G.grainState = () => grainState(G.run);
+  // 이 결의 카드를 지금 자리에 내도 연속 규칙(10-9-3)을 어기지 않는가 — 돌발 뽑기(engine/events.js)도 쓴다
+  G.grainFits = function (run, grain) {
+    if (!grain) return true;
+    const seq = run.grainHist.concat(grain);
+    if (grainBreaks(seq)) return false;
+    for (let i = run.pos + 1; i < run.deck.length; i++) {
+      if (run.deck[i] === '*') break;
+      const nc = cardsById[run.deck[i]];
+      if (nc && nc.grain) return !grainBreaks(seq.concat(nc.grain));
+    }
+    return true;
+  };
   // 무작위 칸 하나 뽑기: 조건(cond.js) → 결 가중치(상태 × 난이도) → 앞뒤 연속 규칙
   function drawRandom(run) {
     const ctx = { run, meta: S.meta };
@@ -337,7 +358,8 @@
     if (run.pending) return showRecord();
     // 무작위 칸: 이 자리에서 뽑는다. 낼 카드가 없으면 칸을 지운다
     while (run.deck[run.pos] === '*') {
-      const id = drawRandom(run);
+      // 돌발 이벤트(10-13-1): 무작위 칸이 난이도별 확률로 돌발 카드가 된다
+      const id = JK.Events.tryReplace(run, JK.rng((run.stageSeed + run.pos * 7177 + 3) >>> 0)) || drawRandom(run);
       if (id) {
         run.deck[run.pos] = id;
         run.pool = run.pool.filter((x) => x !== id);
@@ -357,6 +379,18 @@
       return o;
     };
     const crisisEvent = c.kind === 'crisis' && c.level !== 'warn';
+    // 이 자리에서 처음 뜨는가(이어 하기로 다시 뜰 때 마음·즉시 효과를 두 번 하지 않게)
+    const first = run.lastShown !== run.pos + ':' + c.id;
+    run.lastShown = run.pos + ':' + c.id;
+    const isEv = JK.Events.isEvent(c);
+    let evNow = null;
+    if (isEv) {
+      const luck = c.ev === 'chain' ? (c.event || {}).luck : c.ev;
+      v.game = true;
+      v.evTag = `${c.ev === 'chain' ? '연쇄' : '돌발 · ' + ((era.events.names || {})[c.ev] || '')} · ${c.name}`;
+      v.evKind = luck;
+      if (first) evNow = JK.Events.onShow(run, c);
+    }
     if (c.kind === 'crisis') {
       v.tag = c.level === 'warn' ? '예고' : c.level === 'followup' ? '후속 위기' : '위기';
       v.game = !!c.game_event;
@@ -364,17 +398,26 @@
         v.crisisName = c.name;
         v.similar = c.similar || null;
         // 버튼 아래 무너질 확률(새싹 숫자 / 보통 말 / 성군·실록 없음)
-        const L = JK.Crisis.chanceLabel(JK.Crisis.fallChance(c, 'left', run.vals).p);
-        const R = JK.Crisis.chanceLabel(JK.Crisis.fallChance(c, 'right', run.vals).p);
+        const pL = JK.Crisis.fallChance(c, 'left', run.vals).p;
+        const pR = JK.Crisis.fallChance(c, 'right', run.vals).p;
+        const L = JK.Crisis.chanceLabel(pL);
+        const R = JK.Crisis.chanceLabel(pR);
         if (L || R) v.chance = { left: L, right: R };
+        // 위기가 터짐: 왕의 마음 +20, 사관 한 줄(실각 확률이 50% 넘으면 '마지막 장')
+        if (first) {
+          JK.Events.addMind(run, (era.mind.up || {}).crisis || 20);
+          JK.Events.say(run, Math.min(pL, pR) > 0.5 ? 'brink' : 'crisis');
+        }
       }
     }
     if (!run.seenRun.includes(c.id)) run.seenRun.push(c.id);
     // 역사 분기(10-10-1): 실제 경로 잠김 · 아래 '다른 길' 버튼(열림 조건) · 막다른 길 금지
     if (c.paths && c.choices) Object.assign(v, pathView(run, c));
+    // 실제 경로가 잠겨 다른 길만 열림: 왕의 마음 +10
+    if (v.realShut && first) JK.Events.addMind(run, (era.mind.up || {}).realShut || 10);
     Object.assign(v, {
       crisis: c.kind === 'crisis' ? c.level : '',
-      text: c.line,
+      text: JK.Events.lineOf(run, c, lineOf(run, c)),
       left: c.choices && c.choices.left.label,
       right: c.choices && c.choices.right.label,
       single: c.single,
@@ -384,13 +427,35 @@
       year: c.year || '',
       fx: c.single ? null : { left: previewFx(c, 'left', scaled), right: previewFx(c, 'right', scaled) },
       grainMark: c.grain && (grainCfg().marks || {})[c.grain] ? grainMarkFor(c) : null,
-      preview: run.bigPreview > 0 ? 'arrows' : D.preview,
+      // 지친 왕(10-13-2): 게이지 점(미리보기)이 보이지 않는다
+      preview: JK.Events.previewHidden(run) ? 'none' : run.bigPreview > 0 ? 'arrows' : D.preview,
       rarity: ['rare', 'legend', 'uncommon'].includes(c.rarity) && c.kind !== 'daily' ? c.rarity : '',
       chain: c.kind === 'chain' ? c.chain || '사건 사슬' : '',
       hand: st.tutorial && run.pos < st.tutorial && S.meta.cardsPlayed < 12,
     });
+    if (isEv) {
+      const ln = lineIf(run, c);
+      if (ln && ln.who) v.name = ln.who;
+    }
     S.markSeen(c.id);
     Cards.show(v);
+    // 돌발이 터지는 순간(10-13): 큰 글씨, 세계 연출, 즉시 효과(작게)
+    if (isEv && first) {
+      JK.Events.banner(c);
+      if (JK.EvFx) JK.EvFx.play((c.fx || {}).scene, c);
+      if (evNow && Object.keys(evNow.now).length) {
+        setTimeout(() => {
+          Cards.setGauges(run.vals);
+          Cards.flash(evNow.now, true);
+          W.state.people = run.vals.people;
+          refreshWarn();
+          save();
+        }, 900);
+      }
+    }
+    // 기질이 붙음·풀림·무너질 듯한 밤 알림, 사관의 한 줄(세 장에 한 번)
+    for (const p of JK.Events.takePending()) setTimeout(() => JK.Events.announce(p), 1200);
+    JK.Events.flush(run);
     // 위기 사건(10-8-4): 위기 장면(3단계), 아이콘 흔들림, 카메라 살짝 당김, 징 한 번
     if (crisisEvent) {
       run.eventScene = { gauge: c.gauge, side: c.side, until: run.pos + 1 };
@@ -437,7 +502,7 @@
       delete lock[size('right') <= size('left') ? 'right' : 'left'];
     }
     run.shownAlt = a ? { card: c.id, idx: ai, open } : null;
-    const out = { lock, flavor, need: realShut ? missingGauges(run, need) : [] };
+    const out = { lock, flavor, need: realShut ? missingGauges(run, need) : [], realShut };
     if (a) {
       const fullWhy = `${branchCfg().fullReason || '이미 나라가 많이 흔들렸다'} (한 왕에 다른 길은 ${branchCfg().maxPerStage || 3}번까지)`;
       out.alt = { label: a.label, locked: !open, reason: open ? '' : full ? fullWhy : needText(run, unlockOf(a)) || a.lock_reason || '', flavor: open || full ? '' : a.lock_reason || '' };
@@ -557,6 +622,12 @@
   G.compareEntry = () => compareEntry(G.run, stageOf(G.run.stage));
   // 도박 쪽 버튼은 수치 대신 '?'(이기면·지면 움직이는 게이지 모두)
   function previewFx(c, sideKey, scaled) {
+    // 알 수 없는 상자(10-13-4): 나올 수 있는 게이지마다 '?'
+    if (c.box && c.box.side === sideKey) {
+      const o = {};
+      for (const out of c.box.outcomes) for (const k in out.effects || {}) o[k] = '?';
+      return o;
+    }
     if (!(c.gamble && c.gamble.side === sideKey)) return scaled(c.choices[sideKey]);
     const o = {};
     for (const k of Object.keys(Object.assign({}, c.gamble.win.effects, c.gamble.lose.effects, c.choices[sideKey].effects))) o[k] = '?';
@@ -566,6 +637,15 @@
     const m = grainCfg().marks[c.grain];
     if (c.grain === 'seed' && c.seed && c.seed.side) return { [c.seed.side]: m };
     return { left: m, right: m };
+  }
+  // 판의 상황에 따라 대사만 바꾸는 카드(line_if: [{ when, line, who }]) — 예: 개경에 머문 판의 큰비(ET06)
+  function lineIf(run, c) {
+    for (const x of c.line_if || []) if (JK.Cond.test(x.when, cctx(run))) return x;
+    return null;
+  }
+  function lineOf(run, c) {
+    const x = lineIf(run, c);
+    return x ? x.line : c.line;
   }
   function showRecord() {
     const p = G.run.pending;
@@ -615,6 +695,12 @@
       sideEff = Object.assign({}, side, { effects: o.effects || {}, this_run: o.this_run || side.this_run });
       run.gambles = (run.gambles || []).concat({ card: c.id, won });
     }
+    // 알 수 없는 상자(10-13-4): 여는 쪽을 고르면 좋은·나쁜·빈 셋 가운데 하나
+    let bres = null;
+    if (side && JK.Events.isBox(c, sideKey)) {
+      bres = JK.Events.openBox(run, c, JK.rng((run.stageSeed + run.pos * 3571 + (run.stats.fallsRun || 0) * 11 + 41) >>> 0));
+      sideEff = Object.assign({}, side, { effects: bres.effects || {}, this_run: bres.this_run || side.this_run });
+    }
     // 위기 사건·후속: 고른 순간(효과 전 게이지로) 수습 또는 실각을 굴린다 (10-8-3)
     let cres = null;
     if (c.kind === 'crisis' && c.level !== 'warn' && side) {
@@ -647,7 +733,16 @@
       }
       for (const k in run.vals) if (run.vals[k] <= 10 || run.vals[k] >= 90) run.stageStats.edge = true;
       W.state.people = run.vals.people;
-      if (gres) {
+      if (bres) {
+        // 상자: 흔들리다 뚜껑이 튀고 결과가 뜬 뒤 게이지가 움직인다
+        JK.Events.reveal(c, bres);
+        if (JK.EvFx) JK.EvFx.open((c.fx || {}).scene, bres.kind);
+        setTimeout(() => {
+          Cards.setGauges(run.vals);
+          Cards.flash(applied, bres.kind === 'bad');
+          if (bres.kind === 'bad') Cards.shake();
+        }, 1300);
+      } else if (gres) {
         // 도박: 동전이 돌고 "운이 따랐다 / 운이 없었다"가 뜬 뒤 게이지가 움직인다
         Cards.gamble(gres.won);
         setTimeout(() => {
@@ -670,7 +765,23 @@
           Cards.shake();
         }
       }
-      if (sideEff.this_run && (!c.real_history || isAlt)) setTimeout(() => Cards.toast(sideEff.this_run, Math.max(2600, sideEff.this_run.length * 70), isAlt ? '실제 역사와 달라졌어요 📜' : ''), gres ? 1100 : 0);
+      if (sideEff.this_run && (!c.real_history || isAlt)) setTimeout(() => Cards.toast(sideEff.this_run, Math.max(2600, sideEff.this_run.length * 70), isAlt ? '실제 역사와 달라졌어요 📜' : ''), bres ? 1500 : gres ? 1100 : 0);
+      // 큰 변화: 사관 한 줄 후보
+      if (big >= 15) JK.Events.say(run, 'big');
+      // 돌발: 고른 쪽의 마음 변화, 마음 카드의 쉬는 쪽, 연쇄 예약
+      if (JK.Events.isEvent(c)) {
+        JK.Events.onCommit(run, c, sideKey, JK.rng((run.stageSeed + run.pos * 6007 + 13) >>> 0));
+        if (JK.EvFx) JK.EvFx.chose((c.fx || {}).scene, sideKey, c);
+        // 공사장 불(ET08): 꺼진 뒤 공사 중인 건물은 판 끝까지 손상 모습(10-8-4)
+        if (c.id === 'ET08') {
+          const t = ['workyard', 'gyeongbok'].find((k) => run.built.includes(k) && !(run.damaged || {})[k]);
+          if (t) {
+            run.damaged = run.damaged || {};
+            run.damaged[t] = c.id;
+            setTimeout(() => W.setBuildState(t, 'damaged', 0), 1600);
+          }
+        }
+      }
       if (isAlt) takeAlt(run, c, alt);
       // 수습("버텼다!"): 붉은 도장 "버팀", 북 세 번, 아이콘이 원래 색으로. 아직 거리 15 이하면 후속 예약
       if (cres) {
@@ -681,12 +792,17 @@
         W.camTo(W.CAM_PLAY, 1.6);
         W.state.alarm = 0;
         Cards.held(c.name, `무너질 확률 ${Math.round(cres.p * 100)}%에서 버텼다!`, 2400);
+        JK.Events.addMind(run, (era.mind.down || {}).held || -10);
+        JK.Events.say(run, 'held');
         run.heldAt = run.pos;
         Cards.gaugeMark(c.gauge, 'relief');
         if (JK.Audio) [0, 380, 760].forEach((t) => setTimeout(() => JK.Audio.drum(), t));
         if (cres.level === 'end') titleNow(['heldAtEnd']);
       }
       refreshWarn();
+      // 경고 구간에 들어섬: 사관 한 줄 후보
+      const RK = JK.Crisis.RANK;
+      for (const k in run.zones || {}) if ((RK[run.zones[k].level] || 0) >= RK.warn && (RK[(prevZones[k] || {}).level] || 0) < RK.warn) JK.Events.say(run, 'warn');
       if ((run.stats.followupsCancelled || 0) >= 3) titleNow(['cancel3']);
     }
     if (run.bigPreview > 0) run.bigPreview--;
@@ -705,7 +821,7 @@
       if ((def.removeAfter || []).includes(c.variant_of || c.id)) unbuild(k, 900);
     }
     // 짓기: 이름 있는 건물은 어느 쪽을 골라도 역사대로 선다. 고른 방식은 건물 상태로 남는다(설계서 7-4).
-    let wait = against ? 1300 : cres ? 2300 : gres ? 2000 : 700;
+    let wait = against ? 1300 : cres ? 2300 : gres || bres ? 2000 : 700;
     // 다른 길이면 그 길의 장식만(실제 경로 카드의 연출 build는 세우지 않음)
     const builds = isAlt ? alt.build || [] : ((side && side.build) || []).concat((c.fx && c.fx.build) || []).filter((k, i, a) => a.indexOf(k) === i);
     const state = side && side.build_state;
@@ -719,6 +835,8 @@
       if (v.kind === 'village' && v.grow && !builds.includes(k)) setTimeout(() => W.growVillage(k, v.grow), 600);
     }
     run.grown = (run.grown || 0) + 1;
+    // 왕의 마음: 경고 이하에서 넘긴 장 +2, 기질·무너질 듯한 밤·돌발 쉬는 장수 줄이기
+    JK.Events.afterCard(run, c);
     run.pos++;
     // 위기 카드 끼워 넣기: 지금 구간에 따라 확률로 다음 자리에(역사 카드 순서는 그대로 밀린다)
     // 위기 카드 끼워 넣기(10-8): 후속(기한) → 예고(안정→경고) → 위기 사건(구간 확률). 역사 카드 순서는 그대로 밀린다.

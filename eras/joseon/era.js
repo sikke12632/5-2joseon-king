@@ -161,6 +161,72 @@
     deck: { rarity: { common: 1, uncommon: 0.35, rare: 0.12, legend: 0.04 }, unseen: 3, archiveBoostAt: 10, archiveBoost: 1.5 },
     // 사관 퀴즈 (설계서 4-1·9-3 결정 4): 왕이 바뀔 때 3문항, 그 가운데 교과서 밖은 많아야 1문항. 왕당 문항 풀에서 교과서 밖은 6문항까지
     quiz: { perStage: 3, outsidePerRound: 1, outsidePoolMax: 6 },
+    // 돌발 이벤트 (설계서 10-13-1): 무작위 칸이 돌발로 바뀔 확률 · 한 판 최대(연쇄 포함) · 돌발 뒤 쉬는 장수 · 종류 비율
+    //  chainMult 연쇄 확률에 곱함 · boxBad 상자의 나쁜 결과 확률에 더함(그만큼 좋은 결과에서 뺌) · firstCards 처음 몇 장은 돌발 없음
+    //  chainAfter 연쇄가 이어지는 거리(장) · chainDepth 연쇄 최대 단계 · mindBoost 마음 카드(ET16)가 조건이 맞으면 나올 확률 배율
+    events: {
+      chance: { sprout: 0.15, normal: 0.25, sage: 0.3, annals: 0.35 },
+      max: { sprout: 2, normal: 4, sage: 5, annals: 6 },
+      rest: { sprout: 4, normal: 3, sage: 3, annals: 2 },
+      ratio: {
+        sprout: { bad: 3, good: 4, guest: 1, box: 2, mind: 1 },
+        normal: { bad: 4, good: 3, guest: 1, box: 2, mind: 1 },
+        sage: { bad: 4, good: 2, guest: 1, box: 2, mind: 1 },
+        annals: { bad: 5, good: 2, guest: 1, box: 2, mind: 1 },
+      },
+      chainMult: { sprout: 0.7, normal: 1.0, sage: 1.2, annals: 1.3 },
+      boxBad: { sprout: -0.1, normal: 0, sage: 0.05, annals: 0.1 },
+      firstCards: 3,
+      chainAfter: [3, 6],
+      chainDepth: 3,
+      mindBoost: { ET16: 3 },
+      names: { bad: '흉', good: '길', guest: '손님', box: '상자', mind: '마음', chain: '연쇄' },
+    },
+    // 왕의 마음 (설계서 10-13-2) — [게임 속 일]. 0~100, 숫자는 보이지 않고 붓에 먹이 차오른다
+    //  up/down 오르내리는 값 · traitOdds 100에 닿았을 때 나쁜 기질이 붙을 확률(나머지는 좋은 기질) · after 굴린 뒤 마음
+    //  night '무너질 듯한 밤'(나쁜 기질이 붙은 채 다시 100): 가장 나쁜 게이지의 위기 확률 ×mult, cards장 동안
+    mind: {
+      up: { crisis: 20, badEvent: 10, boxBad: 10, warnCard: 2, realShut: 10 },
+      down: { held: -10 },
+      traitOdds: { sprout: 0.6, normal: 0.75, sage: 0.8, annals: 0.85 },
+      after: 50,
+      night: { mult: 2, cards: 3 },
+      // 기질: bad 나쁨 · last 풀리는 장수 · 효과는 engine/events.js(의심 양반+ 절반 · 지침 미리보기 없음 · 성급 ×1.25 · 겁 위기 ×1.3 · 굳셈 실각 ×0.5 · 너그러움 백성− 절반)
+      traits: {
+        suspicious: { name: '의심 많은 왕', bad: true, last: 12, icon: '👀', tip: '양반이 오르는 효과가 절반만 올라요' },
+        tired: { name: '지친 왕', bad: true, last: 12, icon: '💤', tip: '게이지 점(미리보기)이 보이지 않아요' },
+        hasty: { name: '성급한 왕', bad: true, last: 12, icon: '⚡', tip: '모든 효과가 크게 출렁여요(×1.25)' },
+        fearful: { name: '겁먹은 왕', bad: true, last: 12, icon: '😨', tip: '위기가 더 자주 와요(×1.3)' },
+        steadfast: { name: '굳센 왕', bad: false, last: 10, icon: '🛡️', tip: '위기에서 무너질 확률이 절반이에요' },
+        generous: { name: '너그러운 왕', bad: false, last: 10, icon: '🤲', tip: '백성이 내려가는 효과가 절반만 내려가요' },
+      },
+    },
+    // 사관의 한 줄 (설계서 10-13-3): 세 장에 한 번까지. 겹치면 앞쪽(우선순위 높은 것) 하나만
+    narr: {
+      every: 3,
+      order: ['brink', 'crisis', 'night', 'held', 'trait', 'badEvent', 'chainBad', 'box', 'big', 'warn', 'good'],
+      lines: {
+        big: ['붓이 떨렸다. 오늘 일은 크게 적어야겠다.', '장터 소문이 하룻밤 새 도성을 한 바퀴 돌았다.', '대신들의 얼굴빛이 한꺼번에 바뀌었다.'],
+        warn: ['어딘가에서 금 가는 소리가 들렸다.', '바람이 바뀌었다. 사관은 먹을 진하게 갈았다.'],
+        crisis: ['올 것이 왔다.', '궁궐 북이 세 번 울렸다. 좋은 소식일 리 없다.', '사관은 붓을 멈추고 숨을 골랐다.'],
+        held: ['버텼다. 오늘 밤은 다들 다리 뻗고 자리라.', '큰 고비 하나를 넘었다. 다음 고비는 아직 모른다.'],
+        badEvent: ['하늘이 먼저 시험을 냈다.'],
+        chainBad: ['엎친 데 덮쳤다.'],
+        good: ['드물게, 하늘이 웃었다.', '오늘만은 사관도 붓을 가볍게 놀렸다.'],
+        box: ['열지 말았어야 했을까, 열기를 잘했을까.'],
+        brink: ['이 장이 마지막 장이 될지도 모른다.'],
+        night: ['임금의 방에 밤새 등불이 꺼지지 않았다.'],
+      },
+      // 기질이 붙을 때(설계서 표의 두 줄 + 나머지 넷은 같은 말투로 엔진 세션이 씀 — 담임 확인 필요)
+      trait: {
+        suspicious: '이번 판의 임금은 요즘 사람을 잘 믿지 못한다.',
+        steadfast: '임금의 눈빛이 달라졌다. 굳센 빛이다.',
+        tired: '이번 판의 임금은 요즘 몹시 지쳐 있다.',
+        hasty: '이번 판의 임금은 요즘 마음이 급하다.',
+        fearful: '이번 판의 임금은 요즘 자꾸 성벽 쪽을 돌아본다.',
+        generous: '이번 판의 임금은 요즘 마음이 넉넉하다.',
+      },
+    },
     // 역사 분기 (설계서 10-10-2): 한 왕에서 다른 길은 최대 3개. 넘으면 남은 다른 길은 잠긴다
     branch: { maxPerStage: 3, fullReason: '이미 나라가 많이 흔들렸다' },
     // 진엔딩 (설계서 10-11): 다섯 왕 역사 사건(생명 사건 빼고)을 모두 실제대로. totalEvents는 10-11-4의 "46장"(다섯 왕 집필이 끝나면 데이터에서 센다)

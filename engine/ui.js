@@ -233,6 +233,8 @@
     W.state.title = false;
   };
   UI.toTitle = function () {
+    if (JK.Events) JK.Events.hideHud();
+    if (JK.EvFx) JK.EvFx.reset();
     JK.Game.state = 'title';
     JK.Cards.hide();
     ['#fall', '#soon', '#quiz', '#records', '#kingPick', '#diffPick', '#compare', '#ending', '#intro'].forEach(close);
@@ -518,6 +520,22 @@
       const seen = mp[c.id] || {};
       li.innerHTML = `<b>${esc(c.event || c.id)}</b> <span class="pth ${seen.real ? 'on' : ''}">실제 경로</span>` + c.paths.alt.map((a) => `<span class="pth alt ${seen[a.id] ? 'on' : ''}">${seen[a.id] ? esc(a.label) : '？？？'}</span>`).join('');
       rp.appendChild(li);
+    }
+    // 돌발 사건 도감(10-13): 만난 것은 이름과 종류, 못 만난 것은 ???. 상자는 나온 결과(좋은·나쁜·빈)를 작게
+    const re = $('#recEvents');
+    if (re) {
+      const evs = era.data.cards.filter((c) => c.kind === 'event');
+      const icon = { bad: '🌧', good: '🌈', guest: '⛵', box: '❓', mind: '🌸', chain: '🔗' };
+      const got = S.meta.events || {};
+      re.innerHTML =
+        `<li class="re-sum">만난 돌발 ${evs.filter((c) => got[c.id]).length} / ${evs.length}</li>` +
+        evs
+          .map((c) => {
+            if (!got[c.id]) return `<li class="re-no">${icon[c.ev] || '·'} ???</li>`;
+            const bx = c.box ? ` <small>${['good', 'bad', 'empty'].map((k) => ((S.meta.boxes || {})[c.id] || {})[k] ? { good: '✨', bad: '💨', empty: '🕸️' }[k] : '·').join('')}</small>` : '';
+            return `<li>${icon[c.ev] || '·'} ${esc(c.name)}${bx}</li>`;
+          })
+          .join('');
     }
     // 기록관: 왕마다 남긴 비교(누르면 다시 보기)
     const ra = $('#recArchive');

@@ -178,7 +178,9 @@
     const ch = cfg().chance || {};
     // 다른 길(10-10-2)이 바꾼 위기 확률(예: 성 없이 문만 → 국방 낮음 ×1.5)
     const alt = (run.crisisMult || {})[best.k + ':' + best.z.side] || 1;
-    const p = Math.min(ch.cap || 0.95, (ch[best.z.level] || 0) * (JK.Game.diff().crisisMult || 1) * JK.Game.stageMult('crisisMult') * alt);
+    // 왕의 마음(10-13-2): 겁먹은 왕 ×1.3 · 무너질 듯한 밤(가장 나쁜 게이지) ×2
+    const mind = JK.Events ? JK.Events.crisisMult(run, best.k) : 1;
+    const p = Math.min(ch.cap || 0.95, (ch[best.z.level] || 0) * (JK.Game.diff().crisisMult || 1) * JK.Game.stageMult('crisisMult') * alt * mind);
     if (rnd() >= p) return null;
     const card = era.data.cards.find((x) => x.kind === 'crisis' && x.level === 'event' && x.gauge === best.k && x.side === best.z.side && x.stages.includes(run.stage));
     if (!card) return null;
@@ -205,7 +207,9 @@
     const dm = byDiff(F.diff, 1);
     const step = card.level === 'followup' ? card.step || 2 : 1;
     const add = (step - 1) * byDiff(F.followAdd, 0.1);
-    return { p: Math.min(F.cap || 0.95, base * mult * dm + add), level: z.level, weak, strong };
+    // 굳센 왕(10-13-2): 실각 확률 ×0.5
+    const km = JK.Events ? JK.Events.fallMult(JK.Game.run) : 1;
+    return { p: Math.min(F.cap || 0.95, (base * mult * dm + add) * km), level: z.level, weak, strong };
   };
   // 위기 카드 버튼 아래 보여 줄 말(새싹: 숫자, 보통: 말, 성군·실록: 없음)
   C.chanceLabel = function (p) {
