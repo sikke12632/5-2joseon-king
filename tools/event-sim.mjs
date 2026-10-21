@@ -16,6 +16,8 @@ export default async function (t) {
   await t.waitFor('JK.Cards.isReady()', 20000);
   // 기다림을 짧게(연출은 건너뛰듯)
   await t.eval(`(()=>{const o=window.setTimeout.bind(window); window.setTimeout=(f,ms,...a)=>o(f,Math.min(ms||0,15),...a);})()`);
+  // MINDUP='{"warnCard":4}' 이면 era.mind.up 값을 바꿔 잰다(조정 검토용)
+  if (process.env.MINDUP) await t.eval(`Object.assign(JK.era.mind.up, ${process.env.MINDUP})`);
   if (CHANCE !== 1) await t.eval(`(()=>{const c=JK.era.events.chance; for(const k in c) c[k]=Math.min(0.95,c[k]*${CHANCE});})()`);
   const all = {};
   for (const d of DIFFS) {
@@ -27,8 +29,9 @@ export default async function (t) {
           const tick=()=>{ const G=__jk.G, r=G.run;
             if (r.ended || G.state!=='play' || performance.now()-t0>60000) {
               const tm=JK.Save.meta.traits||{}, a=JSON.parse(tm0); let traits=0; for(const k in tm) traits+=tm[k]-(a[k]||0);
-              return res(JSON.stringify({ev:r.ev.count, chains:Object.keys(r.ev.depth||{}).filter(k=>r.ev.seen.includes(k)).length, boxes:r.ev.boxes.length, traits, nights:r._nights||0, fell:G.state==='fall', cards:r.pos, ids:r.ev.seen, mind:r.mind, kinds:r.ev.seen.map(id=>G.card(id).ev), timeout:performance.now()-t0>60000}));
+              return res(JSON.stringify({ev:r.ev.count, chains:Object.keys(r.ev.depth||{}).filter(k=>r.ev.seen.includes(k)).length, boxes:r.ev.boxes.length, traits, nights:r._nights||0, fell:G.state==='fall', cards:r.pos, ids:r.ev.seen, mind:r.mind, maxMind:r._maxMind||0, kinds:r.ev.seen.map(id=>G.card(id).ev), timeout:performance.now()-t0>60000}));
             }
+            r._maxMind=Math.max(r._maxMind||0, r.mind||0);
             if (!JK.Cards.isReady()) return setTimeout(tick,5);
             document.querySelector('#warnFirst').classList.add('hide');
             if (r.night && !r._nightSeen){ r._nights=(r._nights||0)+1; r._nightSeen=true; } if(!r.night) r._nightSeen=false;
@@ -50,7 +53,7 @@ export default async function (t) {
     for (const x of rows) for (const k of x.kinds) kinds[k] = (kinds[k] || 0) + 1;
     const ids = {};
     for (const x of rows) for (const k of x.ids) ids[k] = (ids[k] || 0) + 1;
-    all[d] = { 판: rows.length, 평균돌발: avg((x) => x.ev), 최대: Math.max(...rows.map((x) => x.ev)), 연쇄: avg((x) => x.chains), 상자: avg((x) => x.boxes), 기질: avg((x) => x.traits), 밤: avg((x) => x.nights), 실각: rows.filter((x) => x.fell).length, 평균장수: avg((x) => x.cards), 종류: kinds, 카드: ids, 시간초과: rows.filter((x) => x.timeout).length };
+    all[d] = { 판: rows.length, 평균돌발: avg((x) => x.ev), 최대: Math.max(...rows.map((x) => x.ev)), 연쇄: avg((x) => x.chains), 상자: avg((x) => x.boxes), 기질: avg((x) => x.traits), 최고마음: avg((x) => x.maxMind), 밤: avg((x) => x.nights), 실각: rows.filter((x) => x.fell).length, 평균장수: avg((x) => x.cards), 종류: kinds, 카드: ids, 시간초과: rows.filter((x) => x.timeout).length };
     console.log(d, JSON.stringify(all[d]));
   }
   const max = { sprout: 2, normal: 4, sage: 5, annals: 6 };

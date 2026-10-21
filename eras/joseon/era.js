@@ -165,7 +165,8 @@
     //  chainMult 연쇄 확률에 곱함 · boxBad 상자의 나쁜 결과 확률에 더함(그만큼 좋은 결과에서 뺌) · firstCards 처음 몇 장은 돌발 없음
     //  chainAfter 연쇄가 이어지는 거리(장) · chainDepth 연쇄 최대 단계 · mindBoost 마음 카드(ET16)가 조건이 맞으면 나올 확률 배율
     events: {
-      chance: { sprout: 0.15, normal: 0.25, sage: 0.3, annals: 0.35 },
+      // 담임 결정 2026-10-21: 설계서 표(15·25·30·35%)의 ×1.8 — 보통 한 생 평균 약 2번(표 숫자로는 약 1번이었음)
+      chance: { sprout: 0.27, normal: 0.45, sage: 0.54, annals: 0.63 },
       max: { sprout: 2, normal: 4, sage: 5, annals: 6 },
       rest: { sprout: 4, normal: 3, sage: 3, annals: 2 },
       ratio: {
@@ -186,7 +187,8 @@
     //  up/down 오르내리는 값 · traitOdds 100에 닿았을 때 나쁜 기질이 붙을 확률(나머지는 좋은 기질) · after 굴린 뒤 마음
     //  night '무너질 듯한 밤'(나쁜 기질이 붙은 채 다시 100): 가장 나쁜 게이지의 위기 확률 ×mult, cards장 동안
     mind: {
-      up: { crisis: 20, badEvent: 10, boxBad: 10, warnCard: 2, realShut: 10 },
+      // 담임 결정 2026-10-21: 기질이 두 생에 1번쯤 보이게 위기 20→30, 경고 구간 한 장 2→4 (event-sim STRAT=random 보통 30생: 기질 0.47번/생, 전에는 약 0.07)
+      up: { crisis: 30, badEvent: 10, boxBad: 10, warnCard: 4, realShut: 10 },
       down: { held: -10 },
       traitOdds: { sprout: 0.6, normal: 0.75, sage: 0.8, annals: 0.85 },
       after: 50,
