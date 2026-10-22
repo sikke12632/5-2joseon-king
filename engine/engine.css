@@ -537,6 +537,46 @@ body:not(.portrait) #panel.extra #deck { aspect-ratio: auto; width: 100%; height
 #inStart svg { width: 22px; height: 22px; fill: #6b4a2a; }
 #inStart b { font-size: 18px; }
 #inGo { padding: 10px 28px; border-radius: 999px; border: 0; background: var(--lacquer); color: var(--gold); font-size: 18px; cursor: pointer; font-family: inherit; }
+/* 사관의 두루마리 석 장(data/common/scrolls.js): 지금까지 · 앞으로 닥칠 일 · 사관의 귀띔 */
+#intro.scroll .in-box { width: min(680px, 95%); padding: 22px 28px 18px; }
+#inPage { max-height: 54vh; overflow-y: auto; scrollbar-width: thin; scrollbar-color: #c9a96c transparent; }
+.in-box.turn #inPage { animation: scPage .45s ease-out; }
+@keyframes scPage { from { opacity: 0; transform: translateX(18px); } to { opacity: 1; transform: none; } }
+.sc-head { margin: 10px 0 2px; font-family: 'JKTitle', serif; font-weight: normal; font-size: 24px; color: #5a2f18; }
+.sc-sub { font-size: 14px; color: #8a6a48; margin-bottom: 4px; }
+.sc-lead { margin: 8px 0 4px; font-size: 18px; color: #3a2414; word-break: keep-all; }
+.sc-list { list-style: none; margin: 8px 0; padding: 0; text-align: left; }
+.sc-list li { display: flex; align-items: flex-start; gap: 10px; padding: 7px 10px; margin: 5px 0; border-radius: 10px; background: rgba(255,250,236,.62); font-size: 18px; line-height: 1.5; color: #1e1712; word-break: keep-all; }
+.sc-list.sc-small li { font-size: 17px; padding: 5px 10px; }
+.sc-ic { flex: none; width: 28px; text-align: center; font-size: 22px; line-height: 1.2; }
+.sc-ic svg { width: 26px; height: 26px; fill: #6b4a2a; vertical-align: -4px; }
+.sc-year { flex: none; padding: 1px 8px; border-radius: 999px; background: #6b4a1e; color: #fff3d6; font-size: 14px; font-weight: normal; margin-top: 3px; }
+.sc-omen li { border-left: 4px solid #c9a96c; }
+.sc-omen li.hit { border-left-color: #2f7a4a; background: rgba(226,244,226,.75); }
+.sc-hit { flex: none; margin-left: auto; color: #2f7a4a; font-size: 14px; white-space: nowrap; margin-top: 3px; }
+.sc-tips li { background: rgba(255,244,214,.8); }
+.sc-foot { margin: 6px 0 0; font-size: 15px; color: #6b4a2a; word-break: keep-all; }
+#inDots { display: flex; justify-content: center; gap: 8px; margin: 6px 0 10px; }
+#inDots:empty { display: none; }
+#inDots i { width: 9px; height: 9px; border-radius: 50%; background: #c9b48a; }
+#inDots i.on { background: var(--red); transform: scale(1.25); }
+.in-btns { display: flex; justify-content: center; gap: 10px; }
+#inBack { padding: 10px 18px; border-radius: 999px; border: 2px solid #b39a6a; background: transparent; color: #6b4a2a; font-size: 16px; cursor: pointer; font-family: inherit; }
+#card.omen #chainTag { font-size: 14px; padding: 2px 10px; background: linear-gradient(#f3d98a, #d9b04a); color: #4a2a0a; box-shadow: 0 0 0 2px rgba(255,240,190,.7); animation: omenGlow 1.6s ease-out 2; }
+@keyframes omenGlow { 0% { box-shadow: 0 0 0 0 rgba(255,215,110,.9); } 100% { box-shadow: 0 0 0 12px rgba(255,215,110,0); } }
+@media (max-height: 700px) {
+  #intro.scroll .in-box { padding: 14px 24px 12px; }
+  #intro.scroll .in-seal { width: 44px; height: 44px; line-height: 44px; font-size: 17px; }
+  #intro.scroll #inTitle { font-size: 24px; }
+  #inPage { max-height: 58vh; }
+  .sc-head { font-size: 21px; margin-top: 2px; }
+  .sc-sub { font-size: 13px; margin-bottom: 0; }
+  .sc-list { margin: 4px 0; }
+  .sc-list li { font-size: 16px; padding: 4px 9px; margin: 3px 0; }
+  #inDots { margin: 4px 0 6px; }
+  .sc-list.sc-small li { font-size: 15px; padding: 4px 9px; }
+  .sc-lead { font-size: 16px; margin: 4px 0 2px; }
+}
 .kp-card .kp-lv { color: #8a5a10; font-size: 13px; }
 
 /* ===== 돌발 이벤트 (설계서 10-13) — 모두 [게임 속 일] ===== */

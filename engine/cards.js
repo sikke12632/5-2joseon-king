@@ -116,7 +116,9 @@
     // 희귀·전설(금빛 테두리)·사건 사슬 표시
     card.classList.toggle('rare', v.rarity === 'rare' || v.rarity === 'uncommon');
     card.classList.toggle('legend', v.rarity === 'legend');
-    $('#chainTag').textContent = v.evTag ? v.evTag : v.chain ? `사슬 · ${v.chain}` : v.rarity === 'legend' ? '전설' : v.rarity === 'rare' ? '희귀' : v.rarity === 'uncommon' ? '드묾' : '';
+    // 사관의 예언이 이루어진 카드(data/common/scrolls.js)
+    card.classList.toggle('omen', !!v.omen && !v.evTag);
+    $('#chainTag').textContent = v.evTag ? v.evTag : v.omen ? v.omen : v.chain ? `사슬 · ${v.chain}` : v.rarity === 'legend' ? '전설' : v.rarity === 'rare' ? '희귀' : v.rarity === 'uncommon' ? '드묾' : '';
     $('#chainTag').style.display = $('#chainTag').textContent ? '' : 'none';
     card.classList.toggle('crisis-event', v.crisis === 'event' || v.crisis === 'followup');
     // 돌발 이벤트(10-13): 종류별 테두리(흉 먹빛 붉음 · 길 금빛 · 손님 푸름 · 상자 보라 · 마음 분홍)

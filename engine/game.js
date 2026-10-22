@@ -269,6 +269,7 @@
     W.reset();
     W.setSky(st.sky);
     W.state.title = false;
+    document.getElementById('btnScroll').style.display = (era.data.scrolls || {})[st.id] ? '' : 'none';
     // 시작 장면(10-12 ③): 이번 판에서 치우지 않은 장식만(T01에서 내려간 고려 깃발 등은 G.run.unscene)
     for (const k of st.scene || []) if (!(G.run.unscene || []).includes(k)) W.buildInstant(k);
     for (const k in st.prebuilt || {}) {
@@ -486,6 +487,9 @@
     if (!run.seenRun.includes(c.id)) run.seenRun.push(c.id);
     // 변형판(다른 길이 바꾼 역사 카드)도 그 사건을 지난 것으로 센다 — seen(Y09)·seen(S08) 같은 뒤 조건이 이어지게
     if (c.variant_of && !run.seenRun.includes(c.variant_of)) run.seenRun.push(c.variant_of);
+    // 사관의 예언(data/common/scrolls.js): 두루마리에 적힌 사건 카드가 뜨면 「📜 예언대로」, 다시 보기에서 ✔
+    const omen = (((era.data.scrolls || {})[st.id] || {}).omens || { list: [] }).list.find((o) => o.cards.includes(c.variant_of || c.id));
+    if (omen && !(run.omens = run.omens || []).includes(omen.id)) run.omens.push(omen.id);
     // 한 판에 두 왕(설계서 2-3): 그 카드가 뜨는 순간 왕 인형·이름이 바뀐다(선조 → 인조)
     if (st.kingSwap && (c.variant_of || c.id) === st.kingSwap.at && run.kingName !== st.kingSwap.name) {
       run.kingName = st.kingSwap.name;
@@ -513,6 +517,7 @@
       preview: JK.Events.previewHidden(run) ? 'none' : run.bigPreview > 0 ? 'arrows' : D.preview,
       rarity: ['rare', 'legend', 'uncommon'].includes(c.rarity) && c.kind !== 'daily' ? c.rarity : '',
       chain: c.kind === 'chain' ? c.chain || '사건 사슬' : '',
+      omen: omen ? `📜 예언대로 · ${omen.short}` : '',
       hand: st.tutorial && run.pos < st.tutorial && S.meta.cardsPlayed < 12,
     });
     if (isEv) {

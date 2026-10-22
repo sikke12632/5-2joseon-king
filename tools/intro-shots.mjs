@@ -17,7 +17,7 @@ export default async function (t) {
   ok('새싹: 시작 게이지를 50 쪽으로 절반(태조 50·40·35·55 → 50·45·43·53)', JSON.stringify(it.vals) === '{"people":50,"nobles":45,"treasury":43,"army":53}', JSON.stringify(it.vals));
   ok('소개 화면이 화면 안', !it.clip, it.level + ' / ' + it.start);
   await t.shot(`${OUT}/intro-1.png`);
-  await t.eval(`document.querySelector('#inGo').click()`);
+  await t.eval(`(()=>{for(let k=0;k<5&&!document.querySelector('#intro').classList.contains('hide');k++) document.querySelector('#inGo').click()})()`);
   await t.waitFor('JK.Cards.isReady()', 15000);
   await t.sleep(2500);
   ok('시작 장면: 개경 쪽 산·고려 깃발·새 깃발', await t.eval(`['kaesongHills','goryeoFlag','newFlag'].every(k=>__jk.W.island.children.some(m=>m.visible&&__jk.W.BUILD_DEFS[k]&&m.position.x===__jk.W.BUILD_DEFS[k].x))`));

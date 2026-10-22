@@ -13,7 +13,7 @@ export default async function (t) {
   };
   const vis = (sel) => t.eval(`!document.querySelector('${sel}').classList.contains('hide')`);
   // 새 판이면 왕 소개 화면(10-12)을 넘긴다
-  const ready = () => (async () => { await t.waitFor(`JK.Cards.isReady() || !document.querySelector('#intro').classList.contains('hide')`, 15000); if (await t.eval(`!document.querySelector('#intro').classList.contains('hide')`)) { await t.eval(`document.querySelector('#inGo').click()`); await (async () => { await t.waitFor(`JK.Cards.isReady() || !document.querySelector('#intro').classList.contains('hide')`, 15000); if (await t.eval(`!document.querySelector('#intro').classList.contains('hide')`)) { await t.eval(`document.querySelector('#inGo').click()`); await t.waitFor('JK.Cards.isReady()', 15000); } })(); } })();
+  const ready = () => (async () => { await t.waitFor(`JK.Cards.isReady() || !document.querySelector('#intro').classList.contains('hide')`, 15000); if (await t.eval(`!document.querySelector('#intro').classList.contains('hide')`)) { await t.eval(`(()=>{for(let k=0;k<5&&!document.querySelector('#intro').classList.contains('hide');k++) document.querySelector('#inGo').click()})()`); await (async () => { await t.waitFor(`JK.Cards.isReady() || !document.querySelector('#intro').classList.contains('hide')`, 15000); if (await t.eval(`!document.querySelector('#intro').classList.contains('hide')`)) { await t.eval(`(()=>{for(let k=0;k<5&&!document.querySelector('#intro').classList.contains('hide');k++) document.querySelector('#inGo').click()})()`); await t.waitFor('JK.Cards.isReady()', 15000); } })(); } })();
   await go();
   await t.eval('localStorage.clear()');
   await go();

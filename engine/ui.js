@@ -42,6 +42,7 @@
       open('#settings');
     };
     $('#btnHome').onclick = () => UI.toTitle();
+    $('#btnScroll').onclick = () => UI.showScroll();
     document.querySelectorAll('[data-close]').forEach((b) => (b.onclick = () => close('#' + b.dataset.close)));
     // 설정
     $('#optSound').onchange = (e) => {
@@ -239,6 +240,7 @@
     JK.Cards.hide();
     ['#fall', '#soon', '#quiz', '#records', '#kingPick', '#diffPick', '#compare', '#ending', '#intro'].forEach(close);
     document.body.classList.remove('playing', 'over');
+    $('#btnScroll').style.display = 'none';
     W.state.inkTarget = 0;
     W.state.ink = 0;
     W.setOrbit(false);
@@ -463,29 +465,94 @@
   /* ---------- 왕별 소개 화면(설계서 10-12 ③) ----------
    * 사관 두루마리에 2~3문장, 그 왕의 쉬움·어려움과 시작 게이지. 누르면 첫 카드
    */
-  UI.showIntro = function (st, info, done) {
+  // 사관의 두루마리(data/common/scrolls.js)가 있는 왕은 석 장: 지금까지 → 앞으로 닥칠 일(예언) → 사관의 귀띔.
+  //   review: 게임 중 📜 단추로 다시 펼침(예언 장부터, 이루어진 예언에 ✔)
+  UI.showIntro = function (st, info, done, review) {
     const it = info.intro || {};
+    const sc = (era.data.scrolls || {})[st.id];
     $('#inSeal').textContent = st.seal;
     $('#inKing').textContent = `${st.king} · ${st.years}`;
     $('#inTitle').textContent = st.title;
-    $('#inText').textContent = it.text || '';
-    $('#inSrc').innerHTML = it.sources_text ? `근거: ${esc(JK.Quiz.sourceLine(it.sources) || '')}${it.out_of_textbook ? ' · 일부 <span class="tag-out">교과서 밖</span>' : ''}` : '';
     const lv = info.level || {};
-    $('#inLevel').textContent = lv.stars ? `${lv.label} ${lv.stars}` : '';
     const sv = JK.Game.run ? JK.Game.run.start : null;
-    $('#inStart').innerHTML = sv ? era.gauges.map((g) => `<span><svg viewBox="0 0 24 24">${g.icon}</svg>${esc(g.name)} <b>${sv[g.key]}</b></span>`).join('') : '';
+    const levelHtml = lv.stars ? esc(`${lv.label} ${lv.stars}`) : '';
+    const startHtml = sv ? era.gauges.map((g) => `<span><svg viewBox="0 0 24 24">${g.icon}</svg>${esc(g.name)} <b>${sv[g.key]}</b></span>`).join('') : '';
+    const srcOf = (t, out) => (t ? `근거: ${esc(t)}${out ? ' · 일부 <span class="tag-out">교과서 밖</span>' : ''}` : '');
+    const pages = sc ? [scrollPast(sc.past), scrollOmens(sc.omens), scrollTips(sc.tips)] : [{ html: `<p id="inText">${esc(it.text || '')}</p>`, src: it.sources_text ? srcOf(JK.Quiz.sourceLine(it.sources) || '', it.out_of_textbook) : '' }];
     const box = $('#intro');
+    box.classList.toggle('scroll', !!sc);
+    let i = review && sc ? 1 : 0;
+    const render = () => {
+      const p = pages[i];
+      const last = i === pages.length - 1;
+      $('#inPage').innerHTML = p.html;
+      $('#inPage').scrollTop = 0;
+      $('#inSrc').innerHTML = p.src || '';
+      $('#inLevel').innerHTML = last && !review ? levelHtml : '';
+      $('#inStart').innerHTML = last && !review ? startHtml : '';
+      $('#inDots').innerHTML = pages.length > 1 ? pages.map((_, k) => `<i class="${k === i ? 'on' : ''}"></i>`).join('') : '';
+      $('#inBack').style.display = i > (review ? 1 : 0) ? '' : 'none';
+      $('#inGo').textContent = !last ? '다음 장 →' : review ? '두루마리를 만다' : '나라를 다스리러 간다 →';
+      const box2 = box.querySelector('.in-box');
+      box2.classList.remove('turn');
+      void box2.offsetWidth;
+      box2.classList.add('turn');
+    };
     box.classList.remove('hide');
     let closed = false;
     const go = () => {
       if (closed) return;
+      if (i < pages.length - 1) {
+        i++;
+        return render();
+      }
       closed = true;
       box.classList.add('hide');
       done && done();
     };
+    $('#inBack').onclick = () => {
+      if (i > 0) i--;
+      render();
+    };
     $('#inGo').onclick = go;
     box.onkeydown = null;
     UI._introGo = go;
+    render();
+  };
+  function scrollPast(p) {
+    const ln = (x) => `<li><span class="sc-ic">${x.icon}</span>${x.year ? `<b class="sc-year">${esc(x.year)}</b>` : ''}<span>${esc(x.text)}</span></li>`;
+    return {
+      html: `<h3 class="sc-head">📜 ${esc(p.head)}</h3><ul class="sc-list">${p.lines.map(ln).join('')}</ul>${p.lead ? `<p class="sc-lead">${esc(p.lead)}</p>` : ''}<ul class="sc-list sc-small">${(p.list || []).map(ln).join('')}</ul>`,
+      src: p.sources_text ? `근거: ${esc(p.sources_text)}` : '',
+    };
+  }
+  function scrollOmens(p) {
+    const hit = (JK.Game.run && JK.Game.run.omens) || [];
+    const ln = (x) => `<li class="${hit.includes(x.id) ? 'hit' : ''}"><span class="sc-ic">${x.icon}</span><span>${esc(x.text)}</span>${hit.includes(x.id) ? '<b class="sc-hit">✔ 이루어짐</b>' : ''}</li>`;
+    return {
+      html: `<h3 class="sc-head">🔭 ${esc(p.head)}</h3>${p.sub ? `<div class="sc-sub">${esc(p.sub)}</div>` : ''}${p.lead ? `<p class="sc-lead">${esc(p.lead)}</p>` : ''}<ul class="sc-list sc-omen">${p.list.map(ln).join('')}</ul>${p.foot ? `<p class="sc-foot">${esc(p.foot)}${hit.length ? ` <b>(${hit.length} / ${p.list.length})</b>` : ''}</p>` : ''}`,
+      src: p.sources_text ? `근거: ${esc(p.sources_text)}` : '',
+    };
+  }
+  function scrollTips(p) {
+    const d = JK.Game.run ? JK.Game.run.diff : 'normal';
+    const riddle = d === 'sage' || d === 'annals';
+    const icon = (k) => {
+      const g = era.gauges.find((x) => x.key === k);
+      return g ? `<svg viewBox="0 0 24 24">${g.icon}</svg>` : k === 'device' ? '⚙️' : '⚖️';
+    };
+    const ln = (x) => `<li><span class="sc-ic">${icon(x.gauge)}</span><span>${esc(riddle ? x.riddle || x.plain : x.plain)}</span></li>`;
+    return {
+      html: `<h3 class="sc-head">🤫 ${esc(p.head)}</h3>${p.sub ? `<div class="sc-sub">${esc(riddle ? p.sub + ' — 수수께끼로' : p.sub)}</div>` : ''}<ul class="sc-list sc-tips">${p.list.map(ln).join('')}</ul>`,
+      src: '',
+    };
+  }
+  // 게임 중 다시 보기(📜 단추)
+  UI.showScroll = function () {
+    const G = JK.Game;
+    if (!G.run || G.state !== 'play') return;
+    const st = era.stages.find((s) => s.id === G.run.stage);
+    if (st) UI.showIntro(st, G.stageInfo(st.id), null, true);
   };
   window.addEventListener('keydown', (e) => {
     const b = document.getElementById('intro');

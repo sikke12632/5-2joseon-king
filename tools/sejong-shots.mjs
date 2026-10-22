@@ -16,7 +16,7 @@ export default async function (t) {
   await t.waitFor(`!document.querySelector('#intro').classList.contains('hide')`, 15000);
   await t.sleep(2500);
   await t.shot(`${OUT}/s2-intro.png`);
-  await t.eval(`document.querySelector('#inGo').click()`);
+  await t.eval(`(()=>{for(let k=0;k<5&&!document.querySelector('#intro').classList.contains('hide');k++) document.querySelector('#inGo').click()})()`);
   await t.waitFor('JK.Cards.isReady()', 15000);
   await t.sleep(3000);
   await t.shot(`${OUT}/s3-first.png`);
