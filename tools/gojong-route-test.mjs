@@ -70,6 +70,15 @@ export default async function (t) {
   ok('G09 뒤 AG02(우리 손으로 만든 기계)', s[s.length - 1] === 'AG02', s.join(' → '));
   await commit(1);
   ok('문을 닫은 생에는 병원·학교·전등·전화 카드가 안 나옴', !(await t.eval(`['GX1','GX2','GX3','GX4'].some((id)=>__jk.G.run.seenRun.includes(id))`)), await t.eval(`JSON.stringify(__jk.G.run.seenRun.filter((x)=>/^GX/.test(x)))`));
+  // 마지막 두 장면: 전차·경인선 대신 공방의 첫 기계·포대의 봉화(담임 결정 2026-10-22)
+  await show('GX5');
+  ok('GX5 자리에 GX5v1(우리 손으로 만든 첫 기계)', (await cur()) === 'GX5v1', await cur());
+  await commit(1);
+  await show('GX6');
+  ok('GX6 자리에 GX6v1(포대의 봉화)', (await cur()) === 'GX6v1', await cur());
+  await commit(1);
+  await t.sleep(1500);
+  ok('공방·포대가 서고 전차·경인선은 없음', await t.eval(`(()=>{const b=__jk.G.run.built; return b.includes('gongbang') && b.includes('podae') && !b.includes('tram') && !b.includes('railway');})()`), await t.eval('JSON.stringify(__jk.G.run.built)'));
   ok('갈래 ① 완성(gojong①)', await t.eval(`(__jk.G.run.branchDone||[]).includes('gojong①')`), await t.eval(`JSON.stringify(__jk.G.run.branchDone)`));
 
   console.log('2) 갑오개혁 없는 조선');

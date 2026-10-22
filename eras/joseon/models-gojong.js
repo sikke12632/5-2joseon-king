@@ -183,4 +183,38 @@
     b.box(0.0, 0.08, 0, 0.26, 0.11, 0.12, col('#6a3a2a'), { top: col('#3a2a20') });
     return b.build();
   };
+
+  /* ---------- 공방(고종 갈래 「문을 끝내 닫은 조선」): 기와 공방 + 굴뚝 + 마당의 톱니바퀴 기계 ---------- */
+  M.gongbang = function () {
+    const b = new JK.Builder();
+    b.push().s(1.5, 1.5, 1.5);
+    b.ao(0, 0.2, 0.72);
+    b.box(0, 0.08, -0.05, 0.3, 0.16, 0.18, C.wallWhite, { top: C.stoneWarm, noBottom: true });
+    b.push().t(0, 0.16, -0.05);
+    roof(b, { type: 'gable', w: 0.2, d: 0.13, h: 0.07, lift: 0.02, out: 0.015, nu: 4, nv: 2, dens: 40, bw: 0.16, bd: 0.1, color: C.tileHouse });
+    b.pop();
+    b.cyl(0.1, 0.12, -0.1, 0.022, 0.026, 0.2, 6, BRICK, { top: BRICK_D });
+    // 마당의 기계: 받침 + 큰 톱니바퀴 둘
+    b.box(0, 0.03, 0.14, 0.16, 0.06, 0.06, C.woodDark);
+    for (const [x, r] of [[-0.04, 0.05], [0.05, 0.035]]) {
+      b.push().t(x, 0.06 + r, 0.14).rx(Math.PI / 2);
+      b.cyl(0, -0.006, 0, r, r, 0.012, 10, IRON);
+      b.pop();
+    }
+    b.pop();
+    return b.build();
+  };
+
+  /* ---------- 포대와 봉화(고종 갈래): 돌을 쌓은 낮은 포대 + 위에 불 피운 봉화 ---------- */
+  M.podae = function () {
+    const b = new JK.Builder();
+    b.push().s(1.4, 1.4, 1.4);
+    b.ao(0, 0.15, 0.75);
+    b.cyl(0, 0, 0, 0.16, 0.19, 0.1, 8, C.stone, { top: C.stoneWarm });
+    b.cyl(0, 0.1, 0, 0.05, 0.06, 0.08, 6, C.stoneDark);
+    b.ball(0, 0.2, 0, 0.035, 0, col('#ffb050'), 1);
+    b.box(0.11, 0.12, 0.05, 0.1, 0.03, 0.03, IRON);
+    b.pop();
+    return b.build();
+  };
 })();

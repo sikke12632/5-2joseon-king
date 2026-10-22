@@ -103,6 +103,10 @@
     ],
     "crisis_mult": {
      "army:low": 1.3
+    },
+    "variants": {
+     "GX5": "GX5v1",
+     "GX6": "GX6v1"
     }
    }
   ]
@@ -503,6 +507,112 @@
   "fx": {
    "note": "과거장 마당에 갓 쓴 인형들이 줄지어 앉는다."
   }
+ },
+ {
+  "id": "GX5v1",
+  "kind": "history",
+  "stages": [
+   "gojong"
+  ],
+  "rarity": "common",
+  "alt_only": true,
+  "variant_of": "GX5",
+  "event_type": "variant",
+  "branch": "①",
+  "conditions": [
+   "flag(F_문닫음)"
+  ],
+  "conditions_text": "조약을 끝내 거부한 생 — GX5(전차) 대신",
+  "who": {
+   "name": "궁궐 장인",
+   "doll": "craftsman"
+  },
+  "line": "바다 건너 물건 없이, 우리 손으로 만든 첫 기계가 오늘 처음 돌아가옵니다!",
+  "choice_type": "how",
+  "choices": {
+   "right": {
+    "label": "모두에게 보여 준다",
+    "effects": {
+     "people": 10,
+     "treasury": -10,
+     "nobles": -5
+    },
+    "this_run": "궁궐 앞마당에 기계를 내놓자 구경꾼들이 몰려들었다. 톱니가 돌 때마다 함성이 났다.",
+    "build": [
+     "gongbang"
+    ]
+   },
+   "left": {
+    "label": "공방에서 다듬는다",
+    "effects": {
+     "nobles": 5,
+     "treasury": -5
+    },
+    "this_run": "장인들은 기계를 공방에 두고 며칠 더 다듬었다.",
+    "build": [
+     "gongbang"
+    ]
+   }
+  },
+  "grain": "balance",
+  "real_note": "실제 역사: 1899년 서울에 전차가 다니기 시작했다. 개통식을 보려고 동대문에 많은 사람이 모였다(교과서 93).",
+  "sources_text": "이번 생 전용 장면(갈래 이야기·다른 길)",
+  "fx": {
+   "note": "궁궐 뒤뜰 공방 굴뚝에서 연기가 오르고, 마당에서 톱니바퀴 기계가 돌아간다."
+  }
+ },
+ {
+  "id": "GX6v1",
+  "kind": "history",
+  "stages": [
+   "gojong"
+  ],
+  "rarity": "common",
+  "alt_only": true,
+  "variant_of": "GX6",
+  "event_type": "variant",
+  "branch": "①",
+  "conditions": [
+   "flag(F_문닫음)"
+  ],
+  "conditions_text": "조약을 끝내 거부한 생 — GX6(경인선) 대신",
+  "who": {
+   "name": "바닷가 군관",
+   "doll": "official_green"
+  },
+  "line": "바닷가 포대마다 봉화를 올렸사옵니다. 낯선 배가 보이면 밤에도 바로 알릴 수 있사옵니다.",
+  "choice_type": "how",
+  "choices": {
+   "right": {
+    "label": "포대를 더 잇는다",
+    "effects": {
+     "army": 10,
+     "treasury": -15,
+     "nobles": -5
+    },
+    "this_run": "바닷가 언덕마다 포대가 이어지고 봉화 불빛이 줄지어 켜졌다.",
+    "build": [
+     "podae"
+    ]
+   },
+   "left": {
+    "label": "있는 포대를 지킨다",
+    "effects": {
+     "army": 5,
+     "treasury": -5
+    },
+    "this_run": "있는 포대에서 군사들이 번갈아 밤을 지켰다.",
+    "build": [
+     "podae"
+    ]
+   }
+  },
+  "grain": "balance",
+  "real_note": "실제 역사: 1899년 우리나라 최초의 철도 경인선이 노량진~인천 사이에 개통되었다. 일본 회사가 놓은 철도였다(지도서 311, 교과서 107).",
+  "sources_text": "이번 생 전용 장면(갈래 이야기·다른 길)",
+  "fx": {
+   "note": "밤바다를 따라 언덕 위 포대에 봉화가 하나씩 켜진다."
+  }
  }
 ]);
   for (const c of D.cards)
@@ -527,7 +637,9 @@
   "path": [
    "G04a1 조약을 끝내 거부한다",
    "AG01 머무는 군함",
-   "AG02 우리 손으로 만든 기계"
+   "AG02 공방을 열다",
+   "GX5v1 첫 기계",
+   "GX6v1 포대의 봉화"
   ],
   "end_fx": {
    "scene": "stormSea",

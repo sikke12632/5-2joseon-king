@@ -96,6 +96,10 @@ for c in G['NEWCARDS']:
     o['fx'] = {'note': c['fx']}
     if c.get('scene'):
         o['fx']['scene'] = c['scene']
+    # 갈래 장면이 세우는 건물(어느 쪽을 골라도) — 고종 갈래 마지막 장면의 공방·포대
+    if c.get('build'):
+        for sk in ('right', 'left'):
+            o['choices'][sk]['build'] = list(c['build'])
     cards.append(o)
 
 # 3) 갈래 이야기와 칭호

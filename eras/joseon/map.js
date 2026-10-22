@@ -211,6 +211,8 @@
       lamps: { kind: 'single', name: '전등', model: 'lamps', at: { x: -1.55, z: -3.45 }, label: 0.5, shadowR: [0, 0] },
       telepole: { kind: 'single', name: '전화', model: 'telepole', at: { x: 1.3, z: -0.95 }, label: 0.5, shadowR: [0, 0] },
       tram: { kind: 'single', name: '전차', model: 'tram', at: { x: 5.4, z: 1.02 }, rot: -0.05, label: 0.4, shadowR: [0.2, 0.1] },
+      gongbang: { kind: 'single', name: '공방', model: 'gongbang', at: { x: -2.65, z: -5.45 }, label: 0.5, shadowR: [0.25, 0.15] },
+      podae: { kind: 'spots', name: '포대', model: 'podae', points: [[-6.95, 4.75], [5.5, 6.05], [7.6, 2.6]], label: 0.4 },
       railway: { kind: 'single', name: '경인선', model: 'railway', at: { x: -3.3, z: 6.45 }, rot: -0.45, label: 0.5, shadowR: [0.3, 0.1] },
       // 초가 마을은 이름 없는 장식 무리(연출표 7-1): 처음 몇 채에서 카드마다 조금씩 늘어난다
       choga: { kind: 'village', name: '', grow: 2, model: 'choga', max: 40, focus: [-1.5, 2.6], extra: [[-4.6, 7.0], [-5.6, 6.2], [-1.2, 7.4], [0.6, 7.3], [-7.8, 1.4], [-7.6, 0.3]] },
