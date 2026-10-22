@@ -12,7 +12,7 @@ export default async function (t) {
   await t.eval("document.querySelector('#btnNew').click()");
   await t.waitFor(`!document.querySelector('#intro').classList.contains('hide')`, 15000);
   await t.sleep(1800);
-  const it = JSON.parse(await t.eval(`JSON.stringify({text:document.querySelector('#inText').textContent, start:document.querySelector('#inStart').textContent, level:document.querySelector('#inLevel').textContent, vals:__jk.G.run.vals, clip:(()=>{const b=document.querySelector('#intro .m-box').getBoundingClientRect();return b.top<0||b.bottom>innerHeight})()})`));
+  const it = JSON.parse(await t.eval(`JSON.stringify({text:document.querySelector('#inPage').textContent, start:(()=>{for(let k=0;k<2;k++) document.querySelector('#inGo').click(); return document.querySelector('#inStart').textContent})(), level:document.querySelector('#inLevel').textContent, vals:__jk.G.run.vals, clip:(()=>{const b=document.querySelector('#intro .m-box').getBoundingClientRect();return b.top<0||b.bottom>innerHeight})()})`));
   ok('소개 글(10-12 ③)', /고려 말/.test(it.text), it.text.slice(0, 40));
   ok('새싹: 시작 게이지를 50 쪽으로 절반(태조 50·40·35·55 → 50·45·43·53)', JSON.stringify(it.vals) === '{"people":50,"nobles":45,"treasury":43,"army":53}', JSON.stringify(it.vals));
   ok('소개 화면이 화면 안', !it.clip, it.level + ' / ' + it.start);

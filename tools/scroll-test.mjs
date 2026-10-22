@@ -80,10 +80,29 @@ export default async function (t) {
   ok('성군: 귀띔이 수수께끼', /벌레가 꾀고/.test(s3.text) && !/국고를 조금/.test(s3.text), s3.text.slice(0, 40));
   await next();
 
-  // 두루마리 없는 왕(태조): 예전 한 장
+  // 다섯 왕 모두: 석 장이 화면 안 · 예언 수가 데이터와 같음 · 끝 장에 시작 게이지
+  for (const [stage, kw] of [['taejo', '고려 말'], ['seonjo', '경국대전'], ['yeongjo', '붕당'], ['gojong', '세도 정치']]) {
+    await start(stage, 'normal');
+    const a = await page();
+    await shot(`${stage}-1`);
+    await next();
+    const b = await page();
+    const n = await t.eval(`document.querySelectorAll('#inPage .sc-omen li').length`);
+    const want = await t.eval(`JK.eraData.scrolls.${stage}.omens.list.length`);
+    await shot(`${stage}-2`);
+    await next();
+    const c = await page();
+    await shot(`${stage}-3`);
+    ok(`${stage}: 석 장(${kw} · 예언 ${want} · 귀띔) · 모두 화면 안`, new RegExp(kw).test(a.text) && n === want && /귀띔/.test(c.head) && /백성/.test(c.start) && !a.clip && !b.clip && !c.clip, [a.clip, b.clip, c.clip].join(','));
+    await next();
+  }
+
+  // 두루마리 없는 왕(데이터를 잠시 빼고): 예전 한 장
+  await t.eval(`window.__scTaejo = JK.eraData.scrolls.taejo; delete JK.eraData.scrolls.taejo`);
   await start('taejo', 'normal');
   const tj = await page();
-  ok('태조(두루마리 없음): 한 장 · 「나라를 다스리러 간다」', tj.dots === 0 && /고려 말/.test(tj.text) && /다스리러/.test(tj.go), tj.go);
+  ok('두루마리 없는 왕: 한 장 · 「나라를 다스리러 간다」', tj.dots === 0 && /고려 말/.test(tj.text) && /다스리러/.test(tj.go), tj.go);
   await next();
-  ok('태조: 📜 단추 숨김', await t.eval(`getComputedStyle(document.querySelector('#btnScroll')).display === 'none'`));
+  ok('두루마리 없는 왕: 📜 단추 숨김', await t.eval(`getComputedStyle(document.querySelector('#btnScroll')).display === 'none'`));
+  await t.eval(`JK.eraData.scrolls.taejo = window.__scTaejo`);
 }

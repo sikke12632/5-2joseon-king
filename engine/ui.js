@@ -520,7 +520,7 @@
     render();
   };
   function scrollPast(p) {
-    const ln = (x) => `<li><span class="sc-ic">${x.icon}</span>${x.year ? `<b class="sc-year">${esc(x.year)}</b>` : ''}<span>${esc(x.text)}</span></li>`;
+    const ln = (x) => `<li><span class="sc-ic">${x.icon}</span>${x.year ? `<b class="sc-year">${esc(x.year)}</b>` : ''}<span>${esc(x.text)}${x.out ? ' <span class="tag-out">교과서 밖</span>' : ''}</span></li>`;
     return {
       html: `<h3 class="sc-head">📜 ${esc(p.head)}</h3><ul class="sc-list">${p.lines.map(ln).join('')}</ul>${p.lead ? `<p class="sc-lead">${esc(p.lead)}</p>` : ''}<ul class="sc-list sc-small">${(p.list || []).map(ln).join('')}</ul>`,
       src: p.sources_text ? `근거: ${esc(p.sources_text)}` : '',
@@ -528,7 +528,7 @@
   }
   function scrollOmens(p) {
     const hit = (JK.Game.run && JK.Game.run.omens) || [];
-    const ln = (x) => `<li class="${hit.includes(x.id) ? 'hit' : ''}"><span class="sc-ic">${x.icon}</span><span>${esc(x.text)}</span>${hit.includes(x.id) ? '<b class="sc-hit">✔ 이루어짐</b>' : ''}</li>`;
+    const ln = (x) => `<li class="${hit.includes(x.id) ? 'hit' : ''}"><span class="sc-ic">${x.icon}</span><span>${esc(x.text)}${x.out ? ' <span class="tag-out">교과서 밖</span>' : ''}</span>${hit.includes(x.id) ? '<b class="sc-hit">✔ 이루어짐</b>' : ''}</li>`;
     return {
       html: `<h3 class="sc-head">🔭 ${esc(p.head)}</h3>${p.sub ? `<div class="sc-sub">${esc(p.sub)}</div>` : ''}${p.lead ? `<p class="sc-lead">${esc(p.lead)}</p>` : ''}<ul class="sc-list sc-omen">${p.list.map(ln).join('')}</ul>${p.foot ? `<p class="sc-foot">${esc(p.foot)}${hit.length ? ` <b>(${hit.length} / ${p.list.length})</b>` : ''}</p>` : ''}`,
       src: p.sources_text ? `근거: ${esc(p.sources_text)}` : '',
@@ -537,11 +537,11 @@
   function scrollTips(p) {
     const d = JK.Game.run ? JK.Game.run.diff : 'normal';
     const riddle = d === 'sage' || d === 'annals';
-    const icon = (k) => {
-      const g = era.gauges.find((x) => x.key === k);
-      return g ? `<svg viewBox="0 0 24 24">${g.icon}</svg>` : k === 'device' ? '⚙️' : '⚖️';
+    const icon = (x) => {
+      const g = era.gauges.find((y) => y.key === x.gauge);
+      return x.icon || (g ? `<svg viewBox="0 0 24 24">${g.icon}</svg>` : { device: '⚙️', alt: '🔀' }[x.gauge] || '⚖️');
     };
-    const ln = (x) => `<li><span class="sc-ic">${icon(x.gauge)}</span><span>${esc(riddle ? x.riddle || x.plain : x.plain)}</span></li>`;
+    const ln = (x) => `<li><span class="sc-ic">${icon(x)}</span><span>${esc(riddle ? x.riddle || x.plain : x.plain)}</span></li>`;
     return {
       html: `<h3 class="sc-head">🤫 ${esc(p.head)}</h3>${p.sub ? `<div class="sc-sub">${esc(riddle ? p.sub + ' — 수수께끼로' : p.sub)}</div>` : ''}<ul class="sc-list sc-tips">${p.list.map(ln).join('')}</ul>`,
       src: '',

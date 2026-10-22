@@ -488,7 +488,8 @@
     // 변형판(다른 길이 바꾼 역사 카드)도 그 사건을 지난 것으로 센다 — seen(Y09)·seen(S08) 같은 뒤 조건이 이어지게
     if (c.variant_of && !run.seenRun.includes(c.variant_of)) run.seenRun.push(c.variant_of);
     // 사관의 예언(data/common/scrolls.js): 두루마리에 적힌 사건 카드가 뜨면 「📜 예언대로」, 다시 보기에서 ✔
-    const omen = (((era.data.scrolls || {})[st.id] || {}).omens || { list: [] }).list.find((o) => o.cards.includes(c.variant_of || c.id));
+    //   변형판(다른 길로 바뀐 카드)은 예언과 달라진 것이라 세지 않는다
+    const omen = (((era.data.scrolls || {})[st.id] || {}).omens || { list: [] }).list.find((o) => o.cards.includes(c.id));
     if (omen && !(run.omens = run.omens || []).includes(omen.id)) run.omens.push(omen.id);
     // 한 판에 두 왕(설계서 2-3): 그 카드가 뜨는 순간 왕 인형·이름이 바뀐다(선조 → 인조)
     if (st.kingSwap && (c.variant_of || c.id) === st.kingSwap.at && run.kingName !== st.kingSwap.name) {
