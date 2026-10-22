@@ -32,6 +32,7 @@
       showKingPick();
     };
     $('#btnRecords').onclick = () => UI.showRecords();
+    $('#btnHow').onclick = () => UI.showHow();
     // 오른쪽 위 버튼
     $('#btnSound').onclick = () => {
       JK.Audio.setOn(!JK.Audio.on);
@@ -547,6 +548,146 @@
       src: '',
     };
   }
+  /* ---------- 하는 방법(첫 화면 「하는 방법 !」) ----------
+   * 네 장: ① 카드 넘기기(연습 카드 두 장을 직접 끌어 봄) ② 네 막대 ③ 실제 역사와 다른 길 ④ 왕마다 다른 장치·두루마리·퀴즈
+   * 연습 카드는 게임 기록에 남지 않는다 */
+  const HOW_PRACTICE = [
+    { icon: '🍚', who: '곳간지기', text: '전하, 연습 삼아 한 번 골라 보소서! 곳간의 쌀을 어찌할까요?', left: { label: '백성에게 나눈다', fx: { people: 10, treasury: -10 } }, right: { label: '곳간에 쌓아 둔다', fx: { treasury: 10, people: -10 } } },
+    { icon: '🧱', who: '성을 지키는 군관', text: '성벽 한쪽이 낡았사옵니다. 고칠까요?', left: { label: '그대로 둔다', fx: { treasury: 5, army: -10 } }, right: { label: '성벽을 고친다', fx: { army: 10, treasury: -10 } } },
+  ];
+  const HOW_PAGES = [
+    { head: '👆 카드를 넘겨요', lead: '신하가 카드로 일을 아뢰어요. 카드를 왼쪽이나 오른쪽으로 끌면 그쪽 답을 골라요. (← → 키도 돼요)', practice: true },
+    {
+      head: '📊 네 막대를 지켜요',
+      list: [
+        { g: 'people', text: '백성 · 양반 · 국고 · 국방, 네 막대가 나라의 힘이에요.' },
+        { icon: '⚠️', text: '막대가 너무 낮아도, 너무 높아도 위기 카드가 와요. 위기를 넘기지 못하면 왕위에서 물러나요(실각).' },
+        { icon: '⚖️', text: '네 막대를 가운데쯤에 고루 두는 것이 비결이에요.' },
+        { icon: '🔵', text: '고르기 전에 막대 위의 점을 보면, 어느 막대가 움직일지 미리 알 수 있어요.' },
+      ],
+    },
+    {
+      head: '📜 실제 역사와 다른 길',
+      list: [
+        { icon: '📜', text: '「실제 역사」 카드는 정말 있었던 일이에요. 실제와 같은 쪽을 고르면 「實錄」 진엔딩에 다가가요.' },
+        { icon: '↑', text: '카드 아래 「↑ 다른 길」을 위로 끌면, 실제와 다른 이야기로 갈 수도 있어요.' },
+        { icon: '🎲', text: '가끔 돌발 사건이 터지고, 왕의 마음이 지치기도 해요. 이번 생에서만 일어나는 일이에요.' },
+      ],
+    },
+    {
+      head: '👑 왕마다 달라요',
+      list: [
+        { icon: '📜', text: '시작할 때 「사관의 두루마리」를 꼭 읽어요. 앞으로 닥칠 일과 귀띔이 적혀 있어요. 게임 중에는 오른쪽 위 📜로 다시 볼 수 있어요.' },
+        { icon: '⚙️', text: '세종은 발명 진행도, 선조·인조는 전쟁 버티기, 영조·정조는 붕당 저울, 고종은 개항 압력 — 왕마다 특별한 막대가 하나 더 있어요.' },
+        { icon: '⭐', text: '왕을 마치면 퀴즈로 별을 모으고, 칭호도 받아요. 태조부터 시작해 보세요!' },
+      ],
+    },
+  ];
+  UI.showHow = function () {
+    const box = $('#howTo');
+    let i = 0;
+    let done = 0;
+    const gIcon = (k) => {
+      const g = era.gauges.find((x) => x.key === k);
+      return g ? `<svg viewBox="0 0 24 24">${g.icon}</svg>` : '';
+    };
+    const vals = { people: 50, nobles: 50, treasury: 50, army: 50 };
+    const gaugesHtml = () => era.gauges.map((g) => `<div class="hw-g" data-k="${g.key}">${gIcon(g.key)}<span class="hw-bar"><i style="height:${vals[g.key]}%"></i></span><b class="hw-d"></b><span class="hw-n">${esc(g.name)}</span></div>`).join('');
+    const render = () => {
+      const p = HOW_PAGES[i];
+      let h = `<h3 class="sc-head">${esc(p.head)}</h3>`;
+      if (p.lead) h += `<p class="sc-lead">${esc(p.lead)}</p>`;
+      if (p.list) h += `<ul class="sc-list">${p.list.map((x) => `<li><span class="sc-ic">${x.g ? gIcon(x.g) : x.icon}</span><span>${esc(x.text)}</span></li>`).join('')}</ul>`;
+      if (p.practice) h += `<div class="hw-gauges">${gaugesHtml()}</div><div class="hw-stage"><div id="hwCard" class="hw-card"></div></div><div id="hwMsg" class="hw-msg"></div>`;
+      $('#hwPage').innerHTML = h;
+      $('#hwDots').innerHTML = HOW_PAGES.map((_, k) => `<i class="${k === i ? 'on' : ''}"></i>`).join('');
+      $('#hwBack').style.display = i > 0 ? '' : 'none';
+      $('#hwGo').textContent = i < HOW_PAGES.length - 1 ? '다음 장 →' : '알겠어요!';
+      $('#hwGo').classList.toggle('wait', !!p.practice && done < HOW_PRACTICE.length);
+      if (p.practice) dealCard();
+    };
+    // 연습 카드: 끌어서(또는 ← → 키) 고르면 막대가 움직이고 결과 숫자가 뜬다
+    const dealCard = () => {
+      const card = $('#hwCard');
+      if (!card) return;
+      if (done >= HOW_PRACTICE.length) {
+        card.className = 'hw-card fin';
+        card.innerHTML = '<div class="hw-ic">🎉</div><div class="hw-t">잘했어요! 이렇게 카드를 넘기며 나라를 다스려요.</div>';
+        $('#hwGo').classList.remove('wait');
+        return;
+      }
+      const c = HOW_PRACTICE[done];
+      card.className = 'hw-card';
+      card.style.transform = '';
+      card.innerHTML = `<div class="hw-ic">${c.icon}</div><div class="hw-who">${esc(c.who)}</div><div class="hw-t">${esc(c.text)}</div><div class="hw-ch"><span>← ${esc(c.left.label)}</span><span>${esc(c.right.label)} →</span></div><div class="hw-tip">카드를 끌어 보세요 (${done + 1} / ${HOW_PRACTICE.length})</div>`;
+      let x0 = null;
+      let dx = 0;
+      card.onpointerdown = (e) => {
+        x0 = e.clientX;
+        dx = 0;
+        card.setPointerCapture(e.pointerId);
+        card.classList.add('drag');
+      };
+      card.onpointermove = (e) => {
+        if (x0 === null) return;
+        dx = e.clientX - x0;
+        card.style.transform = `translateX(${dx}px) rotate(${dx / 14}deg)`;
+        card.classList.toggle('l', dx < -30);
+        card.classList.toggle('r', dx > 30);
+      };
+      card.onpointerup = () => {
+        if (x0 === null) return;
+        x0 = null;
+        card.classList.remove('drag', 'l', 'r');
+        if (Math.abs(dx) > 70) pick(dx < 0 ? 'left' : 'right');
+        else card.style.transform = '';
+      };
+      UI._howPick = pick;
+    };
+    const pick = (side) => {
+      const card = $('#hwCard');
+      if (!card || card.classList.contains('gone') || done >= HOW_PRACTICE.length) return;
+      const ch = HOW_PRACTICE[done][side];
+      card.classList.add('gone');
+      card.style.transform = `translateX(${side === 'left' ? -420 : 420}px) rotate(${side === 'left' ? -20 : 20}deg)`;
+      const parts = [];
+      for (const k in ch.fx) {
+        vals[k] = Math.max(0, Math.min(100, vals[k] + ch.fx[k]));
+        const el = document.querySelector(`.hw-g[data-k="${k}"]`);
+        el.querySelector('i').style.height = vals[k] + '%';
+        const d = el.querySelector('.hw-d');
+        d.textContent = (ch.fx[k] > 0 ? '+' : '−') + Math.abs(ch.fx[k]);
+        d.className = 'hw-d show ' + (ch.fx[k] > 0 ? 'plus' : 'minus');
+        parts.push(`${era.gauges.find((g) => g.key === k).name} ${ch.fx[k] > 0 ? '+' : '−'}${Math.abs(ch.fx[k])}`);
+      }
+      $('#hwMsg').textContent = `「${ch.label}」 → ${parts.join(' · ')}  막대가 움직였죠?`;
+      done++;
+      setTimeout(dealCard, 650);
+    };
+    $('#hwGo').onclick = () => {
+      if (i < HOW_PAGES.length - 1) {
+        i++;
+        return render();
+      }
+      close('#howTo');
+    };
+    $('#hwBack').onclick = () => {
+      if (i > 0) i--;
+      render();
+    };
+    $('#hwClose').onclick = () => close('#howTo');
+    render();
+    open('#howTo');
+  };
+  window.addEventListener('keydown', (e) => {
+    const b = document.getElementById('howTo');
+    if (!b || b.classList.contains('hide')) return;
+    if ((e.key === 'ArrowLeft' || e.key === 'ArrowRight') && UI._howPick && document.getElementById('hwCard')) {
+      e.preventDefault();
+      UI._howPick(e.key === 'ArrowLeft' ? 'left' : 'right');
+    } else if (e.key === 'Escape') close('#howTo');
+  });
+
   // 게임 중 다시 보기(📜 단추)
   UI.showScroll = function () {
     const G = JK.Game;

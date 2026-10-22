@@ -138,6 +138,41 @@ body.portrait #stage { font-size: 16px; }
 .t-btns { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 22px; }
 .t-btns button.big { margin-top: 0; }
 button.big.ghost, .btns button.ghost { background: #3a4450; box-shadow: 0 6px 0 #222a33, 0 10px 20px rgba(0,0,0,.25); }
+/* 하는 방법(첫 화면 「하는 방법 !」) — 두루마리 상자(.in-box)를 그대로 쓰고, 첫 장은 연습 카드 */
+button.big.how { background: #d9a531; color: #3a2408; box-shadow: 0 6px 0 #9a6f16, 0 10px 20px rgba(90,60,10,.3); }
+#howTo { z-index: 56; background: rgba(30,24,18,.3); }
+.how-box { position: relative; width: min(680px, 95%); padding: 18px 28px 16px; }
+.hw-x { position: absolute; top: 12px; right: 14px; width: 36px; height: 36px; border-radius: 50%; border: 0; background: rgba(90,60,30,.12); color: #5a3a1e; font-size: 18px; cursor: pointer; }
+#hwPage { max-height: 62vh; overflow-y: auto; scrollbar-width: thin; }
+#hwDots { display: flex; justify-content: center; gap: 8px; margin: 8px 0 10px; }
+#hwDots i { width: 9px; height: 9px; border-radius: 50%; background: #c9b48a; }
+#hwDots i.on { background: var(--red); transform: scale(1.25); }
+#hwBack { padding: 10px 18px; border-radius: 999px; border: 2px solid #b39a6a; background: transparent; color: #6b4a2a; font-size: 16px; cursor: pointer; font-family: inherit; }
+#hwGo { padding: 10px 28px; border-radius: 999px; border: 0; background: var(--lacquer); color: var(--gold); font-size: 18px; cursor: pointer; font-family: inherit; }
+#hwGo.wait { opacity: .55; }
+.hw-gauges { display: flex; justify-content: center; gap: 18px; margin: 6px 0 4px; }
+.hw-g { position: relative; display: flex; flex-direction: column; align-items: center; gap: 2px; width: 56px; }
+.hw-g svg { width: 26px; height: 26px; fill: #6b4a2a; }
+.hw-bar { width: 14px; height: 46px; border-radius: 7px; background: #e2d3b2; display: flex; align-items: flex-end; overflow: hidden; }
+.hw-bar i { display: block; width: 100%; background: #b0482e; transition: height .6s; }
+.hw-n { font-size: 13px; color: #5a4030; }
+.hw-d { position: absolute; top: 24px; left: 38px; font-size: 18px; opacity: 0; }
+.hw-d.show { animation: hwPop 1.6s ease-out; }
+.hw-d.plus { color: #2f7a4a; } .hw-d.minus { color: #b0482e; }
+@keyframes hwPop { 0% { opacity: 0; transform: translateY(6px) scale(.8); } 20% { opacity: 1; transform: none; } 80% { opacity: 1; } 100% { opacity: 0; } }
+.hw-stage { display: flex; justify-content: center; padding: 6px 0; overflow: hidden; }
+.hw-card { width: min(400px, 92%); background: #fffaf0; border-radius: 16px; box-shadow: 0 6px 18px rgba(60,35,10,.22); padding: 12px 16px 10px; text-align: center; touch-action: none; user-select: none; cursor: grab; transition: transform .45s ease-out, opacity .45s; }
+.hw-card.drag { transition: none; cursor: grabbing; }
+.hw-card.gone { opacity: 0; }
+.hw-card.fin { cursor: default; }
+.hw-ic { font-size: 34px; line-height: 1.2; }
+.hw-who { font-family: 'JKTitle', serif; font-size: 19px; color: #3a2414; }
+.hw-t { font-size: 17px; line-height: 1.5; color: #1e1712; word-break: keep-all; margin: 4px 0 6px; }
+.hw-ch { display: flex; justify-content: space-between; gap: 10px; font-size: 15px; color: #6b4a2a; }
+.hw-card.l .hw-ch span:first-child, .hw-card.r .hw-ch span:last-child { color: var(--red); font-weight: bold; }
+.hw-tip { margin-top: 4px; font-size: 13px; color: #9a7a58; }
+.hw-msg { min-height: 1.5em; font-size: 15px; color: #2f5a3a; word-break: keep-all; }
+@media (max-height: 700px) { .how-box { padding: 12px 22px 10px; } .hw-ic { font-size: 26px; } .hw-bar { height: 36px; } .hw-t { font-size: 16px; } }
 #btnContinue { background: var(--green); box-shadow: 0 6px 0 #1d5248, 0 10px 20px rgba(20,60,50,.3); }
 .hide { display: none !important; }
 
