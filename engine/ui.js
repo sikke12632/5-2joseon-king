@@ -469,6 +469,7 @@
   // 사관의 두루마리(data/common/scrolls.js)가 있는 왕은 석 장: 지금까지 → 앞으로 닥칠 일(예언) → 사관의 귀띔.
   //   review: 게임 중 📜 단추로 다시 펼침(예언 장부터, 이루어진 예언에 ✔)
   UI.showIntro = function (st, info, done, review) {
+    if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
     const it = info.intro || {};
     const sc = (era.data.scrolls || {})[st.id];
     $('#inSeal').textContent = st.seal;
@@ -569,7 +570,7 @@
     {
       head: '📜 실제 역사와 다른 길',
       list: [
-        { icon: '📜', text: '「실제 역사」 카드는 정말 있었던 일이에요. 실제와 같은 쪽을 고르면 「實錄」 진엔딩에 다가가요.' },
+        { icon: '📜', text: '「실제 역사」 카드는 정말 있었던 일이에요. 실제와 같은 쪽을 고르면 진엔딩(실제 역사대로 끝나는 결말)에 다가가요.' },
         { icon: '↑', text: '카드 아래 「↑ 다른 길」을 위로 끌면, 실제와 다른 이야기로 갈 수도 있어요.' },
         { icon: '🎲', text: '가끔 돌발 사건이 터지고, 왕의 마음이 지치기도 해요. 이번 생에서만 일어나는 일이에요.' },
       ],
@@ -579,11 +580,13 @@
       list: [
         { icon: '📜', text: '시작할 때 「사관의 두루마리」를 꼭 읽어요. 앞으로 닥칠 일과 귀띔이 적혀 있어요. 게임 중에는 오른쪽 위 📜로 다시 볼 수 있어요.' },
         { icon: '⚙️', text: '세종은 발명 진행도, 선조·인조는 전쟁 버티기, 영조·정조는 붕당 저울, 고종은 개항 압력 — 왕마다 특별한 막대가 하나 더 있어요.' },
-        { icon: '⭐', text: '왕을 마치면 퀴즈로 별을 모으고, 칭호도 받아요. 태조부터 시작해 보세요!' },
+        { icon: '⭐', text: '게임이 끝나면 퀴즈로 별을 모으고, 칭호도 받아요. 태조부터 시작해 보세요!' },
       ],
     },
   ];
   UI.showHow = function () {
+    // 첫 화면 단추에 포커스가 남으면 Space·Enter가 그 단추를 또 누른다
+    if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
     const box = $('#howTo');
     let i = 0;
     let done = 0;
@@ -617,8 +620,12 @@
         return;
       }
       const c = HOW_PRACTICE[done];
-      card.className = 'hw-card';
+      // 새 카드는 날아간 자리에서 되돌아오지 않고 제자리에서 나타난다
+      card.className = 'hw-card in';
+      card.style.transition = 'none';
       card.style.transform = '';
+      void card.offsetWidth;
+      card.style.transition = '';
       card.innerHTML = `<div class="hw-ic">${c.icon}</div><div class="hw-who">${esc(c.who)}</div><div class="hw-t">${esc(c.text)}</div><div class="hw-ch"><span>← ${esc(c.left.label)}</span><span>${esc(c.right.label)} →</span></div><div class="hw-tip">카드를 끌어 보세요 (${done + 1} / ${HOW_PRACTICE.length})</div>`;
       let x0 = null;
       let dx = 0;
@@ -662,7 +669,7 @@
       }
       $('#hwMsg').textContent = `「${ch.label}」 → ${parts.join(' · ')}  막대가 움직였죠?`;
       done++;
-      setTimeout(dealCard, 650);
+      setTimeout(dealCard, 450);
     };
     $('#hwGo').onclick = () => {
       if (i < HOW_PAGES.length - 1) {
@@ -679,13 +686,18 @@
     render();
     open('#howTo');
   };
+  // 키: 연습 카드가 남아 있으면 ← → 로 고르고, 그 밖에는 → ·Enter·Space 다음 장, ← 앞 장, Esc 닫기
   window.addEventListener('keydown', (e) => {
     const b = document.getElementById('howTo');
     if (!b || b.classList.contains('hide')) return;
-    if ((e.key === 'ArrowLeft' || e.key === 'ArrowRight') && UI._howPick && document.getElementById('hwCard')) {
-      e.preventDefault();
-      UI._howPick(e.key === 'ArrowLeft' ? 'left' : 'right');
-    } else if (e.key === 'Escape') close('#howTo');
+    const card = document.getElementById('hwCard');
+    const practicing = card && !card.classList.contains('fin');
+    if ((e.key === 'ArrowLeft' || e.key === 'ArrowRight') && practicing && UI._howPick) UI._howPick(e.key === 'ArrowLeft' ? 'left' : 'right');
+    else if (['ArrowRight', 'Enter', ' '].includes(e.key)) $('#hwGo').click();
+    else if (e.key === 'ArrowLeft') $('#hwBack').style.display !== 'none' && $('#hwBack').click();
+    else if (e.key === 'Escape') close('#howTo');
+    else return;
+    e.preventDefault();
   });
 
   // 게임 중 다시 보기(📜 단추)
@@ -697,7 +709,11 @@
   };
   window.addEventListener('keydown', (e) => {
     const b = document.getElementById('intro');
-    if (b && !b.classList.contains('hide') && ['Enter', ' '].includes(e.key) && UI._introGo) {
+    if (b && !b.classList.contains('hide') && e.key === 'ArrowLeft' && $('#inBack').style.display !== 'none') {
+      e.preventDefault();
+      return $('#inBack').click();
+    }
+    if (b && !b.classList.contains('hide') && ['Enter', ' ', 'ArrowRight'].includes(e.key) && UI._introGo) {
       e.preventDefault();
       UI._introGo();
     }

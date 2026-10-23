@@ -31,17 +31,24 @@ export default async function (t) {
   s = await st();
   ok('두 장 끝 → 「잘했어요」 · 다음 장 단추 밝아짐', /잘했어요/.test(s.text) && !s.wait && /국방 \+10/.test(s.text), s.go);
   await shot('3-done');
+  const key = (k) => t.eval(`window.dispatchEvent(new KeyboardEvent('keydown',{key:'${k}'}))`);
   const heads = [];
   for (let k = 0; k < 3; k++) {
-    await t.eval(`document.querySelector('#hwGo').click()`);
+    await key('ArrowRight');
     await t.sleep(300);
     s = await st();
     heads.push(s.head);
     ok(`${k + 2}장 화면 안`, !s.clip, s.head);
     await shot(`p${k + 2}`);
   }
-  ok('네 장: 막대 · 다른 길 · 왕마다', /네 막대/.test(heads[0]) && /다른 길/.test(heads[1]) && /왕마다/.test(heads[2]) && /알겠어요/.test(s.go), heads.join(' / '));
-  await t.eval(`document.querySelector('#hwGo').click()`);
+  ok('→ 키로 네 장: 막대 · 다른 길 · 왕마다', /네 막대/.test(heads[0]) && /다른 길/.test(heads[1]) && /왕마다/.test(heads[2]) && /알겠어요/.test(s.go), heads.join(' / '));
+  ok('한자 없음 · 「게임이 끝나면」', !/[一-鿿]/.test(s.text) && /게임이 끝나면/.test(s.text));
+  await key('ArrowLeft');
+  await t.sleep(300);
+  ok('← 키로 앞 장', /다른 길/.test((await st()).head));
+  await key('ArrowRight');
+  await t.sleep(300);
+  await key('Enter');
   await t.sleep(300);
   ok('「알겠어요!」로 닫힘 · 게임 기록 그대로', (await st()).hidden && (await t.eval(`!__jk.G.run || !__jk.G.run.used || true`)) && (await t.eval(`JSON.parse(localStorage.getItem(Object.keys(localStorage).find(k=>/meta|jk/i.test(k))||'null')||'{}').cardsPlayed||0`)) === 0);
   // 다시 열면 처음부터 · ✕로 닫힘

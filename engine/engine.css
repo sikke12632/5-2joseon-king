@@ -165,6 +165,8 @@ button.big.how { background: #d9a531; color: #3a2408; box-shadow: 0 6px 0 #9a6f1
 .hw-card.drag { transition: none; cursor: grabbing; }
 .hw-card.gone { opacity: 0; }
 .hw-card.fin { cursor: default; }
+.hw-card.in { animation: hwIn .35s ease-out; }
+@keyframes hwIn { from { opacity: 0; transform: scale(.92); } }
 .hw-ic { font-size: 34px; line-height: 1.2; }
 .hw-who { font-family: 'JKTitle', serif; font-size: 19px; color: #3a2414; }
 .hw-t { font-size: 17px; line-height: 1.5; color: #1e1712; word-break: keep-all; margin: 4px 0 6px; }

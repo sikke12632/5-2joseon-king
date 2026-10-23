@@ -36,9 +36,14 @@ export default async function (t) {
   ok('3장 「사관의 귀띔」(보통은 쉬운 말) · 시작 게이지', /귀띔/.test(p3.head) && /국고를 조금/.test(p3.text) && /백성/.test(p3.start) && /다스리러/.test(p3.go), p3.go);
   ok('3장이 화면 안', !p3.clip);
   await shot('3');
+  await t.eval(`window.dispatchEvent(new KeyboardEvent('keydown',{key:'ArrowLeft'}))`);
+  await t.sleep(400);
+  ok('← 키로 앞 장', /앞으로 닥칠 일/.test((await page()).head));
+  await t.eval(`window.dispatchEvent(new KeyboardEvent('keydown',{key:'ArrowRight'}))`);
+  await t.sleep(400);
+  ok('→ 키로 다음 장', /귀띔/.test((await page()).head));
   await t.eval(`document.querySelector('#inBack').click()`);
   await t.sleep(400);
-  ok('← 앞 장', /앞으로 닥칠 일/.test((await page()).head));
   await next();
   await next();
   ok('마지막 장에서 누르면 닫히고 첫 카드', (await page()).hidden);
